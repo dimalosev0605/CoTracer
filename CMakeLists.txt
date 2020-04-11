@@ -11,6 +11,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(Boost_INCLUDE_DIR /home/dima/Boost/boost_1_72_0/Boost_Library_Binary/include)
+set(Boost_LIBRARY_DIR /home/dima/Boost/boost_1_72_0/Boost_Library_Binary/lib)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
 # QtCreator supports the following variables for Android, which are identical to qmake Android variables.
 # Check http://doc.qt.io/qt-5/deployment-android.html for more information.
 # They need to be set before the find_package(Qt5 ...) call.
@@ -24,17 +28,26 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #    endif()
 #endif()
 
+include_directories("/home/dima/Documents/Qt_projects/mhc_client")
+include_directories(${Boost_INCLUDE_DIR})
+
+link_directories(${Boost_LIBRARY_DIR})
+
 find_package(Qt5 COMPONENTS Core Quick REQUIRED)
 
 if(ANDROID)
     add_library(mhc_client SHARED
       main.cpp
       qml.qrc
+      user_validator.cpp
+      authentication_tcp_client.cpp
     )
 else()
     add_executable(mhc_client
       main.cpp
       qml.qrc
+      user_validator.cpp
+      authentication_tcp_client.cpp
     )
 endif()
 
