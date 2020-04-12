@@ -3,5 +3,7 @@
         <file>qml_files/stack_views/Main_menu_view.qml</file>
         <file>qml_files/main.qml</file>
         <file>qml_files/stack_views/Account_view.qml</file>
+        <file>qml_files/stack_views/My_contacts_view.qml</file>
+        <file>qml_files/Contacts_list.qml</file>
     </qresource>
 </RCC>

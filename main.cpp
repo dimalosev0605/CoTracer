@@ -2,6 +2,8 @@
 #include <QQmlApplicationEngine>
 
 #include "authentication_tcp_client.h"
+#include "days_model.h"
+#include "contacts_model.h"
 
 int main(int argc, char *argv[])
 {
@@ -10,6 +12,8 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     qmlRegisterType<Authentication_tcp_client>("Authentication_tcp_client_qml", 1, 0, "Authentication_tcp_client");
+    qmlRegisterType<Days_model>("Days_model_qml", 1, 0, "Days_model");
+    qmlRegisterType<Contacts_model>("Contacts_model_qml", 1, 0, "Contacts_model");
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/qml_files/main.qml"));

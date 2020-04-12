@@ -51,7 +51,7 @@ void Authentication_tcp_client::sing_in(const QString& nickname, const QString& 
     m_user_validator.set_nickname(nickname);
     m_user_validator.set_password(password);
 
-    m_session->m_req_code = Authentication_session::Request_code::sign_in;
+    m_session->m_req_code = Protocol_codes::Request_code::sign_in;
     m_session->m_request = create_request(nickname, password);
 
     boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
@@ -68,7 +68,7 @@ void Authentication_tcp_client::sing_up(const QString& nickname, const QString& 
     m_user_validator.set_nickname(nickname);
     m_user_validator.set_password(password);
 
-    m_session->m_req_code = Authentication_session::Request_code::sign_up;
+    m_session->m_req_code = Protocol_codes::Request_code::sign_up;
     m_session->m_request = create_request(nickname, password);
 
     boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
@@ -145,7 +145,7 @@ void Authentication_tcp_client::parse_response()
     if(!j_doc.isEmpty()) {
         auto j_obj = j_doc.object();
         auto j_map = j_obj.toVariantMap();
-        m_session->m_res_code = (Authentication_session::Response_code)j_map["response"].toInt();
+        m_session->m_res_code = (Protocol_codes::Response_code)j_map["response"].toInt();
     }
 }
 
@@ -153,27 +153,27 @@ void Authentication_tcp_client::process_data()
 {
     switch (m_session->m_res_code) {
 
-    case Authentication_session::Response_code::success_sign_up: {
+    case Protocol_codes::Response_code::success_sign_up: {
         m_user_validator.save_user_info();
         set_is_authenticated(true);
         emit success_sign_up();
         break;
     }
-    case Authentication_session::Response_code::sign_up_failure: {
+    case Protocol_codes::Response_code::sign_up_failure: {
         emit sign_up_failure();
         break;
     }
-    case Authentication_session::Response_code::success_sign_in: {
+    case Protocol_codes::Response_code::success_sign_in: {
         m_user_validator.save_user_info();
         set_is_authenticated(true);
         emit success_sign_in();
         break;
     }
-    case Authentication_session::Response_code::sign_in_failure: {
+    case Protocol_codes::Response_code::sign_in_failure: {
         emit sign_in_failure();
         break;
     }
-    case Authentication_session::Response_code::internal_server_error: {
+    case Protocol_codes::Response_code::internal_server_error: {
         emit internal_server_error();
         break;
     }

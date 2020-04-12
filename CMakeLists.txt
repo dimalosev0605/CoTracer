@@ -41,6 +41,9 @@ if(ANDROID)
       qml.qrc
       user_validator.cpp
       authentication_tcp_client.cpp
+      days_model.cpp
+      contacts_model.cpp
+      communication_tcp_client.cpp
     )
 else()
     add_executable(mhc_client
@@ -48,6 +51,9 @@ else()
       qml.qrc
       user_validator.cpp
       authentication_tcp_client.cpp
+      days_model.cpp
+      contacts_model.cpp
+      communication_tcp_client.cpp
     )
 endif()
 

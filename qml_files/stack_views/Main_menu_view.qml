@@ -7,6 +7,10 @@ Rectangle {
         id: account_view_comp
         Account_view {}
     }
+    Component {
+        id: my_contacts_view_comp
+        My_contacts_view {}
+    }
 
     Column {
         anchors.centerIn: parent
@@ -37,6 +41,7 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
+                    stack_view.push(my_contacts_view_comp)
                 }
             }
         }
