@@ -1,7 +1,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "authentication_tcp_client.h"
+#include "authorization_tcp_client.h"
+#include "communication_tcp_client.h"
 #include "days_model.h"
 #include "contacts_model.h"
 
@@ -11,7 +12,8 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
-    qmlRegisterType<Authentication_tcp_client>("Authentication_tcp_client_qml", 1, 0, "Authentication_tcp_client");
+    qmlRegisterType<Authorization_tcp_client>("Authorization_tcp_client_qml", 1, 0, "Authorization_tcp_client");
+    qmlRegisterType<Communication_tcp_client>("Communication_tcp_client_qml", 1, 0, "Communication_tcp_client");
     qmlRegisterType<Days_model>("Days_model_qml", 1, 0, "Days_model");
     qmlRegisterType<Contacts_model>("Contacts_model_qml", 1, 0, "Contacts_model");
 

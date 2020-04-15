@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 
 import ".."
 import Days_model_qml 1.0
+import Communication_tcp_client_qml 1.0
 
 Rectangle {
     Rectangle {
@@ -18,10 +19,19 @@ Rectangle {
     Days_model {
         id: days_model
     }
+    Communication_tcp_client {
+        id: client
+        onConnection_error: {
+
+        }
+        onSuccess_connection: {
+
+        }
+    }
 
     Component {
-        id: contacts_list_comp
-        Contacts_list {}
+        id: my_contacts_list_comp
+        My_contacts_list {}
     }
 
     ListView {
@@ -35,17 +45,21 @@ Rectangle {
         spacing: 5
         model: days_model
         delegate: Rectangle {
+            id: m_delegate
             color: "red"
             width: parent.width
             height: 40
+            property string text: text.text
             Text {
+                id: text
                 anchors.centerIn: parent
                 text: String(model.date)
             }
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    stack_view.push(contacts_list_comp)
+                    days_list_view.currentIndex = index
+                    stack_view.push(my_contacts_list_comp)
                 }
             }
         }

@@ -1,11 +1,11 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.12
 
-import Authentication_tcp_client_qml 1.0
+import Authorization_tcp_client_qml 1.0
 
 Rectangle {
 
-    Authentication_tcp_client {
+    Authorization_tcp_client {
         id: client
         onSuccess_connection: {
             info_text.text = "Connection completed"

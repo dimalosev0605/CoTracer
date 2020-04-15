@@ -26,6 +26,10 @@ Contacts_model* Communication_tcp_client::create_new_view(const QString& nicknam
 {
     Contacts_model* p = new Contacts_model;
     m_contacts_models.push_back(p);
+    
+    
+    
+    return p;
 }
 
 void Communication_tcp_client::destroy_model()

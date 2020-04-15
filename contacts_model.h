@@ -4,13 +4,17 @@
 #include <QAbstractListModel>
 #include <QDate>
 #include <QDebug>
+#include <QThread>
+
+#include <tuple>
 
 class Contacts_model: public QAbstractListModel
 {
     Q_OBJECT
 
     QHash<int, QByteArray> m_roles;
-    QVector<QString> m_contacts;
+//    QVector<std::pair<QString, QString>> m_contacts;
+    QVector<std::tuple<QString, QString, bool>> m_contacts;
 
 private:
     QHash<int, QByteArray> roleNames() const override;
@@ -20,11 +24,17 @@ public:
     ~Contacts_model();
 
     enum class RolesNames {
-        date = Qt::UserRole,
+        nickname = Qt::UserRole,
+        time = Qt::UserRole + 1,
+        is_registered = Qt::UserRole + 2
     };
 
     virtual int rowCount(const QModelIndex &index = QModelIndex()) const override;
     virtual QVariant data(const QModelIndex& index, int role) const override;
+
+public slots:
+    void receive_unregistered_contacts(const QVector<std::pair<QString, QString>>& contacts);
+    void receive_registered_contacts(const QVector<std::pair<QString, QString>>& contacts);
 };
 
 #endif // CONTACTS_MODEL_H

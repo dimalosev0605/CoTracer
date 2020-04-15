@@ -44,16 +44,3 @@ void Days_model::fill_m_dates()
     }
 }
 
-Contacts_model* Days_model::create_model()
-{
-    Contacts_model* p = new Contacts_model;
-    m_models.push_back(p);
-    return p;
-}
-
-void Days_model::destroy_model()
-{
-    auto temp = m_models.last();
-    m_models.pop_back();
-    delete temp;
-}
