@@ -42,7 +42,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                client.add_registered_contact(nickname_field.text, time.text)
+                client.add_contact(2, nickname_field.text, time.text)
             }
         }
     }
@@ -60,7 +60,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                client.add_unregistered_contact(nickname_field.text, time.text)
+                client.add_contact(3, nickname_field.text, time.text)
             }
         }
     }

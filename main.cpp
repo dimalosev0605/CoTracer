@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
     qmlRegisterType<Contacts_model>("Contacts_model_qml", 1, 0, "Contacts_model");
 
     QQmlApplicationEngine engine;
+
+
     const QUrl url(QStringLiteral("qrc:/qml_files/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {

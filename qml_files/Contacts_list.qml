@@ -30,7 +30,7 @@ Rectangle {
         clip: true
         spacing: 5
 
-        model: client.create_new_view(nickname)
+        model: client.create_model_based_on_nickname(nickname)
         delegate: Rectangle {
             color: model.is_registered ? "green" : "red"
             width: parent.width

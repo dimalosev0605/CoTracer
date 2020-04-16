@@ -6,75 +6,44 @@ Communication_tcp_client::Communication_tcp_client(QObject* parent)
 
 }
 
-Contacts_model* Communication_tcp_client::create_main_model(const QString& date)
+Contacts_model* Communication_tcp_client::create_model_based_on_date(const QString& date)
 {
-    m_date = date;
-    m_nickname = m_user_validator.get_nickname();
+    m_model_date = date;
+    m_model_nickname = m_user_validator.get_nickname();
+    Contacts_model* new_model = new Contacts_model(this);
 
-    Contacts_model* p = new Contacts_model;
-
-    connect(this, &Communication_tcp_client::unregistered_list, p, &Contacts_model::receive_unregistered_contacts,
+    connect(this, &Communication_tcp_client::unregistered_list, new_model, &Contacts_model::receive_unregistered_contacts,
             Qt::QueuedConnection);
-    connect(this, &Communication_tcp_client::registered_list, p, &Contacts_model::receive_registered_contacts,
+    connect(this, &Communication_tcp_client::registered_list, new_model, &Contacts_model::receive_registered_contacts,
             Qt::QueuedConnection);
 
-    m_contacts_models.push_back(p);
-
-    get_all_contacts_with_unregistered();
-
-    return p;
+    m_models.push_back(new_model);
+    request_contacts(Protocol_codes::Request_code::get_unregistered_contacts);
+    return new_model;
 }
 
-Contacts_model* Communication_tcp_client::create_new_view(const QString& nickname)
+Contacts_model* Communication_tcp_client::create_model_based_on_nickname(const QString& nickname)
 {
-    m_nickname = nickname;
-    Contacts_model* p = new Contacts_model;
+    m_model_nickname = nickname;
+    Contacts_model* new_model = new Contacts_model;
 
-    connect(this, &Communication_tcp_client::unregistered_list, p, &Contacts_model::receive_unregistered_contacts,
+    connect(this, &Communication_tcp_client::unregistered_list, new_model, &Contacts_model::receive_unregistered_contacts,
             Qt::QueuedConnection);
-    connect(this, &Communication_tcp_client::registered_list, p, &Contacts_model::receive_registered_contacts,
+    connect(this, &Communication_tcp_client::registered_list, new_model, &Contacts_model::receive_registered_contacts,
             Qt::QueuedConnection);
 
-    m_contacts_models.push_back(p);
-
-    get_all_contacts_with_unregistered();
-
-    return p;
+    m_models.push_back(new_model);
+    request_contacts(Protocol_codes::Request_code::get_unregistered_contacts);
+    return new_model;
 }
 
 void Communication_tcp_client::destroy_model()
 {
-    auto temp = m_contacts_models.back();
-    m_contacts_models.pop_back();
-    delete temp;
-}
-
-const char* Communication_tcp_client::add_reg_user_req(const QString& contact_nickname, const QString& time)
-{
-    QJsonObject j_obj;
-
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::add_registered_user);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
-    j_obj.insert(Protocol_keys::contact, contact_nickname);
-    j_obj.insert(Protocol_keys::contact_date, m_date);
-    j_obj.insert(Protocol_keys::contact_time, time);
-
-    QJsonDocument j_doc(j_obj);
-    return j_doc.toJson().append(Protocol_keys::end_of_message).data();
-}
-
-const char* Communication_tcp_client::add_unreg_user_req(const QString& contact_nickname, const QString& time)
-{
-    QJsonObject j_obj;
-
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::add_unregistered_user);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
-    j_obj.insert(Protocol_keys::contact, contact_nickname);
-    j_obj.insert(Protocol_keys::contact_date, m_date);
-    j_obj.insert(Protocol_keys::contact_time, time);
-
-    QJsonDocument j_doc(j_obj);
-    return j_doc.toJson().append(Protocol_keys::end_of_message).data();
+    if(!m_models.isEmpty()) {
+        auto poped_model = m_models.back();
+        m_models.pop_back();
+        delete poped_model;
+    }
 }
 
 void Communication_tcp_client::parse_response(size_t bytes_transferred)
@@ -83,57 +52,41 @@ void Communication_tcp_client::parse_response(size_t bytes_transferred)
 //                                boost::asio::buffers_begin(m_session->m_response.data()) + bytes_transferred - 4};
 // from https://stackoverflow.com/questions/40561097/read-until-a-string-delimiter-in-boostasiostreambuf
 
-    std::string data((const char*)m_session->m_response.data().data(), bytes_transferred - 4);
+    std::string data((const char*)m_session->m_response.data().data(), bytes_transferred - Protocol_keys::end_of_message.size());
     auto j_doc = QJsonDocument::fromJson(data.c_str());
     m_session->m_response.consume(bytes_transferred);
-
-//    qDebug() << "Data: " << j_doc.toJson();
 
     if(!j_doc.isEmpty()) {
         auto j_obj = j_doc.object();
         auto j_map = j_obj.toVariantMap();
         m_session->m_res_code = (Protocol_codes::Response_code)j_map[Protocol_keys::response].toInt();
 
-        if(m_session->m_res_code == Protocol_codes::Response_code::unregistered_list) {
-
-            auto j_arr_of_unreg_contacts = j_map[Protocol_keys::unregistered_list].toJsonArray();
-            for(int i = 0; i < j_arr_of_unreg_contacts.size(); ++i) {
-                auto contact_j_obj = j_arr_of_unreg_contacts[i].toObject();
-                auto contact_j_obj_map = contact_j_obj.toVariantMap();
-
-                auto pair = std::make_pair(contact_j_obj_map[Protocol_keys::nickname].toString(),
-                                           contact_j_obj_map[Protocol_keys::contact_time].toString());
-                m_unregistered_contacts.push_back(pair);
-            }
-
-//            qDebug() << "Unregistered Contacts in tcp_client:";
-//            for(int i = 0; i < m_unregistered_contacts.size(); ++i) {
-//                qDebug() << m_unregistered_contacts[i].first << " - " << m_unregistered_contacts[i].second;
-//            }
-
+        if(m_session->m_res_code == Protocol_codes::Response_code::unregistered_list ||
+           m_session->m_res_code == Protocol_codes::Response_code::registered_list)
+        {
+            parse_contacts(m_session->m_res_code, j_map);
         }
+    }
+}
 
-        if(m_session->m_res_code == Protocol_codes::Response_code::registered_list) {
-
-            auto j_arr_of_reg_contacts = j_map[Protocol_keys::registered_list].toJsonArray();
-            for(int i = 0; i < j_arr_of_reg_contacts.size(); ++i) {
-                auto contact_j_obj = j_arr_of_reg_contacts[i].toObject();
-                auto contact_j_obj_map = contact_j_obj.toVariantMap();
-
-                auto pair = std::make_pair(contact_j_obj_map[Protocol_keys::nickname].toString(),
-                                           contact_j_obj_map[Protocol_keys::contact_time].toString());
-                m_registered_contacts.push_back(pair);
-            }
-
-//            qDebug() << "Registered Contacts in tcp_client:";
-//            for(int i = 0; i < m_registered_contacts.size(); ++i) {
-//                qDebug() << m_registered_contacts[i].first << " - " << m_registered_contacts[i].second;
-//            }
-
-        }
-
+void Communication_tcp_client::parse_contacts(Protocol_codes::Response_code code, const QMap<QString, QVariant>& j_map)
+{
+    QJsonArray j_arr_of_contacts;
+    if(code == Protocol_codes::Response_code::unregistered_list) {
+        j_arr_of_contacts = j_map[Protocol_keys::unregistered_list].toJsonArray();
+    } else {
+        j_arr_of_contacts = j_map[Protocol_keys::registered_list].toJsonArray();
     }
 
+    for(int i = 0; i < j_arr_of_contacts.size(); ++i) {
+        auto contact_j_obj = j_arr_of_contacts[i].toObject();
+        auto contact_j_obj_map = contact_j_obj.toVariantMap();
+
+        auto pair = std::make_pair(contact_j_obj_map[Protocol_keys::nickname].toString(),
+                                   contact_j_obj_map[Protocol_keys::contact_time].toString());
+
+        m_received_contacts.push_back(pair);
+    }
 }
 
 void Communication_tcp_client::process_data()
@@ -151,15 +104,15 @@ void Communication_tcp_client::process_data()
     }
 
     case Protocol_codes::Response_code::unregistered_list: {
-        emit unregistered_list(m_unregistered_contacts);
-        m_unregistered_contacts.clear();
-        get_all_contacts_with_registered();
+        emit unregistered_list(m_received_contacts);
+        m_received_contacts.clear();
+        request_contacts(Protocol_codes::Request_code::get_registered_contacts);
         break;
     }
     case Protocol_codes::Response_code::registered_list: {
-        emit registered_list(m_registered_contacts);
-        m_registered_contacts.clear();
-        disconnect(this, nullptr, m_contacts_models.last(), nullptr);
+        emit registered_list(m_received_contacts);
+        m_received_contacts.clear();
+        disconnect(this, nullptr, m_models.last(), nullptr);
         break;
     }
 //    case Protocol_codes::Response_code::
@@ -167,9 +120,9 @@ void Communication_tcp_client::process_data()
     }
 }
 
-void Communication_tcp_client::add_registered_contact(const QString& nickaname, const QString& time)
+void Communication_tcp_client::add_contact(int code, const QString& nickname, const QString& time)
 {
-    m_session->m_request = add_reg_user_req(nickaname, time);
+    m_session->m_request = create_add_contact_req((Protocol_codes::Request_code)code, nickname, time);
 
     boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
                              boost::bind
@@ -180,17 +133,18 @@ void Communication_tcp_client::add_registered_contact(const QString& nickaname, 
                              );
 }
 
-void Communication_tcp_client::add_unregistered_contact(const QString& nickname, const QString& time)
+const char* Communication_tcp_client::create_add_contact_req(Protocol_codes::Request_code code, const QString& contact_nickname, const QString& time)
 {
-    m_session->m_request = add_unreg_user_req(nickname, time);
+    QJsonObject j_obj;
 
-    boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                             boost::bind
-                             (&Communication_tcp_client::on_request_sent,
-                              boost::ref(*this),
-                              boost::placeholders::_1,
-                              boost::placeholders::_2)
-                             );
+    j_obj.insert(Protocol_keys::request, (int)code);
+    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::contact, contact_nickname);
+    j_obj.insert(Protocol_keys::contact_date, m_model_date);
+    j_obj.insert(Protocol_keys::contact_time, time);
+
+    QJsonDocument j_doc(j_obj);
+    return j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
 
 void Communication_tcp_client::on_request_sent(const boost::system::error_code& ec, size_t bytes_transferred)
@@ -205,6 +159,7 @@ void Communication_tcp_client::on_request_sent(const boost::system::error_code& 
                                        boost::placeholders::_2)
                                       );
     } else {
+        emit sending_request_error();
     }
 }
 
@@ -214,14 +169,13 @@ void Communication_tcp_client::on_response_received(const boost::system::error_c
         parse_response(bytes_transferred);
         process_data();
     } else {
-
+        emit reading_response_error();
     }
 }
 
-void Communication_tcp_client::get_all_contacts_with_registered()
+void Communication_tcp_client::request_contacts(Protocol_codes::Request_code code)
 {
-    m_session->m_request = get_all_contacts_with_registered_req();
-
+    m_session->m_request = create_req_for_contacts(code);
     boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
                              boost::bind
                              (&Communication_tcp_client::on_request_sent,
@@ -231,47 +185,21 @@ void Communication_tcp_client::get_all_contacts_with_registered()
                              );
 }
 
-void Communication_tcp_client::get_all_contacts_with_unregistered()
-{
-    m_session->m_request = get_all_contacts_with_unregistered_req();
-
-    boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                             boost::bind
-                             (&Communication_tcp_client::on_request_sent,
-                              boost::ref(*this),
-                              boost::placeholders::_1,
-                              boost::placeholders::_2)
-                             );
-}
-
-const char* Communication_tcp_client::get_all_contacts_with_registered_req()
+const char* Communication_tcp_client::create_req_for_contacts(Protocol_codes::Request_code code)
 {
     QJsonObject j_obj;
 
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::get_registered_contacts);
-    j_obj.insert(Protocol_keys::nickname, m_nickname);
-    j_obj.insert(Protocol_keys::contact_date, m_date);
+    j_obj.insert(Protocol_keys::request, (int)code);
+    j_obj.insert(Protocol_keys::nickname, m_model_nickname);
+    j_obj.insert(Protocol_keys::contact_date, m_model_date);
 
     QJsonDocument j_doc(j_obj);
     return j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
 
-const char* Communication_tcp_client::get_all_contacts_with_unregistered_req()
+void Communication_tcp_client::remove_contact(int code, const QString& nickname, const QString& time)
 {
-    QJsonObject j_obj;
-
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::get_unregistered_contacts);
-    j_obj.insert(Protocol_keys::nickname, m_nickname);
-    j_obj.insert(Protocol_keys::contact_date, m_date);
-
-    QJsonDocument j_doc(j_obj);
-    return j_doc.toJson().append(Protocol_keys::end_of_message).data();
-}
-
-void Communication_tcp_client::remove_unregistered_contact(const QString& nickname, const QString& time)
-{
-    qDebug() << "Removing UNregistered contact: " << nickname + " - " + time;
-    m_session->m_request = remove_unregistered_contact_req(nickname, time);
+    m_session->m_request = create_remove_contact_req((Protocol_codes::Request_code)code, nickname, time);
 
     boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
                              boost::bind
@@ -282,41 +210,13 @@ void Communication_tcp_client::remove_unregistered_contact(const QString& nickna
                              );
 }
 
-void Communication_tcp_client::remove_registered_contact(const QString& nickname, const QString& time)
-{
-    qDebug() << "Removing Registered contact: " << nickname + " - " + time;
-    m_session->m_request = remove_registered_contact_req(nickname, time);
-
-    boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                             boost::bind
-                             (&Communication_tcp_client::on_request_sent,
-                              boost::ref(*this),
-                              boost::placeholders::_1,
-                              boost::placeholders::_2)
-                             );
-}
-
-const char* Communication_tcp_client::remove_unregistered_contact_req(const QString& nickname, const QString& time)
+const char* Communication_tcp_client::create_remove_contact_req(Protocol_codes::Request_code code, const QString& nickname, const QString& time)
 {
     QJsonObject j_obj;
 
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::remove_unregister_contact);
+    j_obj.insert(Protocol_keys::request, (int)code);
     j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
-    j_obj.insert(Protocol_keys::contact_date, m_date);
-    j_obj.insert(Protocol_keys::contact, nickname);
-    j_obj.insert(Protocol_keys::contact_time, time);
-
-    QJsonDocument j_doc(j_obj);
-    return j_doc.toJson().append(Protocol_keys::end_of_message).data();
-}
-
-const char* Communication_tcp_client::remove_registered_contact_req(const QString& nickname, const QString& time)
-{
-    QJsonObject j_obj;
-
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::remove_register_contact);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
-    j_obj.insert(Protocol_keys::contact_date, m_date);
+    j_obj.insert(Protocol_keys::contact_date, m_model_date);
     j_obj.insert(Protocol_keys::contact, nickname);
     j_obj.insert(Protocol_keys::contact_time, time);
 

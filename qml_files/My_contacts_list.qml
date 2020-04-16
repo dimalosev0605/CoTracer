@@ -45,7 +45,7 @@ Rectangle {
         orientation: ListView.Vertical
         clip: true
         spacing: 5
-        model: client.create_main_model(days_list_view.currentItem.text)
+        model: client.create_model_based_on_date(days_list_view.currentItem.text)
         delegate: Rectangle {
             color: "red"
             width: parent.width
@@ -83,11 +83,11 @@ Rectangle {
                         contacts_list_view.currentIndex = index
                         if(model.is_registered) {
                             console.log("remove registered qml")
-                            client.remove_registered_contact(contacts_list_view.currentItem.nickname.text,
+                            client.remove_contact(7, contacts_list_view.currentItem.nickname.text,
                                                              contacts_list_view.currentItem.time.text)
                         } else {
                             console.log("remove unregistered qml")
-                            client.remove_unregistered_contact(contacts_list_view.currentItem.nickname.text,
+                            client.remove_contact(6, contacts_list_view.currentItem.nickname.text,
                                                                contacts_list_view.currentItem.time.text)
                         }
                     }
