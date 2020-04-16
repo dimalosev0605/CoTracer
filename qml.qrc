@@ -6,5 +6,6 @@
         <file>qml_files/stack_views/My_contacts_view.qml</file>
         <file>qml_files/My_contacts_list.qml</file>
         <file>qml_files/Add_contact_menu.qml</file>
+        <file>qml_files/Contacts_list.qml</file>
     </qresource>
 </RCC>

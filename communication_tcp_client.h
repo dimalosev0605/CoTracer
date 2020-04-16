@@ -20,8 +20,11 @@ class Communication_tcp_client: public Base_tcp_client
     Q_OBJECT
 
     QList<Contacts_model*> m_contacts_models;
-    User_validator m_user_validator;
+
     QString m_date;
+    QString m_nickname;
+
+    User_validator m_user_validator;
     QVector<std::pair<QString, QString>> m_unregistered_contacts;
     QVector<std::pair<QString, QString>> m_registered_contacts;
 
@@ -48,7 +51,7 @@ public:
     explicit Communication_tcp_client(QObject* parent = nullptr);
 
 public slots:
-    Contacts_model* create_model(const QString& date);
+    Contacts_model* create_main_model(const QString& date);
     void destroy_model();
 
     void add_registered_contact(const QString& nickaname, const QString& time);

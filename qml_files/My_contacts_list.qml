@@ -2,6 +2,8 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 
 Rectangle {
+    id: root
+
     Rectangle {
         width: 50
         height: 50
@@ -43,7 +45,7 @@ Rectangle {
         orientation: ListView.Vertical
         clip: true
         spacing: 5
-        model: client.create_model(days_list_view.currentItem.text)
+        model: client.create_main_model(days_list_view.currentItem.text)
         delegate: Rectangle {
             color: "red"
             width: parent.width
@@ -58,7 +60,9 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         if(model.is_registered) {
-                            // push new view
+                            var comp = Qt.createComponent("Contacts_list.qml")
+                            var obj = comp.createObject(root, {nickname: nickname.text})
+                            stack_view.push(obj)
                         }
                     }
                 }

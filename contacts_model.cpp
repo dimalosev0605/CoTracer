@@ -6,12 +6,12 @@ Contacts_model::Contacts_model(QObject* parent)
     m_roles[(int)RolesNames::nickname] = "nickname";
     m_roles[(int)RolesNames::time] = "time";
     m_roles[(int)RolesNames::is_registered] = "is_registered";
-//    qDebug() << this << " created";
+    qDebug() << this << " created";
 }
 
 Contacts_model::~Contacts_model()
 {
-//    qDebug() << this << " destroyed";
+    qDebug() << this << " destroyed";
 }
 
 QHash<int, QByteArray> Contacts_model::roleNames() const
@@ -48,10 +48,10 @@ QVariant Contacts_model::data(const QModelIndex& index, int role) const
 
 void Contacts_model::receive_unregistered_contacts(const QVector<std::pair<QString, QString>>& contacts)
 {
-    qDebug() << "Unregistered Contacts in model:";
-    for(auto& i : contacts) {
-        qDebug() << i.first << " - " << i.second;
-    }
+//    qDebug() << "Unregistered Contacts in model:";
+//    for(auto& i : contacts) {
+//        qDebug() << i.first << " - " << i.second;
+//    }
 
     for(int i = 0; i < contacts.size(); ++i) {
         beginInsertRows(QModelIndex(), m_contacts.size(), m_contacts.size());
@@ -62,14 +62,15 @@ void Contacts_model::receive_unregistered_contacts(const QVector<std::pair<QStri
 
 void Contacts_model::receive_registered_contacts(const QVector<std::pair<QString, QString>>& contacts)
 {
-    qDebug() << "Registered Contacts in model:";
-    for(auto& i : contacts) {
-        qDebug() << i.first << " - " << i.second;
-    }
 
     for(int i = 0; i < contacts.size(); ++i) {
         beginInsertRows(QModelIndex(), m_contacts.size(), m_contacts.size());
         m_contacts.push_back(std::make_tuple(contacts[i].first, contacts[i].second, true));
         endInsertRows();
+    }
+
+    qDebug() << "All contacts in model:";
+    for(auto& i : m_contacts) {
+        qDebug() << std::get<0>(i) << " - " << std::get<1>(i);
     }
 }

@@ -6,10 +6,13 @@ Communication_tcp_client::Communication_tcp_client(QObject* parent)
 
 }
 
-Contacts_model* Communication_tcp_client::create_model(const QString& date)
+Contacts_model* Communication_tcp_client::create_main_model(const QString& date)
 {
     m_date = date;
+    m_nickname = m_user_validator.get_nickname();
+
     Contacts_model* p = new Contacts_model;
+
     connect(this, &Communication_tcp_client::unregistered_list, p, &Contacts_model::receive_unregistered_contacts,
             Qt::QueuedConnection);
     connect(this, &Communication_tcp_client::registered_list, p, &Contacts_model::receive_registered_contacts,
@@ -24,8 +27,19 @@ Contacts_model* Communication_tcp_client::create_model(const QString& date)
 
 Contacts_model* Communication_tcp_client::create_new_view(const QString& nickname)
 {
+    m_nickname = nickname;
     Contacts_model* p = new Contacts_model;
+
+    connect(this, &Communication_tcp_client::unregistered_list, p, &Contacts_model::receive_unregistered_contacts,
+            Qt::QueuedConnection);
+    connect(this, &Communication_tcp_client::registered_list, p, &Contacts_model::receive_registered_contacts,
+            Qt::QueuedConnection);
+
     m_contacts_models.push_back(p);
+
+    get_all_contacts_with_unregistered();
+
+    return p;
 }
 
 void Communication_tcp_client::destroy_model()
@@ -145,6 +159,7 @@ void Communication_tcp_client::process_data()
     case Protocol_codes::Response_code::registered_list: {
         emit registered_list(m_registered_contacts);
         m_registered_contacts.clear();
+        disconnect(this, nullptr, m_contacts_models.last(), nullptr);
         break;
     }
 //    case Protocol_codes::Response_code::
@@ -234,7 +249,7 @@ const char* Communication_tcp_client::get_all_contacts_with_registered_req()
     QJsonObject j_obj;
 
     j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::get_registered_contacts);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::nickname, m_nickname);
     j_obj.insert(Protocol_keys::contact_date, m_date);
 
     QJsonDocument j_doc(j_obj);
@@ -246,7 +261,7 @@ const char* Communication_tcp_client::get_all_contacts_with_unregistered_req()
     QJsonObject j_obj;
 
     j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::get_unregistered_contacts);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::nickname, m_nickname);
     j_obj.insert(Protocol_keys::contact_date, m_date);
 
     QJsonDocument j_doc(j_obj);
