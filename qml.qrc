@@ -7,5 +7,7 @@
         <file>qml_files/My_contacts_list.qml</file>
         <file>qml_files/Add_contact_menu.qml</file>
         <file>qml_files/Contacts_list.qml</file>
+        <file>imgs/biohazard_symbol.png</file>
+        <file>qml_files/buttons/Main_menu_btn.qml</file>
     </qresource>
 </RCC>
