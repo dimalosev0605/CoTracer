@@ -10,7 +10,7 @@ Contacts_model* Communication_tcp_client::create_model_based_on_date(const QStri
 {
     m_model_date = date;
     m_model_nickname = m_user_validator.get_nickname();
-    Contacts_model* new_model = new Contacts_model(this);
+    Contacts_model* new_model = new Contacts_model(m_user_validator.get_nickname(), this);
 
     connect(this, &Communication_tcp_client::unregistered_list, new_model, &Contacts_model::receive_unregistered_contacts,
             Qt::QueuedConnection);
@@ -25,7 +25,7 @@ Contacts_model* Communication_tcp_client::create_model_based_on_date(const QStri
 Contacts_model* Communication_tcp_client::create_model_based_on_nickname(const QString& nickname)
 {
     m_model_nickname = nickname;
-    Contacts_model* new_model = new Contacts_model;
+    Contacts_model* new_model = new Contacts_model(m_user_validator.get_nickname(), this);
 
     connect(this, &Communication_tcp_client::unregistered_list, new_model, &Contacts_model::receive_unregistered_contacts,
             Qt::QueuedConnection);

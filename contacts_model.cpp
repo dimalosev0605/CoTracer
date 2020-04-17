@@ -1,17 +1,18 @@
 #include "contacts_model.h"
 
-Contacts_model::Contacts_model(QObject* parent)
-    : QAbstractListModel(parent)
+Contacts_model::Contacts_model(const QString& name, QObject* parent)
+    : QAbstractListModel(parent),
+      m_host_name(name)
 {
     m_roles[(int)RolesNames::nickname] = "nickname";
     m_roles[(int)RolesNames::time] = "time";
     m_roles[(int)RolesNames::is_registered] = "is_registered";
-    qDebug() << this << " created";
+//    qDebug() << this << " created";
 }
 
 Contacts_model::~Contacts_model()
 {
-    qDebug() << this << " destroyed";
+//    qDebug() << this << " destroyed";
 }
 
 QHash<int, QByteArray> Contacts_model::roleNames() const
@@ -38,6 +39,12 @@ QVariant Contacts_model::data(const QModelIndex& index, int role) const
         return std::get<1>(m_contacts[row]);
     }
     case (int)RolesNames::is_registered: {
+//        qDebug() << std::get<0>(m_contacts[row]) << " - " << std::get<2>(m_contacts[row]);
+//        qDebug() << "m_my_name = " << m_host_name;
+        if(m_host_name == std::get<0>(m_contacts[row])) {
+            qDebug() << "LALAALALALALALALALALLAAL";
+            return false;
+        }
         return std::get<2>(m_contacts[row]);
     }
 
@@ -48,11 +55,6 @@ QVariant Contacts_model::data(const QModelIndex& index, int role) const
 
 void Contacts_model::receive_unregistered_contacts(const QVector<std::pair<QString, QString>>& contacts)
 {
-//    qDebug() << "Unregistered Contacts in model:";
-//    for(auto& i : contacts) {
-//        qDebug() << i.first << " - " << i.second;
-//    }
-
     for(int i = 0; i < contacts.size(); ++i) {
         beginInsertRows(QModelIndex(), m_contacts.size(), m_contacts.size());
         m_contacts.push_back(std::make_tuple(contacts[i].first, contacts[i].second, false));
@@ -69,8 +71,8 @@ void Contacts_model::receive_registered_contacts(const QVector<std::pair<QString
         endInsertRows();
     }
 
-    qDebug() << "All contacts in model:";
-    for(auto& i : m_contacts) {
-        qDebug() << std::get<0>(i) << " - " << std::get<1>(i);
-    }
+//    qDebug() << "All contacts in model:";
+//    for(auto& i : m_contacts) {
+//        qDebug() << std::get<0>(i) << " - " << std::get<1>(i);
+//    }
 }

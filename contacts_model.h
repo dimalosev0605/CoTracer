@@ -13,14 +13,15 @@ class Contacts_model: public QAbstractListModel
     Q_OBJECT
 
     QHash<int, QByteArray> m_roles;
-//    QVector<std::pair<QString, QString>> m_contacts;
     QVector<std::tuple<QString, QString, bool>> m_contacts;
+    QString m_host_name;
 
 private:
     QHash<int, QByteArray> roleNames() const override;
 
 public:
-    Contacts_model(QObject* parent = nullptr);
+    Contacts_model(const QString& name, QObject* parent = nullptr);
+    Contacts_model() = default;
     ~Contacts_model();
 
     enum class RolesNames {
