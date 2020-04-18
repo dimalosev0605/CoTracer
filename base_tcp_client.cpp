@@ -73,6 +73,8 @@ void Base_tcp_client::cancel_operation()
 {
     m_session->m_socket.cancel();
     m_session->m_request.clear();
+    m_session->m_response.consume(UINT_MAX); // ЫЫЫ
+    release();
 }
 
 bool Base_tcp_client::is_free() const
