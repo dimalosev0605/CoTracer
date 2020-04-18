@@ -3,11 +3,21 @@
 Authorization_tcp_client::Authorization_tcp_client(QObject* parent)
     : Base_tcp_client(parent)
 {
+//    qDebug() << "Derived ctor";
+}
 
+Authorization_tcp_client::~Authorization_tcp_client()
+{
+//    qDebug() << "Derived dtor";
 }
 
 void Authorization_tcp_client::sing_in(const QString& nickname, const QString& password)
 {
+    if(!get_is_connected()) {
+        emit connection_error();
+        return;
+    }
+    occupy();
     m_user_validator.set_nickname(nickname);
     m_user_validator.set_password(password);
 
@@ -24,6 +34,11 @@ void Authorization_tcp_client::sing_in(const QString& nickname, const QString& p
 
 void Authorization_tcp_client::sing_up(const QString& nickname, const QString& password)
 {
+    if(!get_is_connected()) {
+        emit connection_error();
+        return;
+    }
+    occupy();
     m_user_validator.set_nickname(nickname);
     m_user_validator.set_password(password);
 
@@ -60,10 +75,11 @@ const char* Authorization_tcp_client::create_request(Protocol_codes::Request_cod
     return j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
 
-void Authorization_tcp_client::parse_response()
+void Authorization_tcp_client::parse_response(std::size_t bytes_transferred)
 {
-    auto j_doc = QJsonDocument::fromJson((char*)m_session->m_response.data().data());
-    m_session->m_response.consume(UINT_MAX);
+    std::string data((const char*)m_session->m_response.data().data(), bytes_transferred - Protocol_keys::end_of_message.size());
+    auto j_doc = QJsonDocument::fromJson(data.c_str());
+    m_session->m_response.consume(bytes_transferred);
 
     if(!j_doc.isEmpty()) {
         auto j_obj = j_doc.object();
@@ -102,6 +118,7 @@ void Authorization_tcp_client::process_data()
     }
 
     }
+    release();
 }
 
 void Authorization_tcp_client::on_request_sent(const boost::system::error_code& ec, size_t bytes_transferred)
@@ -116,15 +133,18 @@ void Authorization_tcp_client::on_request_sent(const boost::system::error_code& 
                                        boost::placeholders::_2)
                                       );
     } else {
+        set_is_connected(false);
+        emit undefined_error();
     }
 }
 
 void Authorization_tcp_client::on_response_received(const boost::system::error_code& ec, size_t bytes_transferred)
 {
     if(ec.value() == 0) {
-        parse_response();
+        parse_response(bytes_transferred);
         process_data();
     } else {
-
+        set_is_connected(false);
+        emit undefined_error();
     }
 }

@@ -47,7 +47,7 @@ Rectangle {
         }
 
         width: if(parent.height > parent.width) {
-                   parent.width * 0.7
+                   parent.width * 0.6
                }
                else {
                    parent.height * 0.4
@@ -63,7 +63,7 @@ Rectangle {
 
         anchors {
             top: bio_hazard_symbol_img.bottom
-            topMargin: 5
+            topMargin: parent.height > parent.width ? 90 : 5
             bottom: parent.bottom
             bottomMargin: 5
             horizontalCenter: parent.horizontalCenter

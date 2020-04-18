@@ -9,5 +9,10 @@
         <file>qml_files/Contacts_list.qml</file>
         <file>imgs/biohazard_symbol.png</file>
         <file>qml_files/buttons/Main_menu_btn.qml</file>
+        <file>imgs/microorganism.png</file>
+        <file>qml_files/buttons/Authorization_button.qml</file>
+        <file>qml_files/buttons/Back_btn.qml</file>
+        <file>imgs/back.png</file>
+        <file>qml_files/My_dialog.qml</file>
     </qresource>
 </RCC>

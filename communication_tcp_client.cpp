@@ -159,7 +159,7 @@ void Communication_tcp_client::on_request_sent(const boost::system::error_code& 
                                        boost::placeholders::_2)
                                       );
     } else {
-        emit sending_request_error();
+        emit undefined_error();
     }
 }
 
@@ -169,7 +169,7 @@ void Communication_tcp_client::on_response_received(const boost::system::error_c
         parse_response(bytes_transferred);
         process_data();
     } else {
-        emit reading_response_error();
+        emit undefined_error();
     }
 }
 

@@ -2,92 +2,212 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 
 import Authorization_tcp_client_qml 1.0
+import "../buttons"
+import ".."
 
 Rectangle {
+    z: 0
+    color: "#e00d0d"
+
+    My_dialog {
+        id: my_dialog
+        z: 2
+        anchors.centerIn: parent
+        width: if(parent.height > parent.width) {
+                   parent.width * 0.9
+               }
+               else {
+                   parent.width * 0.5
+               }
+
+        height: if(parent.height > parent.width) {
+                    parent.height * 0.2
+                }
+                else {
+                    parent.height * 0.5
+                }
+
+        visible: true
+        opacity: 0.7
+    }
 
     Authorization_tcp_client {
         id: client
         onSuccess_connection: {
-            info_text.text = "Connection completed"
+            my_dialog.visible = false
         }
         onConnection_error: {
-            info_text.text = "Connection error"
+            my_dialog.busy_indicator.running = false
+            my_dialog.text.text = "Connection error."
+            my_dialog.visible = true
+        }
+        onUndefined_error: {
+            my_dialog.busy_indicator.running = false
+            my_dialog.text.text = "Error occured. Try later."
+            sign_in_btn.enabled = false
+            sign_up_btn.enabled = false
+            my_dialog.visible = true
         }
         onSuccess_sign_in: {
-            info_text.text = "Success sing in";
+            my_dialog.text.text = "Success sing in!"
+            my_dialog.busy_indicator.running = false
+            my_dialog.visible = true
+            my_dialog.opacity_anim.start()
         }
         onSign_in_failure: {
-            info_text.text = "Sing in fail";
+            my_dialog.text.text = "Incorrect nickname or password."
+            my_dialog.busy_indicator.running = false
+            my_dialog.visible = true
+            my_dialog.opacity_anim.start()
         }
         onSuccess_sign_up: {
-            info_text.text = "Success sign up!"
+            my_dialog.text.text = "Success sign up!"
+            my_dialog.busy_indicator.running = false
+            my_dialog.visible = true
+            my_dialog.opacity_anim.start()
         }
         onSign_up_failure: {
-            info_text.text = "Sign up fail"
+            my_dialog.text.text = "Such nickname already exists. Please change it."
+            my_dialog.busy_indicator.running = false
+            my_dialog.visible = true
+            my_dialog.opacity_anim.start()
         }
         onInternal_server_error: {
-            info_text.text = "Server error"
+            my_dialog.text.text = "Internal server error occured, please try later."
+            my_dialog.busy_indicator.running = false
+            my_dialog.visible = true
+            my_dialog.opacity_anim.start()
         }
     }
-    Text {
-        id: info_text
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: "Connecting to server..."
-    }
 
-
-    Rectangle {
-        width: 50
-        height: 50
-        color: "red"
-        MouseArea {
-            anchors.fill: parent
-            onClicked: stack_view.pop()
+    Back_btn {
+        id: back_btn
+        z: 1
+        anchors {
+            left: parent.left
+            leftMargin: 5
+            top: parent.top
+            topMargin: 5
         }
+        color: mouse_area.pressed ? "#708090" : parent.color
     }
+
+    Image {
+        id: microorganism_img
+        z: 1
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+        }
+        y: nickname_field.y / 2 - height / 2
+        width: height
+        height: if(parent.height > parent.width) {
+                    nickname_field.y / 2
+                }
+                else {
+                    nickname_field.y * 0.75
+                }
+
+        source: "qrc:/imgs/microorganism.png"
+    }
+
+    property real max_text_fields_width: 300
+    property real text_fields_height: 30
     TextField {
         id: nickname_field
-        anchors.centerIn: parent
-        width: 200
-        height: 30
+        z: 1
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            bottom: password_field.top
+            bottomMargin: 10
+        }
+        width: password_field.width
+        height: parent.text_fields_height
+        placeholderText: "Nickname"
         text: client.get_nickname()
     }
     TextField {
+        // main item
         id: password_field
-        anchors.top: nickname_field.bottom
-        anchors.left: nickname_field.left
-        width: 200
-        height: 30
+        z: 1
+        anchors.centerIn: parent
+        width: parent.width > parent.max_text_fields_width ? parent.max_text_fields_width * 0.8 : parent.width * 0.8
+        height: parent.text_fields_height
+        placeholderText: "Password"
+        echoMode: TextInput.Password
         text: client.get_password()
     }
-    Row {
-        anchors.top: password_field.bottom
-        anchors.left: password_field.left
-        spacing: 10
-        Text {
-            id: sing_up_t
-            text: "Sing up"
-            MouseArea {
-                anchors.fill: parent
-                onClicked: client.sing_up(nickname_field.text, password_field.text)
+
+    property real max_btns_width: 250
+    property int btns_height: 40
+
+    Authorization_button {
+        id: sign_up_btn
+        z: 1
+        anchors {
+            bottom: parent.bottom
+            bottomMargin: parent.height > parent.width ? 10 : 5
+            horizontalCenter: parent.horizontalCenter
+        }
+        width: password_field.width
+        height: parent.btns_height
+        color: mouse_area.pressed ? "#ffffff" : parent.color
+
+        visible: !client.is_authenticated
+        text.text: "Sing up"
+        mouse_area.onClicked: {
+            if(nickname_field.text === "" || password_field.text === "") return
+            if(client.is_connected) {
+                client.sing_up(nickname_field.text, password_field.text)
+
+                my_dialog.busy_indicator.running = true
+                my_dialog.text.text = "Please wait"
+                my_dialog.visible = true
             }
         }
-        Text {
-            id: sing_in_t
-            text: "Sing in"
-            MouseArea {
-                anchors.fill: parent
-                onClicked: client.sing_in(nickname_field.text, password_field.text)
+    }
+    Authorization_button {
+        id: sign_in_btn
+        z: 1
+        anchors {
+            top: password_field.bottom
+            topMargin: 15
+            horizontalCenter: parent.horizontalCenter
+        }
+        width: password_field.width
+        height: parent.btns_height
+        color: mouse_area.pressed ? "#af1111" : "#b22222"
+
+        visible: !client.is_authenticated
+        text.text: "Sing in"
+        mouse_area.onClicked: {
+            if(nickname_field.text === "" || password_field.text === "") return
+            if(client.is_connected) {
+                client.sing_in(nickname_field.text, password_field.text)
+
+                my_dialog.busy_indicator.running = true
+                my_dialog.text.text = "Please wait"
+                my_dialog.visible = true
             }
         }
-        Text {
-            id: exit_t
-            text: "Exit"
-            MouseArea {
-                anchors.fill: parent
-                onClicked: client.exit_from_account()
-            }
+    }
+    Authorization_button {
+        id: exit_from_account_btn
+        z: 1
+        anchors {
+            bottom: sign_up_btn.anchors.bottom
+            bottomMargin: sign_up_btn.anchors.bottomMargin
+            horizontalCenter: sign_up_btn.anchors.horizontalCenter
+        }
+        width: sign_up_btn.width
+        height: sign_up_btn.height
+        color: mouse_area.pressed ? "#af1111" : "#b22222"
+
+        visible: client.is_authenticated
+        text.text: "Exit"
+        mouse_area.onClicked: {
+            client.exit_from_account()
+            nickname_field.text = ""
+            password_field.text = ""
         }
     }
 }

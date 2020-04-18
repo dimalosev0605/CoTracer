@@ -57,8 +57,6 @@ public slots:
 signals:
     void success_adding();
     void internal_server_error();
-    void sending_request_error();
-    void reading_response_error();
     void unregistered_list(const QVector<std::pair<QString, QString>>&);
     void registered_list(const QVector<std::pair<QString, QString>>&);
 };
