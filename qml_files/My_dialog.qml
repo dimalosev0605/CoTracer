@@ -52,7 +52,6 @@ Rectangle {
         onFinished: {
             root.opacity = 0.7
             root.visible = false
-            console.log("Anim finished!")
         }
     }
 }

@@ -199,6 +199,15 @@ const char* Communication_tcp_client::create_req_for_contacts(Protocol_codes::Re
 
 void Communication_tcp_client::remove_contact(int code, const QString& nickname, const QString& time)
 {
+    if(!get_is_connected()) {
+        emit connection_error();
+        return;
+    }
+    if(is_free()) {
+        occupy();
+    } else {
+        return;
+    }
     m_session->m_request = create_remove_contact_req((Protocol_codes::Request_code)code, nickname, time);
 
     boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
