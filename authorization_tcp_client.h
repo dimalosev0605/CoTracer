@@ -23,8 +23,8 @@ public:
     ~Authorization_tcp_client();
 
 public slots:
-    void sing_in(const QString& nickname, const QString& password);
-    void sing_up(const QString& nickname, const QString& password);
+    bool sing_in(const QString& nickname, const QString& password);
+    bool sing_up(const QString& nickname, const QString& password);
     void exit_from_account();
 
     QString get_nickname() const { return m_user_validator.get_nickname(); }

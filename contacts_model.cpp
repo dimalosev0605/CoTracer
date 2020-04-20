@@ -60,6 +60,10 @@ void Contacts_model::receive_unregistered_contacts(const QVector<std::pair<QStri
         m_contacts.push_back(std::make_tuple(contacts[i].first, contacts[i].second, false));
         endInsertRows();
     }
+    qDebug() << "Unreg contacts:";
+    for(auto& i : contacts) {
+        qDebug() << i.first << " - " << i.second;
+    }
 }
 
 void Contacts_model::receive_registered_contacts(const QVector<std::pair<QString, QString>>& contacts)
@@ -71,8 +75,16 @@ void Contacts_model::receive_registered_contacts(const QVector<std::pair<QString
         endInsertRows();
     }
 
-//    qDebug() << "All contacts in model:";
-//    for(auto& i : m_contacts) {
-//        qDebug() << std::get<0>(i) << " - " << std::get<1>(i);
-//    }
+    qDebug() << "Reg contacts:";
+    for(auto& i : contacts) {
+        qDebug() << i.first << " - " << i.second;
+    }
+}
+
+void Contacts_model::remove_contact(int index)
+{
+    if(index < 0 || index >= m_contacts.size()) return;
+    beginRemoveRows(QModelIndex(), index, index);
+    m_contacts.removeAt(index);
+    endRemoveRows();
 }

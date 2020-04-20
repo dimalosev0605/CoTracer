@@ -65,6 +65,9 @@ Rectangle {
         delegate: Rectangle {
             id: delegate
 
+            property alias nickname: nickname
+            property alias time: time
+
             width: parent.width
             height: 40
 
@@ -131,14 +134,6 @@ Rectangle {
                 }
                 height: parent.height
                 onClicked: {
-                    contacts_list_view.currentIndex = index
-                    if(model.is_registered) {
-                        client.remove_contact(7, contacts_list_view.currentItem.nickname.text,
-                                                         contacts_list_view.currentItem.time.text)
-                    } else {
-                        client.remove_contact(6, contacts_list_view.currentItem.nickname.text,
-                                                           contacts_list_view.currentItem.time.text)
-                    }
                 }
             }
             Rectangle {
@@ -162,58 +157,31 @@ Rectangle {
                     id: m_area
                     anchors.fill: parent
                     onClicked: {
+                        contacts_list_view.currentIndex = index
+                        if(model.is_registered) {
+                            if(client.is_connected) {
+                                if(client.remove_contact(7, contacts_list_view.currentItem.nickname.text,
+                                                         contacts_list_view.currentItem.time.text, index))
+                                {
+                                    my_dialog.busy_indicator.running = true
+                                    my_dialog.text.text = "Please wait"
+                                    my_dialog.visible = true
+                                }
+                            }
+                        } else {
+                            if(client.is_connected) {
+                                if(client.remove_contact(6, contacts_list_view.currentItem.nickname.text,
+                                                                   contacts_list_view.currentItem.time.text, index))
+                                {
+                                    my_dialog.busy_indicator.running = true
+                                    my_dialog.text.text = "Please wait"
+                                    my_dialog.visible = true
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-
-//        delegate: Rectangle {
-//            color: "red"
-//            width: parent.width
-//            height: 40
-//            property alias nickname: nickname
-//            property alias time: time
-//            Text {
-//                id: nickname
-//                anchors.centerIn: parent
-//                text: String(model.nickname)
-//                MouseArea {
-//                    anchors.fill: parent
-//                    onClicked: {
-//                        if(model.is_registered) {
-//                            var comp = Qt.createComponent("Contacts_list.qml")
-//                            var obj = comp.createObject(root, {nickname: nickname.text})
-//                            stack_view.push(obj)
-//                        }
-//                    }
-//                }
-//            }
-//            Text {
-//                id: time
-//                anchors.left: nickname.right
-//                text: String(model.time)
-//            }
-//            Rectangle {
-//                anchors.right: parent.right
-//                width: 40
-//                height: 40
-//                color: model.is_registered ? "green" : "blue"
-//                MouseArea {
-//                    anchors.fill: parent
-//                    onClicked: {
-//                        contacts_list_view.currentIndex = index
-//                        if(model.is_registered) {
-//                            console.log("remove registered qml")
-//                            client.remove_contact(7, contacts_list_view.currentItem.nickname.text,
-//                                                             contacts_list_view.currentItem.time.text)
-//                        } else {
-//                            console.log("remove unregistered qml")
-//                            client.remove_contact(6, contacts_list_view.currentItem.nickname.text,
-//                                                               contacts_list_view.currentItem.time.text)
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
 }

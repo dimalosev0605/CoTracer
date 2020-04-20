@@ -157,11 +157,11 @@ Rectangle {
         mouse_area.onClicked: {
             if(nickname_field.text === "" || password_field.text === "") return
             if(client.is_connected) {
-                client.sing_up(nickname_field.text, password_field.text)
-
-                my_dialog.busy_indicator.running = true
-                my_dialog.text.text = "Please wait"
-                my_dialog.visible = true
+                if(client.sing_up(nickname_field.text, password_field.text)) {
+                    my_dialog.busy_indicator.running = true
+                    my_dialog.text.text = "Please wait"
+                    my_dialog.visible = true
+                }
             }
         }
     }
@@ -182,11 +182,11 @@ Rectangle {
         mouse_area.onClicked: {
             if(nickname_field.text === "" || password_field.text === "") return
             if(client.is_connected) {
-                client.sing_in(nickname_field.text, password_field.text)
-
-                my_dialog.busy_indicator.running = true
-                my_dialog.text.text = "Please wait"
-                my_dialog.visible = true
+                if(client.sing_in(nickname_field.text, password_field.text)) {
+                    my_dialog.busy_indicator.running = true
+                    my_dialog.text.text = "Please wait"
+                    my_dialog.visible = true
+                }
             }
         }
     }

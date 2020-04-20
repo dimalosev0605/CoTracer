@@ -11,54 +11,56 @@ Authorization_tcp_client::~Authorization_tcp_client()
 //    qDebug() << "Derived dtor";
 }
 
-void Authorization_tcp_client::sing_in(const QString& nickname, const QString& password)
+bool Authorization_tcp_client::sing_in(const QString& nickname, const QString& password)
 {
     if(!get_is_connected()) {
         emit connection_error();
-        return;
+        return false;
     }
     if(is_free()) {
         occupy();
+        m_user_validator.set_nickname(nickname);
+        m_user_validator.set_password(password);
+
+        m_session->m_request = create_request(Protocol_codes::Request_code::sign_in, nickname, password);
+
+        boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
+                                 boost::bind
+                                 (&Authorization_tcp_client::on_request_sent,
+                                  boost::ref(*this),
+                                  boost::placeholders::_1,
+                                  boost::placeholders::_2)
+                                 );
+        return true;
     } else {
-        return;
+        return false;
     }
-    m_user_validator.set_nickname(nickname);
-    m_user_validator.set_password(password);
-
-    m_session->m_request = create_request(Protocol_codes::Request_code::sign_in, nickname, password);
-
-    boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                             boost::bind
-                             (&Authorization_tcp_client::on_request_sent,
-                              boost::ref(*this),
-                              boost::placeholders::_1,
-                              boost::placeholders::_2)
-                             );
 }
 
-void Authorization_tcp_client::sing_up(const QString& nickname, const QString& password)
+bool Authorization_tcp_client::sing_up(const QString& nickname, const QString& password)
 {
     if(!get_is_connected()) {
         emit connection_error();
-        return;
+        return false;
     }
     if(is_free()) {
         occupy();
+        m_user_validator.set_nickname(nickname);
+        m_user_validator.set_password(password);
+
+        m_session->m_request = create_request(Protocol_codes::Request_code::sign_up, nickname, password);
+
+        boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
+                                 boost::bind
+                                 (&Authorization_tcp_client::on_request_sent,
+                                  boost::ref(*this),
+                                  boost::placeholders::_1,
+                                  boost::placeholders::_2)
+                                 );
+        return true;
     } else {
-        return;
+        return false;
     }
-    m_user_validator.set_nickname(nickname);
-    m_user_validator.set_password(password);
-
-    m_session->m_request = create_request(Protocol_codes::Request_code::sign_up, nickname, password);
-
-    boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                             boost::bind
-                             (&Authorization_tcp_client::on_request_sent,
-                              boost::ref(*this),
-                              boost::placeholders::_1,
-                              boost::placeholders::_2)
-                             );
 }
 
 void Authorization_tcp_client::exit_from_account()
@@ -142,6 +144,7 @@ void Authorization_tcp_client::on_request_sent(const boost::system::error_code& 
                                       );
     } else {
         set_is_connected(false);
+        release();
         emit undefined_error();
     }
 }
@@ -153,6 +156,7 @@ void Authorization_tcp_client::on_response_received(const boost::system::error_c
         process_data();
     } else {
         set_is_connected(false);
+        release();
         emit undefined_error();
     }
 }

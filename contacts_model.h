@@ -36,6 +36,7 @@ public:
 public slots:
     void receive_unregistered_contacts(const QVector<std::pair<QString, QString>>& contacts);
     void receive_registered_contacts(const QVector<std::pair<QString, QString>>& contacts);
+    void remove_contact(int index);
 };
 
 #endif // CONTACTS_MODEL_H

@@ -14,6 +14,13 @@ Rectangle {
         id: days_model
     }
 
+    Component {
+        id: my_contacts_list_comp
+        My_contacts_list {
+            id: my_contacts_list
+        }
+    }
+
     Communication_tcp_client {
         id: client
         onSuccess_connection: {
@@ -30,6 +37,18 @@ Rectangle {
             sign_in_btn.enabled = false
             sign_up_btn.enabled = false
             my_dialog.visible = true
+        }
+        onSuccess_unregister_contact_deletion: {
+            my_contacts_list.my_dialog.text.text = "Success deletion!"
+            my_contacts_list.my_dialog.busy_indicator.running = false
+            my_contacts_list.my_dialog.visible = true
+            my_contacts_list.my_dialog.opacity_anim.start()
+        }
+        onSuccess_register_contact_deletion: {
+            my_contacts_list.my_dialog.text.text = "Success deletion!"
+            my_contacts_list.my_dialog.busy_indicator.running = false
+            my_contacts_list.my_dialog.visible = true
+            my_contacts_list.my_dialog.opacity_anim.start()
         }
     }
 
@@ -65,11 +84,6 @@ Rectangle {
             leftMargin: 10
         }
         color: mouse_area.pressed ? "#708090" : parent.color
-    }
-
-    Component {
-        id: my_contacts_list_comp
-        My_contacts_list {}
     }
 
     ListView {
