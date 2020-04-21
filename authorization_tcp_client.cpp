@@ -17,8 +17,7 @@ bool Authorization_tcp_client::sing_in(const QString& nickname, const QString& p
         emit connection_error();
         return false;
     }
-    if(is_free()) {
-        occupy();
+    if(occupy()) {
         m_user_validator.set_nickname(nickname);
         m_user_validator.set_password(password);
 
@@ -43,8 +42,7 @@ bool Authorization_tcp_client::sing_up(const QString& nickname, const QString& p
         emit connection_error();
         return false;
     }
-    if(is_free()) {
-        occupy();
+    if(occupy()) {
         m_user_validator.set_nickname(nickname);
         m_user_validator.set_password(password);
 

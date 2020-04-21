@@ -25,12 +25,14 @@ class Base_tcp_client : public QObject
     boost::asio::io_service m_ios;
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     std::unique_ptr<std::thread> m_thread;
-    mutable std::mutex m_is_conencted_mutex;
 
     bool m_is_authenticated = false;
+
+    mutable std::mutex m_is_conencted_mutex;
     bool m_is_connected = false;
 
-    mutable std::mutex m_is_free_mutex;
+
+    std::mutex m_is_free_mutex;
     bool m_is_free = true;
 
 protected:
@@ -51,8 +53,7 @@ public:
     bool get_is_connected() const;
     void set_is_connected(bool v);
 
-    bool is_free() const;
-    void occupy();
+    bool occupy();
     void release();
 
 public slots:
@@ -62,9 +63,10 @@ signals:
     void is_authenticated_changed();
     void is_connected_changed();
 
-    void internal_server_error();
     void success_connection();
     void connection_error();
+
+    void internal_server_error();
     void undefined_error();
 };
 

@@ -12,14 +12,10 @@ Contacts_model* Communication_tcp_client::create_model_based_on_date(const QStri
     m_model_nickname = m_user_validator.get_nickname();
     Contacts_model* new_model = new Contacts_model(m_user_validator.get_nickname(), this);
 
-    bool flag = true;
-    flag = connect(this, &Communication_tcp_client::unregistered_list, new_model, &Contacts_model::receive_unregistered_contacts,
+    connect(this, &Communication_tcp_client::unregistered_list, new_model, &Contacts_model::receive_unregistered_contacts,
             Qt::QueuedConnection);
-    flag = connect(this, &Communication_tcp_client::registered_list, new_model, &Contacts_model::receive_registered_contacts,
+    connect(this, &Communication_tcp_client::registered_list, new_model, &Contacts_model::receive_registered_contacts,
             Qt::QueuedConnection);
-    if(!flag) {
-        qDebug() << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    }
 
     connect(this, &Communication_tcp_client::success_unregister_contact_deletion, new_model, &Contacts_model::remove_contact,
             Qt::QueuedConnection);
@@ -59,15 +55,14 @@ void Communication_tcp_client::destroy_model()
 
 void Communication_tcp_client::parse_response(size_t bytes_transferred)
 {
+// from https://stackoverflow.com/questions/40561097/read-until-a-string-delimiter-in-boostasiostreambuf
     std::string data = std::string{boost::asio::buffers_begin(m_session->m_response.data()),
                                 boost::asio::buffers_begin(m_session->m_response.data()) + bytes_transferred - Protocol_keys::end_of_message.size()};
-// from https://stackoverflow.com/questions/40561097/read-until-a-string-delimiter-in-boostasiostreambuf
 
-//    std::string data((const char*)m_session->m_response.data().data(), bytes_transferred - Protocol_keys::end_of_message.size());
     auto j_doc = QJsonDocument::fromJson(data.c_str());
     m_session->m_response.consume(bytes_transferred);
 
-    qDebug() << "Data: " << QString::fromStdString(data);
+//    qDebug() << "Data: " << QString::fromStdString(data);
 
     if(!j_doc.isEmpty()) {
         auto j_obj = j_doc.object();
@@ -100,10 +95,10 @@ void Communication_tcp_client::parse_contacts(Protocol_codes::Response_code code
 
         m_received_contacts.push_back(pair);
     }
-    qDebug() << "Parse: ";
-    for(auto& i : m_received_contacts) {
-        qDebug() << i.first << " - " << i.second;
-    }
+//    qDebug() << "Parse: ";
+//    for(auto& i : m_received_contacts) {
+//        qDebug() << i.first << " - " << i.second;
+//    }
 }
 
 void Communication_tcp_client::process_data()
@@ -114,12 +109,14 @@ void Communication_tcp_client::process_data()
         emit success_adding(m_add_contact_nickname, m_add_contact_time, m_add_contact_is_reg);
         break;
     }
-
+    case Protocol_codes::Response_code::such_user_not_exists: {
+        emit such_user_not_exists();
+        break;
+    }
     case Protocol_codes::Response_code::internal_server_error: {
         emit internal_server_error();
         break;
     }
-
     case Protocol_codes::Response_code::unregistered_list: {
         emit unregistered_list(m_received_contacts);
         m_received_contacts.clear();
@@ -147,15 +144,6 @@ void Communication_tcp_client::process_data()
         emit success_unregister_contact_deletion(m_index_for_deletion);
         break;
     }
-    case Protocol_codes::Response_code::register_contact_deletion_failure: {
-        emit register_contact_deletion_failure();
-        break;
-    }
-    case Protocol_codes::Response_code::unregister_contact_deletion_failure: {
-        emit unregister_contact_deletion_failure();
-        break;
-    }
-
     }
 
     release();
@@ -167,8 +155,7 @@ bool Communication_tcp_client::add_contact(int code, const QString& nickname, co
         emit connection_error();
         return false;
     }
-    if(is_free()) {
-        occupy();
+    if(occupy()) {
         m_session->m_request = create_add_contact_req((Protocol_codes::Request_code)code, nickname, time);
 
         m_add_contact_nickname = nickname;
@@ -271,8 +258,7 @@ bool Communication_tcp_client::remove_contact(int code, const QString& nickname,
         emit connection_error();
         return false;
     }
-    if(is_free()) {
-        occupy();
+    if(occupy()) {
         m_session->m_request = create_remove_contact_req((Protocol_codes::Request_code)code, nickname, time);
         m_index_for_deletion = index;
 

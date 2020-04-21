@@ -77,16 +77,16 @@ void Base_tcp_client::cancel_operation()
     release();
 }
 
-bool Base_tcp_client::is_free() const
+bool Base_tcp_client::occupy()
 {
     std::lock_guard<std::mutex> lock(m_is_free_mutex);
-    return m_is_free;
-}
-
-void Base_tcp_client::occupy()
-{
-    std::lock_guard<std::mutex> lock(m_is_free_mutex);
-    m_is_free = false;
+    if(m_is_free) {
+        m_is_free = false;
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 void Base_tcp_client::release()
