@@ -7,20 +7,6 @@ Rectangle {
     id: root
     color: "#e00d0d"
 
-    Back_btn {
-        id: back_btn
-        anchors {
-            bottom: parent.bottom
-            left: parent.left
-            bottomMargin: 10
-            leftMargin: 10
-        }
-        color: mouse_area.pressed ? "#708090" : parent.color
-        mouse_area.onClicked: {
-            // poped define in Back_btn.qml
-        }
-    }
-
     My_dialog {
         id: my_dialog
         z: 3
@@ -42,23 +28,31 @@ Rectangle {
         visible: false
         opacity: 0.7
     }
+
     Connections {
         target: client
-        onSuccess_adding: {
-            my_dialog.text.text = "Success adding!"
+        onInfo: {
             my_dialog.busy_indicator.running = false
-            my_dialog.visible = true
+            my_dialog.text.text = info_message
             my_dialog.opacity_anim.start()
         }
-        onInternal_server_error: {
-            my_dialog.text.text = "Internal server errror. Try later."
-            my_dialog.busy_indicator.running = false
-            my_dialog.visible = true
+        onSuccess_adding: {
+            my_dialog.show_dialog(false, "Success adding")
+            my_dialog.opacity_anim.start()
         }
-        onConnection_error: {
-            my_dialog.busy_indicator.running = false
-            my_dialog.text.text = "Connection error."
-            my_dialog.visible = true
+    }
+
+    Back_btn {
+        id: back_btn
+        anchors {
+            bottom: parent.bottom
+            left: parent.left
+            bottomMargin: 10
+            leftMargin: 10
+        }
+        color: mouse_area.pressed ? "#708090" : parent.color
+        mouse_area.onClicked: {
+            // poped define in Back_btn.qml
         }
     }
 
@@ -234,18 +228,14 @@ Rectangle {
             if(qstn.is_reg) {
                 if(client.is_connected) {
                     if(client.add_contact(2, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)) {
-                        my_dialog.busy_indicator.running = true
-                        my_dialog.text.text = "Please wait"
-                        my_dialog.visible = true
+                        my_dialog.show_dialog(true, "Please wait.")
                     }
                 }
             }
             else {
                 if(client.is_connected) {
                     if(client.add_contact(3, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)) {
-                        my_dialog.busy_indicator.running = true
-                        my_dialog.text.text = "Please wait"
-                        my_dialog.visible = true
+                        my_dialog.show_dialog(true, "Please wait.")
                     }
                 }
             }

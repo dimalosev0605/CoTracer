@@ -14,7 +14,7 @@ Authorization_tcp_client::~Authorization_tcp_client()
 bool Authorization_tcp_client::sing_in(const QString& nickname, const QString& password)
 {
     if(!get_is_connected()) {
-        emit connection_error();
+        emit info("Connection error");
         return false;
     }
     if(occupy()) {
@@ -39,7 +39,7 @@ bool Authorization_tcp_client::sing_in(const QString& nickname, const QString& p
 bool Authorization_tcp_client::sing_up(const QString& nickname, const QString& password)
 {
     if(!get_is_connected()) {
-        emit connection_error();
+        emit info("Connection error");
         return false;
     }
     if(occupy()) {
@@ -103,25 +103,25 @@ void Authorization_tcp_client::process_data()
     case Protocol_codes::Response_code::success_sign_up: {
         m_user_validator.save_user_info();
         set_is_authenticated(true);
-        emit success_sign_up();
+        emit info("Success sing up!");
         break;
     }
     case Protocol_codes::Response_code::sign_up_failure: {
-        emit sign_up_failure();
+        emit info("Such user already exists.");
         break;
     }
     case Protocol_codes::Response_code::success_sign_in: {
         m_user_validator.save_user_info();
         set_is_authenticated(true);
-        emit success_sign_in();
+        emit info("Success sign in!");
         break;
     }
     case Protocol_codes::Response_code::sign_in_failure: {
-        emit sign_in_failure();
+        emit info("Incorrect nickname or password.");
         break;
     }
     case Protocol_codes::Response_code::internal_server_error: {
-        emit internal_server_error();
+        emit info("Internal server error occured. Try later.");
         break;
     }
 
@@ -143,7 +143,7 @@ void Authorization_tcp_client::on_request_sent(const boost::system::error_code& 
     } else {
         set_is_connected(false);
         release();
-        emit undefined_error();
+        emit info("Error occured.");
     }
 }
 
@@ -155,6 +155,6 @@ void Authorization_tcp_client::on_response_received(const boost::system::error_c
     } else {
         set_is_connected(false);
         release();
-        emit undefined_error();
+        emit info("Error occured.");
     }
 }

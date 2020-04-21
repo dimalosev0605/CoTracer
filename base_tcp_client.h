@@ -63,11 +63,7 @@ signals:
     void is_authenticated_changed();
     void is_connected_changed();
 
-    void success_connection();
-    void connection_error();
-
-    void internal_server_error();
-    void undefined_error();
+    void info(const QString& info_message);
 };
 
 #endif // BASE_TCP_CLIENT_H

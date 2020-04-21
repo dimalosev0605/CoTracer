@@ -8,6 +8,12 @@ Rectangle {
     property alias busy_indicator: busy_indicator
     property alias opacity_anim: opacity_anim
 
+    function show_dialog(is_busy, message) {
+        my_dialog.busy_indicator.running = is_busy
+        my_dialog.text.text = message
+        my_dialog.visible = true
+    }
+
     color: "#c0c0c0"
     border.width: 1
     border.color: "#000000"

@@ -33,9 +33,9 @@ void Base_tcp_client::connect_to_server()
 //        qDebug() << "callback_thread: " << QThread::currentThreadId();
         if(ec.value() == 0) {
             set_is_connected(true);
-            emit success_connection();
+            emit info("Success connection to server!");
         } else {
-            emit connection_error();
+            emit info("Connection error.");
         }
     });
 }

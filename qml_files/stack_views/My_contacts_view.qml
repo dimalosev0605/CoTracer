@@ -21,18 +21,6 @@ Rectangle {
         }
     }
 
-    Communication_tcp_client {
-        id: client
-        onSuccess_connection: {
-            my_dialog.visible = false
-        }
-        onConnection_error: {
-            my_dialog.busy_indicator.running = false
-            my_dialog.text.text = "Connection error."
-            my_dialog.visible = true
-        }
-    }
-
     My_dialog {
         id: my_dialog
         z: 3
@@ -53,6 +41,15 @@ Rectangle {
 
         visible: true
         opacity: 0.7
+    }
+
+    Communication_tcp_client {
+        id: client
+        onInfo: {
+            my_dialog.busy_indicator.running = false
+            my_dialog.text.text = info_message
+            my_dialog.opacity_anim.start()
+        }
     }
 
     Back_btn {

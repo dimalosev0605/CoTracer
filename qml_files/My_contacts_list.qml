@@ -7,7 +7,51 @@ Rectangle {
     id: root
     color: "#e00d0d"
 
-    property alias my_dialog: my_dialog
+//    property alias my_dialog: my_dialog
+
+    Component {
+        id: add_contact_menu_comp
+        Add_contact_menu {}
+    }
+
+    My_dialog {
+        id: my_dialog
+        z: 3
+        anchors.centerIn: parent
+        width: if(parent.height > parent.width) {
+                   parent.width * 0.9
+               }
+               else {
+                   parent.width * 0.5
+               }
+
+        height: if(parent.height > parent.width) {
+                    parent.height * 0.2
+                }
+                else {
+                    parent.height * 0.5
+                }
+
+        visible: false
+        opacity: 0.7
+    }
+
+    Connections {
+        target: client
+        onInfo: {
+            my_dialog.busy_indicator.running = false
+            my_dialog.text.text = info_message
+            my_dialog.opacity_anim.start()
+        }
+        onSuccess_unregister_contact_deletion: {
+            my_dialog.show_dialog(false, "Contact was deleted.")
+            my_dialog.opacity_anim.start()
+        }
+        onSuccess_register_contact_deletion: {
+            my_dialog.show_dialog(false, "Contact was deleted.")
+            my_dialog.opacity_anim.start()
+        }
+    }
 
     Back_btn {
         id: back_btn
@@ -40,57 +84,6 @@ Rectangle {
         mouse_area.onClicked: {
             stack_view.push(add_contact_menu_comp)
         }
-    }
-    My_dialog {
-        id: my_dialog
-        z: 3
-        anchors.centerIn: parent
-        width: if(parent.height > parent.width) {
-                   parent.width * 0.9
-               }
-               else {
-                   parent.width * 0.5
-               }
-
-        height: if(parent.height > parent.width) {
-                    parent.height * 0.2
-                }
-                else {
-                    parent.height * 0.5
-                }
-
-        visible: false
-        opacity: 0.7
-    }
-    Connections {
-        target: client
-        onUndefined_error: {
-            my_dialog.busy_indicator.running = false
-            my_dialog.text.text = "Error occured. Try later."
-            my_dialog.visible = true
-        }
-        onSuccess_unregister_contact_deletion: {
-            my_dialog.text.text = "Success deletion!"
-            my_dialog.busy_indicator.running = false
-            my_dialog.visible = true
-            my_dialog.opacity_anim.start()
-        }
-        onSuccess_register_contact_deletion: {
-            my_dialog.text.text = "Success deletion!"
-            my_dialog.busy_indicator.running = false
-            my_dialog.visible = true
-            my_dialog.opacity_anim.start()
-        }
-        onInternal_server_error: {
-            my_dialog.text.text = "Internal server errror. Try later."
-            my_dialog.busy_indicator.running = false
-            my_dialog.visible = true
-        }
-    }
-
-    Component {
-        id: add_contact_menu_comp
-        Add_contact_menu {}
     }
 
     ListView {
@@ -182,6 +175,12 @@ Rectangle {
                 }
                 height: parent.height
                 onClicked: {
+                    contacts_list_view.currentIndex = index
+                    if(model.is_registered) {
+                        var comp = Qt.createComponent("Contacts_list.qml");
+                        var obj = comp.createObject(root, { nickname: nickname.text } );
+                        stack_view.push(obj);
+                    }
                 }
             }
             Rectangle {
@@ -211,9 +210,7 @@ Rectangle {
                                 if(client.remove_contact(7, contacts_list_view.currentItem.nickname.text,
                                                          contacts_list_view.currentItem.time.text, index))
                                 {
-                                    my_dialog.busy_indicator.running = true
-                                    my_dialog.text.text = "Please wait"
-                                    my_dialog.visible = true
+                                    my_dialog.show_dialog(true, "Please wait.")
                                 }
                             }
                         } else {
@@ -221,9 +218,7 @@ Rectangle {
                                 if(client.remove_contact(6, contacts_list_view.currentItem.nickname.text,
                                                                    contacts_list_view.currentItem.time.text, index))
                                 {
-                                    my_dialog.busy_indicator.running = true
-                                    my_dialog.text.text = "Please wait"
-                                    my_dialog.visible = true
+                                    my_dialog.show_dialog(true, "Please wait.")
                                 }
                             }
                         }

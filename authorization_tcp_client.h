@@ -29,12 +29,6 @@ public slots:
 
     QString get_nickname() const { return m_user_validator.get_nickname(); }
     QString get_password() const { return m_user_validator.get_password(); }
-
-signals:
-    void success_sign_up();
-    void sign_up_failure();
-    void success_sign_in();
-    void sign_in_failure();
 };
 
 #endif // AUTHORIZATION_TCP_CLIENT_H

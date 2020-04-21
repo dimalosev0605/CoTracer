@@ -33,49 +33,9 @@ Rectangle {
 
     Authorization_tcp_client {
         id: client
-        onSuccess_connection: {
-            my_dialog.visible = false
-        }
-        onConnection_error: {
+        onInfo: {
             my_dialog.busy_indicator.running = false
-            my_dialog.text.text = "Connection error."
-            my_dialog.visible = true
-        }
-        onUndefined_error: {
-            my_dialog.busy_indicator.running = false
-            my_dialog.text.text = "Error occured. Try later."
-            sign_in_btn.enabled = false
-            sign_up_btn.enabled = false
-            my_dialog.visible = true
-        }
-        onSuccess_sign_in: {
-            my_dialog.text.text = "Success sing in!"
-            my_dialog.busy_indicator.running = false
-            my_dialog.visible = true
-            my_dialog.opacity_anim.start()
-        }
-        onSign_in_failure: {
-            my_dialog.text.text = "Incorrect nickname or password."
-            my_dialog.busy_indicator.running = false
-            my_dialog.visible = true
-            my_dialog.opacity_anim.start()
-        }
-        onSuccess_sign_up: {
-            my_dialog.text.text = "Success sign up!"
-            my_dialog.busy_indicator.running = false
-            my_dialog.visible = true
-            my_dialog.opacity_anim.start()
-        }
-        onSign_up_failure: {
-            my_dialog.text.text = "Such nickname already exists. Please change it."
-            my_dialog.busy_indicator.running = false
-            my_dialog.visible = true
-            my_dialog.opacity_anim.start()
-        }
-        onInternal_server_error: {
-            my_dialog.text.text = "Internal server error occured, please try later."
-            my_dialog.busy_indicator.running = false
-            my_dialog.visible = true
+            my_dialog.text.text = info_message
             my_dialog.opacity_anim.start()
         }
     }
@@ -158,9 +118,7 @@ Rectangle {
             if(nickname_field.text === "" || password_field.text === "") return
             if(client.is_connected) {
                 if(client.sing_up(nickname_field.text, password_field.text)) {
-                    my_dialog.busy_indicator.running = true
-                    my_dialog.text.text = "Please wait"
-                    my_dialog.visible = true
+                    my_dialog.show_dialog(true, "Please wait.")
                 }
             }
         }
@@ -183,9 +141,7 @@ Rectangle {
             if(nickname_field.text === "" || password_field.text === "") return
             if(client.is_connected) {
                 if(client.sing_in(nickname_field.text, password_field.text)) {
-                    my_dialog.busy_indicator.running = true
-                    my_dialog.text.text = "Please wait"
-                    my_dialog.visible = true
+                    my_dialog.show_dialog(true, "Please wait.")
                 }
             }
         }

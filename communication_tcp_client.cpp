@@ -110,11 +110,11 @@ void Communication_tcp_client::process_data()
         break;
     }
     case Protocol_codes::Response_code::such_user_not_exists: {
-        emit such_user_not_exists();
+        emit info("Such user not exists.");
         break;
     }
     case Protocol_codes::Response_code::internal_server_error: {
-        emit internal_server_error();
+        emit info("Internal server error occured. Try later.");
         break;
     }
     case Protocol_codes::Response_code::unregistered_list: {
@@ -135,12 +135,11 @@ void Communication_tcp_client::process_data()
         break;
     }
     case Protocol_codes::Response_code::success_register_contact_deletion: {
-        qDebug() << "register delition";
         emit success_register_contact_deletion(m_index_for_deletion);
+//        emit
         break;
     }
     case Protocol_codes::Response_code::success_unregister_contact_deletion: {
-        qDebug() << "Unregister delition";
         emit success_unregister_contact_deletion(m_index_for_deletion);
         break;
     }
@@ -152,7 +151,7 @@ void Communication_tcp_client::process_data()
 bool Communication_tcp_client::add_contact(int code, const QString& nickname, const QString& time)
 {
     if(!get_is_connected()) {
-        emit connection_error();
+        emit info("Connection error.");
         return false;
     }
     if(occupy()) {
@@ -209,7 +208,7 @@ void Communication_tcp_client::on_request_sent(const boost::system::error_code& 
         set_is_connected(false);
         release();
         qWarning() << "undefined_error()";
-        emit undefined_error();
+        emit info("Error occured.");
     }
 }
 
@@ -223,7 +222,7 @@ void Communication_tcp_client::on_response_received(const boost::system::error_c
         set_is_connected(false);
         release();
         qWarning() << "undefined_error()";
-        emit undefined_error();
+        emit info("Error occured.");
     }
 }
 
@@ -255,7 +254,7 @@ const char* Communication_tcp_client::create_req_for_contacts(Protocol_codes::Re
 bool Communication_tcp_client::remove_contact(int code, const QString& nickname, const QString& time, int index)
 {
     if(!get_is_connected()) {
-        emit connection_error();
+        emit info("Connection error.");
         return false;
     }
     if(occupy()) {
