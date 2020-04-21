@@ -31,25 +31,6 @@ Rectangle {
             my_dialog.text.text = "Connection error."
             my_dialog.visible = true
         }
-        onUndefined_error: {
-            my_dialog.busy_indicator.running = false
-            my_dialog.text.text = "Error occured. Try later."
-            sign_in_btn.enabled = false
-            sign_up_btn.enabled = false
-            my_dialog.visible = true
-        }
-        onSuccess_unregister_contact_deletion: {
-            my_contacts_list.my_dialog.text.text = "Success deletion!"
-            my_contacts_list.my_dialog.busy_indicator.running = false
-            my_contacts_list.my_dialog.visible = true
-            my_contacts_list.my_dialog.opacity_anim.start()
-        }
-        onSuccess_register_contact_deletion: {
-            my_contacts_list.my_dialog.text.text = "Success deletion!"
-            my_contacts_list.my_dialog.busy_indicator.running = false
-            my_contacts_list.my_dialog.visible = true
-            my_contacts_list.my_dialog.opacity_anim.start()
-        }
     }
 
     My_dialog {

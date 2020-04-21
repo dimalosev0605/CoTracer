@@ -24,6 +24,9 @@ class Communication_tcp_client: public Base_tcp_client
     QString m_model_date;
     QString m_model_nickname;
 
+    QString m_add_contact_nickname;
+    QString m_add_contact_time;
+    bool m_add_contact_is_reg;
     int m_index_for_deletion;
 
     User_validator m_user_validator;
@@ -53,11 +56,11 @@ public slots:
     Contacts_model* create_model_based_on_nickname(const QString& nickname);
     void destroy_model();
 
-    void add_contact(int code, const QString& nickname, const QString& time);
+    bool add_contact(int code, const QString& nickname, const QString& time);
     bool remove_contact(int code, const QString& nickname, const QString& time, int index);
 
 signals:
-    void success_adding();
+    void success_adding(const QString& nickname, const QString& time, bool is_reg);
     void success_register_contact_deletion(int index);
     void success_unregister_contact_deletion(int index);
     void register_contact_deletion_failure();

@@ -7,6 +7,8 @@ Rectangle {
     id: root
     color: "#e00d0d"
 
+    property alias my_dialog: my_dialog
+
     Back_btn {
         id: back_btn
 //        z:
@@ -37,6 +39,52 @@ Rectangle {
         color: mouse_area.pressed ? "#00ff00" : parent.color
         mouse_area.onClicked: {
             stack_view.push(add_contact_menu_comp)
+        }
+    }
+    My_dialog {
+        id: my_dialog
+        z: 3
+        anchors.centerIn: parent
+        width: if(parent.height > parent.width) {
+                   parent.width * 0.9
+               }
+               else {
+                   parent.width * 0.5
+               }
+
+        height: if(parent.height > parent.width) {
+                    parent.height * 0.2
+                }
+                else {
+                    parent.height * 0.5
+                }
+
+        visible: false
+        opacity: 0.7
+    }
+    Connections {
+        target: client
+        onUndefined_error: {
+            my_dialog.busy_indicator.running = false
+            my_dialog.text.text = "Error occured. Try later."
+            my_dialog.visible = true
+        }
+        onSuccess_unregister_contact_deletion: {
+            my_dialog.text.text = "Success deletion!"
+            my_dialog.busy_indicator.running = false
+            my_dialog.visible = true
+            my_dialog.opacity_anim.start()
+        }
+        onSuccess_register_contact_deletion: {
+            my_dialog.text.text = "Success deletion!"
+            my_dialog.busy_indicator.running = false
+            my_dialog.visible = true
+            my_dialog.opacity_anim.start()
+        }
+        onInternal_server_error: {
+            my_dialog.text.text = "Internal server errror. Try later."
+            my_dialog.busy_indicator.running = false
+            my_dialog.visible = true
         }
     }
 

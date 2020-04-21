@@ -83,8 +83,16 @@ void Contacts_model::receive_registered_contacts(const QVector<std::pair<QString
 
 void Contacts_model::remove_contact(int index)
 {
+    qDebug() << "remove contact: " << index;
     if(index < 0 || index >= m_contacts.size()) return;
     beginRemoveRows(QModelIndex(), index, index);
     m_contacts.removeAt(index);
     endRemoveRows();
+}
+
+void Contacts_model::add_contact(const QString& nickname, const QString& time, bool is_reg)
+{
+    beginInsertRows(QModelIndex(), m_contacts.size(), m_contacts.size());
+    m_contacts.push_back(std::make_tuple(nickname, time, is_reg));
+    endInsertRows();
 }

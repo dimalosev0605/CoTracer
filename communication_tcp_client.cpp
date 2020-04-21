@@ -25,6 +25,8 @@ Contacts_model* Communication_tcp_client::create_model_based_on_date(const QStri
             Qt::QueuedConnection);
     connect(this, &Communication_tcp_client::success_register_contact_deletion, new_model, &Contacts_model::remove_contact,
             Qt::QueuedConnection);
+    connect(this, &Communication_tcp_client::success_adding, new_model, &Contacts_model::add_contact,
+            Qt::QueuedConnection);
 
     m_models.push_back(new_model);
     request_contacts(Protocol_codes::Request_code::get_unregistered_contacts);
@@ -109,7 +111,7 @@ void Communication_tcp_client::process_data()
     switch (m_session->m_res_code) {
 
     case Protocol_codes::Response_code::success_adding: {
-        emit success_adding();
+        emit success_adding(m_add_contact_nickname, m_add_contact_time, m_add_contact_is_reg);
         break;
     }
 
@@ -159,17 +161,35 @@ void Communication_tcp_client::process_data()
     release();
 }
 
-void Communication_tcp_client::add_contact(int code, const QString& nickname, const QString& time)
+bool Communication_tcp_client::add_contact(int code, const QString& nickname, const QString& time)
 {
-    m_session->m_request = create_add_contact_req((Protocol_codes::Request_code)code, nickname, time);
+    if(!get_is_connected()) {
+        emit connection_error();
+        return false;
+    }
+    if(is_free()) {
+        occupy();
+        m_session->m_request = create_add_contact_req((Protocol_codes::Request_code)code, nickname, time);
 
-    boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                             boost::bind
-                             (&Communication_tcp_client::on_request_sent,
-                              boost::ref(*this),
-                              boost::placeholders::_1,
-                              boost::placeholders::_2)
-                             );
+        m_add_contact_nickname = nickname;
+        m_add_contact_time = time;
+        if(Protocol_codes::Request_code::add_registered_user == (Protocol_codes::Request_code)code) {
+            m_add_contact_is_reg = true;
+        } else {
+            m_add_contact_is_reg = false;
+        }
+
+        boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
+                                 boost::bind
+                                 (&Communication_tcp_client::on_request_sent,
+                                  boost::ref(*this),
+                                  boost::placeholders::_1,
+                                  boost::placeholders::_2)
+                                 );
+        return true;
+    } else {
+        return false;
+    }
 }
 
 const char* Communication_tcp_client::create_add_contact_req(Protocol_codes::Request_code code, const QString& contact_nickname, const QString& time)

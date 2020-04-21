@@ -18,7 +18,47 @@ Rectangle {
         color: mouse_area.pressed ? "#708090" : parent.color
         mouse_area.onClicked: {
             // poped define in Back_btn.qml
-            client.destroy_model()
+        }
+    }
+
+    My_dialog {
+        id: my_dialog
+        z: 3
+        anchors.centerIn: parent
+        width: if(parent.height > parent.width) {
+                   parent.width * 0.9
+               }
+               else {
+                   parent.width * 0.5
+               }
+
+        height: if(parent.height > parent.width) {
+                    parent.height * 0.2
+                }
+                else {
+                    parent.height * 0.5
+                }
+
+        visible: false
+        opacity: 0.7
+    }
+    Connections {
+        target: client
+        onSuccess_adding: {
+            my_dialog.text.text = "Success adding!"
+            my_dialog.busy_indicator.running = false
+            my_dialog.visible = true
+            my_dialog.opacity_anim.start()
+        }
+        onInternal_server_error: {
+            my_dialog.text.text = "Internal server errror. Try later."
+            my_dialog.busy_indicator.running = false
+            my_dialog.visible = true
+        }
+        onConnection_error: {
+            my_dialog.busy_indicator.running = false
+            my_dialog.text.text = "Connection error."
+            my_dialog.visible = true
         }
     }
 
@@ -192,10 +232,22 @@ Rectangle {
         mouse_area.onClicked: {
             if(nickname_field.text === "") return;
             if(qstn.is_reg) {
-                client.add_contact(2, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)
+                if(client.is_connected) {
+                    if(client.add_contact(2, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)) {
+                        my_dialog.busy_indicator.running = true
+                        my_dialog.text.text = "Please wait"
+                        my_dialog.visible = true
+                    }
+                }
             }
             else {
-                client.add_contact(3, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)
+                if(client.is_connected) {
+                    if(client.add_contact(3, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)) {
+                        my_dialog.busy_indicator.running = true
+                        my_dialog.text.text = "Please wait"
+                        my_dialog.visible = true
+                    }
+                }
             }
         }
     }
