@@ -23,6 +23,7 @@ class Communication_tcp_client: public Base_tcp_client
 
     QString m_model_date;
     QString m_model_nickname;
+    QVector<QString> m_previous_links;
 
     QString m_add_contact_nickname;
     QString m_add_contact_time;

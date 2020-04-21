@@ -10,7 +10,8 @@ Contacts_model* Communication_tcp_client::create_model_based_on_date(const QStri
 {
     m_model_date = date;
     m_model_nickname = m_user_validator.get_nickname();
-    Contacts_model* new_model = new Contacts_model(m_user_validator.get_nickname(), this);
+    m_previous_links.push_back(m_model_nickname);
+    Contacts_model* new_model = new Contacts_model(m_previous_links, this);
 
     connect(this, &Communication_tcp_client::unregistered_list, new_model, &Contacts_model::receive_unregistered_contacts,
             Qt::QueuedConnection);
@@ -32,7 +33,8 @@ Contacts_model* Communication_tcp_client::create_model_based_on_date(const QStri
 Contacts_model* Communication_tcp_client::create_model_based_on_nickname(const QString& nickname)
 {
     m_model_nickname = nickname;
-    Contacts_model* new_model = new Contacts_model(m_user_validator.get_nickname(), this);
+    m_previous_links.push_back(nickname);
+    Contacts_model* new_model = new Contacts_model(m_previous_links, this);
 
     connect(this, &Communication_tcp_client::unregistered_list, new_model, &Contacts_model::receive_unregistered_contacts,
             Qt::QueuedConnection);
@@ -50,6 +52,8 @@ void Communication_tcp_client::destroy_model()
         auto poped_model = m_models.back();
         m_models.pop_back();
         delete poped_model;
+
+        m_previous_links.pop_back();
     }
 }
 

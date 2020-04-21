@@ -14,13 +14,13 @@ class Contacts_model: public QAbstractListModel
 
     QHash<int, QByteArray> m_roles;
     QVector<std::tuple<QString, QString, bool>> m_contacts;
-    QString m_host_name;
+    QVector<QString> m_previous_links;
 
 private:
     QHash<int, QByteArray> roleNames() const override;
 
 public:
-    Contacts_model(const QString& name, QObject* parent = nullptr);
+    Contacts_model(const QVector<QString>& previous_links, QObject* parent = nullptr);
     Contacts_model() = default;
     ~Contacts_model();
 

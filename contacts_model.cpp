@@ -1,8 +1,8 @@
 #include "contacts_model.h"
 
-Contacts_model::Contacts_model(const QString& name, QObject* parent)
+Contacts_model::Contacts_model(const QVector<QString>& previous_links, QObject* parent)
     : QAbstractListModel(parent),
-      m_host_name(name)
+      m_previous_links(previous_links)
 {
     m_roles[(int)RolesNames::nickname] = "nickname";
     m_roles[(int)RolesNames::time] = "time";
@@ -39,10 +39,8 @@ QVariant Contacts_model::data(const QModelIndex& index, int role) const
         return std::get<1>(m_contacts[row]);
     }
     case (int)RolesNames::is_registered: {
-//        qDebug() << std::get<0>(m_contacts[row]) << " - " << std::get<2>(m_contacts[row]);
-//        qDebug() << "m_my_name = " << m_host_name;
-        if(m_host_name == std::get<0>(m_contacts[row])) {
-            qDebug() << "LALAALALALALALALALALLAAL";
+        if(std::find(m_previous_links.begin(), m_previous_links.end(), std::get<0>(m_contacts[row])) != m_previous_links.end()) {
+            qDebug() << "Dont show: " << std::get<0>(m_contacts[row]);
             return false;
         }
         return std::get<2>(m_contacts[row]);
