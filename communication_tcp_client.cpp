@@ -3,24 +3,18 @@
 Communication_tcp_client::Communication_tcp_client(QObject* parent)
     : Base_tcp_client(parent)
 {
-
+    m_previous_links.push_back(m_user_validator.get_nickname());
 }
 
 Contacts_model* Communication_tcp_client::create_model_based_on_date(const QString& date)
 {
+    Contacts_model* new_model = new Contacts_model(this);
     m_model_date = date;
     m_model_nickname = m_user_validator.get_nickname();
-    m_previous_links.push_back(m_model_nickname);
-    Contacts_model* new_model = new Contacts_model(m_previous_links, this);
 
-    connect(this, &Communication_tcp_client::unregistered_list, new_model, &Contacts_model::receive_unregistered_contacts,
+    connect(this, &Communication_tcp_client::contacts_received, new_model, &Contacts_model::receive_contacts,
             Qt::QueuedConnection);
-    connect(this, &Communication_tcp_client::registered_list, new_model, &Contacts_model::receive_registered_contacts,
-            Qt::QueuedConnection);
-
-    connect(this, &Communication_tcp_client::success_unregister_contact_deletion, new_model, &Contacts_model::remove_contact,
-            Qt::QueuedConnection);
-    connect(this, &Communication_tcp_client::success_register_contact_deletion, new_model, &Contacts_model::remove_contact,
+    connect(this, &Communication_tcp_client::success_contact_deletion, new_model, &Contacts_model::remove_contact,
             Qt::QueuedConnection);
     connect(this, &Communication_tcp_client::success_adding, new_model, &Contacts_model::add_contact,
             Qt::QueuedConnection);
@@ -28,17 +22,15 @@ Contacts_model* Communication_tcp_client::create_model_based_on_date(const QStri
     m_models.push_back(new_model);
     request_contacts(Protocol_codes::Request_code::get_unregistered_contacts);
     return new_model;
+
 }
 
 Contacts_model* Communication_tcp_client::create_model_based_on_nickname(const QString& nickname)
 {
     m_model_nickname = nickname;
-    m_previous_links.push_back(nickname);
     Contacts_model* new_model = new Contacts_model(m_previous_links, this);
 
-    connect(this, &Communication_tcp_client::unregistered_list, new_model, &Contacts_model::receive_unregistered_contacts,
-            Qt::QueuedConnection);
-    connect(this, &Communication_tcp_client::registered_list, new_model, &Contacts_model::receive_registered_contacts,
+    connect(this, &Communication_tcp_client::contacts_received, new_model, &Contacts_model::receive_contacts,
             Qt::QueuedConnection);
 
     m_models.push_back(new_model);
@@ -53,13 +45,18 @@ void Communication_tcp_client::destroy_model()
         m_models.pop_back();
         delete poped_model;
 
-        m_previous_links.pop_back();
+        if(!m_previous_links_count.isEmpty()) {
+            int must_poped = m_previous_links_count.back();
+            m_previous_links_count.pop_back();
+            for(int i = 0; i < must_poped; ++i) {
+                m_previous_links.pop_back();
+            }
+        }
     }
 }
 
 void Communication_tcp_client::parse_response(size_t bytes_transferred)
 {
-// from https://stackoverflow.com/questions/40561097/read-until-a-string-delimiter-in-boostasiostreambuf
     std::string data = std::string{boost::asio::buffers_begin(m_session->m_response.data()),
                                 boost::asio::buffers_begin(m_session->m_response.data()) + bytes_transferred - Protocol_keys::end_of_message.size()};
 
@@ -97,12 +94,17 @@ void Communication_tcp_client::parse_contacts(Protocol_codes::Response_code code
         auto pair = std::make_pair(contact_j_obj_map[Protocol_keys::nickname].toString(),
                                    contact_j_obj_map[Protocol_keys::contact_time].toString());
 
-        m_received_contacts.push_back(pair);
+        if(Protocol_codes::Response_code::unregistered_list == code) {
+            m_received_contacts.push_back(std::make_tuple(pair.first, pair.second, false));
+        }
+        if(Protocol_codes::Response_code::registered_list == code) {
+            m_received_contacts.push_back(std::make_tuple(pair.first, pair.second, true));
+            m_previous_links.push_back(pair.first);
+        }
     }
-//    qDebug() << "Parse: ";
-//    for(auto& i : m_received_contacts) {
-//        qDebug() << i.first << " - " << i.second;
-//    }
+    if(Protocol_codes::Response_code::registered_list == code) {
+        m_previous_links_count.push_back(j_arr_of_contacts.size());
+    }
 }
 
 void Communication_tcp_client::process_data()
@@ -122,29 +124,21 @@ void Communication_tcp_client::process_data()
         break;
     }
     case Protocol_codes::Response_code::unregistered_list: {
-        emit unregistered_list(m_received_contacts);
-        m_received_contacts.clear();
         request_contacts(Protocol_codes::Request_code::get_registered_contacts);
         break;
     }
     case Protocol_codes::Response_code::registered_list: {
-        emit registered_list(m_received_contacts);
+        emit contacts_received(m_received_contacts);
         m_received_contacts.clear();
-        if(m_models.size() == 1) {
-            disconnect(this, &Communication_tcp_client::registered_list, nullptr, nullptr);
-            disconnect(this, &Communication_tcp_client::unregistered_list, nullptr, nullptr);
-        } else {
-            disconnect(this, nullptr, m_models.last(), nullptr);
-        }
+        disconnect(this, &Communication_tcp_client::contacts_received, nullptr, nullptr);
         break;
     }
     case Protocol_codes::Response_code::success_register_contact_deletion: {
-        emit success_register_contact_deletion(m_index_for_deletion);
-//        emit
+        emit success_contact_deletion(m_index_for_deletion);
         break;
     }
     case Protocol_codes::Response_code::success_unregister_contact_deletion: {
-        emit success_unregister_contact_deletion(m_index_for_deletion);
+        emit success_contact_deletion(m_index_for_deletion);
         break;
     }
     }
@@ -154,6 +148,7 @@ void Communication_tcp_client::process_data()
 
 bool Communication_tcp_client::add_contact(int code, const QString& nickname, const QString& time)
 {
+    if(nickname == m_user_validator.get_nickname()) return false;
     if(!get_is_connected()) {
         emit info("Connection error.");
         return false;
@@ -198,7 +193,6 @@ const char* Communication_tcp_client::create_add_contact_req(Protocol_codes::Req
 
 void Communication_tcp_client::on_request_sent(const boost::system::error_code& ec, size_t bytes_transferred)
 {
-    qDebug() << "on_request_sent()";
     m_session->m_request.clear();
     if(ec.value() == 0) {
         boost::asio::async_read_until(m_session->m_socket, m_session->m_response, Protocol_keys::end_of_message.toStdString(),
@@ -218,7 +212,6 @@ void Communication_tcp_client::on_request_sent(const boost::system::error_code& 
 
 void Communication_tcp_client::on_response_received(const boost::system::error_code& ec, size_t bytes_transferred)
 {
-    qDebug() << "on_response_recived";
     if(ec.value() == 0) {
         parse_response(bytes_transferred);
         process_data();
@@ -232,7 +225,6 @@ void Communication_tcp_client::on_response_received(const boost::system::error_c
 
 void Communication_tcp_client::request_contacts(Protocol_codes::Request_code code)
 {
-    qDebug() << "request_contacts, code " << (int)code;
     m_session->m_request = create_req_for_contacts(code);
     boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
                              boost::bind

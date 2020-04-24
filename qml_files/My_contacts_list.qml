@@ -43,11 +43,7 @@ Rectangle {
             my_dialog.text.text = info_message
             my_dialog.opacity_anim.start()
         }
-        onSuccess_unregister_contact_deletion: {
-            my_dialog.show_dialog(false, "Contact was deleted.")
-            my_dialog.opacity_anim.start()
-        }
-        onSuccess_register_contact_deletion: {
+        onSuccess_contact_deletion: {
             my_dialog.show_dialog(false, "Contact was deleted.")
             my_dialog.opacity_anim.start()
         }

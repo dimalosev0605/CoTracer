@@ -17,6 +17,8 @@ int main(int argc, char *argv[])
     qmlRegisterType<Days_model>("Days_model_qml", 1, 0, "Days_model");
     qmlRegisterType<Contacts_model>("Contacts_model_qml", 1, 0, "Contacts_model");
 
+    qRegisterMetaType<QVector<std::tuple<QString, QString, bool>>>("QVector<std::tuple<QString, QString, bool>>");
+
     QQmlApplicationEngine engine;
 
 

@@ -24,6 +24,7 @@ class Communication_tcp_client: public Base_tcp_client
     QString m_model_date;
     QString m_model_nickname;
     QVector<QString> m_previous_links;
+    QVector<int> m_previous_links_count;
 
     QString m_add_contact_nickname;
     QString m_add_contact_time;
@@ -32,7 +33,7 @@ class Communication_tcp_client: public Base_tcp_client
     int m_index_for_deletion;
 
     User_validator m_user_validator;
-    QVector<std::pair<QString, QString>> m_received_contacts;
+    QVector<std::tuple<QString, QString, bool>> m_received_contacts;
 
 private:
     const char* create_add_contact_req(Protocol_codes::Request_code code, const QString& nickname, const QString& time);
@@ -64,13 +65,8 @@ public slots:
 
 signals:
     void success_adding(const QString& nickname, const QString& time, bool is_reg);
-    void such_user_not_exists();
-
-    void success_register_contact_deletion(int index);
-    void success_unregister_contact_deletion(int index);
-
-    void unregistered_list(const QVector<std::pair<QString, QString>>&);
-    void registered_list(const QVector<std::pair<QString, QString>>&);
+    void success_contact_deletion(int index);
+    void contacts_received(const QVector<std::tuple<QString, QString, bool>>& contacts);
 };
 
 #endif // COMMUNICATION_TCP_CLIENT_H

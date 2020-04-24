@@ -20,8 +20,8 @@ private:
     QHash<int, QByteArray> roleNames() const override;
 
 public:
+    Contacts_model(QObject* parent = nullptr);
     Contacts_model(const QVector<QString>& previous_links, QObject* parent = nullptr);
-    Contacts_model() = default;
     ~Contacts_model();
 
     enum class RolesNames {
@@ -34,10 +34,9 @@ public:
     virtual QVariant data(const QModelIndex& index, int role) const override;
 
 public slots:
-    void receive_unregistered_contacts(const QVector<std::pair<QString, QString>>& contacts);
-    void receive_registered_contacts(const QVector<std::pair<QString, QString>>& contacts);
     void remove_contact(int index);
     void add_contact(const QString& nickname, const QString& time, bool is_reg);
+    void receive_contacts(const QVector<std::tuple<QString, QString, bool>>& contacts);
 };
 
 #endif // CONTACTS_MODEL_H
