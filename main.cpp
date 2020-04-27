@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<Contacts_model>("Contacts_model_qml", 1, 0, "Contacts_model");
 
     qRegisterMetaType<QVector<std::tuple<QString, QString, bool>>>("QVector<std::tuple<QString, QString, bool>>");
+    qRegisterMetaType<QVector<std::tuple<QString, int, int>>>("QVector<std::tuple<QString, int, int>>");
 
     QQmlApplicationEngine engine;
 

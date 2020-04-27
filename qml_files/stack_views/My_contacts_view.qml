@@ -50,6 +50,17 @@ Rectangle {
             my_dialog.text.text = info_message
             my_dialog.opacity_anim.start()
         }
+        onStatistics_received: {
+            days_model.receive_stats(m_stats)
+            my_dialog.busy_indicator.running = false
+            my_dialog.text.text = "Statistics was received."
+            my_dialog.opacity_anim.start()
+        }
+        onFetching_statistics: {
+            my_dialog.busy_indicator.running = true
+            my_dialog.text.text = message
+            my_dialog.visible = true
+        }
     }
 
     Back_btn {
@@ -95,13 +106,16 @@ Rectangle {
             border.color: "#000000"
             color: "#d70707"
 
-            property string date: text.text
+            property string date: date.text
             Text {
-                id: text
-                anchors.centerIn: parent
+                id: date
+                anchors {
+                    left: parent.left
+                    top: parent.top
+                }
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-                width: parent.width
+                width: parent.width * 0.7
                 height: parent.height
                 fontSizeMode: Text.Fit
                 minimumPointSize: 5
@@ -109,6 +123,57 @@ Rectangle {
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
                 text: String(model.date)
+            }
+            Text {
+                id: reg_count
+                anchors {
+                    left: date.right
+                    top: date.top
+                }
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                width: (parent.width - date.width) / 3
+                height: parent.height
+                fontSizeMode: Text.Fit
+                minimumPointSize: 5
+                font.pointSize: 12
+                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
+                text: String(model.reg_count)
+            }
+            Text {
+                id: unreg_count
+                anchors {
+                    left: reg_count.right
+                    top: reg_count.top
+                }
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                width: reg_count.width
+                height: parent.height
+                fontSizeMode: Text.Fit
+                minimumPointSize: 5
+                font.pointSize: 12
+                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
+                text: String(model.unreg_count)
+            }
+            Text {
+                id: sum_contacts
+                anchors {
+                    left: unreg_count.right
+                    top: unreg_count.top
+                }
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                width: reg_count.width
+                height: parent.height
+                fontSizeMode: Text.Fit
+                minimumPointSize: 5
+                font.pointSize: 12
+                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
+                text: parseInt(reg_count.text) + parseInt(unreg_count.text)
             }
             MouseArea {
                 anchors.fill: parent

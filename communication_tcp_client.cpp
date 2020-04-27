@@ -4,6 +4,7 @@ Communication_tcp_client::Communication_tcp_client(QObject* parent)
     : Base_tcp_client(parent)
 {
     m_previous_links.push_back(m_user_validator.get_nickname());
+    connect(this, &Communication_tcp_client::is_connected_changed, this, &Communication_tcp_client::request_for_14_days_stats);
 }
 
 Contacts_model* Communication_tcp_client::create_model_based_on_date(const QString& date)
@@ -75,6 +76,10 @@ void Communication_tcp_client::parse_response(size_t bytes_transferred)
         {
             parse_contacts(m_session->m_res_code, j_map);
         }
+
+        if(m_session->m_res_code == Protocol_codes::Response_code::success_fetch_stats_for_14_days) {
+            parse_stat(j_map);
+        }
     }
 }
 
@@ -106,6 +111,23 @@ void Communication_tcp_client::parse_contacts(Protocol_codes::Response_code code
         m_previous_links_count.push_back(j_arr_of_contacts.size());
     }
 }
+
+void Communication_tcp_client::parse_stat(const QMap<QString, QVariant>& j_map)
+{
+    auto j_arr_of_stats = j_map[Protocol_keys::statistics_for_14_days].toJsonArray();
+
+    for(int i = 0; i < j_arr_of_stats.size(); ++i) {
+        auto j_stat_for_day = j_arr_of_stats[i].toObject();
+        auto day_map = j_stat_for_day.toVariantMap();
+
+        QString date = day_map[Protocol_keys::date].toString();
+        int unreg_qnt = day_map[Protocol_keys::unregisterd_quantity].toInt();
+        int reg_qnt = day_map[Protocol_keys::registered_quantity].toInt();
+
+        m_stats.push_back(std::make_tuple(date, reg_qnt, unreg_qnt));
+    }
+}
+
 
 void Communication_tcp_client::process_data()
 {
@@ -139,6 +161,10 @@ void Communication_tcp_client::process_data()
     }
     case Protocol_codes::Response_code::success_unregister_contact_deletion: {
         emit success_contact_deletion(m_index_for_deletion);
+        break;
+    }
+    case Protocol_codes::Response_code::success_fetch_stats_for_14_days: {
+        emit statistics_received(m_stats);
         break;
     }
     }
@@ -279,6 +305,38 @@ const char* Communication_tcp_client::create_remove_contact_req(Protocol_codes::
     j_obj.insert(Protocol_keys::contact_date, m_model_date);
     j_obj.insert(Protocol_keys::contact, nickname);
     j_obj.insert(Protocol_keys::contact_time, time);
+
+    QJsonDocument j_doc(j_obj);
+    return j_doc.toJson().append(Protocol_keys::end_of_message).data();
+}
+
+void Communication_tcp_client::request_for_14_days_stats()
+{
+    if(!get_is_connected()) {
+        return;
+    }
+    else {
+        if(occupy()) {
+            emit fetching_statistics("Fetching statistics...");
+            m_session->m_request = create_req_for_14_days_stats();
+//            qDebug() << "My request: " << QString::fromStdString(m_session->m_request);
+            boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
+                                     boost::bind
+                                     (&Communication_tcp_client::on_request_sent,
+                                      boost::ref(*this),
+                                      boost::placeholders::_1,
+                                      boost::placeholders::_2)
+                                     );
+        }
+    }
+}
+
+const char* Communication_tcp_client::create_req_for_14_days_stats()
+{
+    QJsonObject j_obj;
+
+    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::stats_for_14_days);
+    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
 
     QJsonDocument j_doc(j_obj);
     return j_doc.toJson().append(Protocol_keys::end_of_message).data();

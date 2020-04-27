@@ -34,6 +34,7 @@ class Communication_tcp_client: public Base_tcp_client
 
     User_validator m_user_validator;
     QVector<std::tuple<QString, QString, bool>> m_received_contacts;
+    QVector<std::tuple<QString, int, int>> m_stats; // date, reg, unreg.
 
 private:
     const char* create_add_contact_req(Protocol_codes::Request_code code, const QString& nickname, const QString& time);
@@ -51,6 +52,12 @@ private:
 
     void process_data();
 
+    const char* create_req_for_14_days_stats();
+    void parse_stat(const QMap<QString, QVariant>& j_map);
+
+private slots:
+    void request_for_14_days_stats();
+
 public:
     explicit Communication_tcp_client(QObject* parent = nullptr);
 
@@ -67,6 +74,8 @@ signals:
     void success_adding(const QString& nickname, const QString& time, bool is_reg);
     void success_contact_deletion(int index);
     void contacts_received(const QVector<std::tuple<QString, QString, bool>>& contacts);
+    void fetching_statistics(const QString& message);
+    void statistics_received(const QVector<std::tuple<QString, int, int>>& m_stats);
 };
 
 #endif // COMMUNICATION_TCP_CLIENT_H

@@ -15,6 +15,10 @@ const QString contact_time = "time";
 const QString contact_date = "date";
 const QString unregistered_list = "unregistered_list";
 const QString registered_list = "registered_list";
+const QString statistics_for_14_days = "stat";
+const QString registered_quantity = "reg_qnt";
+const QString unregisterd_quantity = "unreg_qnt";
+const QString date = "date";
 
 }
 

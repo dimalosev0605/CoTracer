@@ -11,7 +11,8 @@ enum class Request_code: int {
     get_unregistered_contacts,
     get_registered_contacts,
     remove_unregister_contact,
-    remove_register_contact
+    remove_register_contact,
+    stats_for_14_days
 };
 
 enum class Response_code: int {
@@ -26,6 +27,7 @@ enum class Response_code: int {
     registered_list,
     success_unregister_contact_deletion,
     success_register_contact_deletion,
+    success_fetch_stats_for_14_days
 };
 
 }
