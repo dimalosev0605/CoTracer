@@ -7,6 +7,7 @@ import Days_model_qml 1.0
 import Communication_tcp_client_qml 1.0
 
 Rectangle {
+    id: root
     z: 0
     color: "#e00d0d"
 
@@ -18,6 +19,12 @@ Rectangle {
         id: my_contacts_list_comp
         My_contacts_list {
             id: my_contacts_list
+        }
+    }
+    Component {
+        id: chart_view_comp
+        Chart_view {
+            id: chart_view
         }
     }
 
@@ -74,6 +81,19 @@ Rectangle {
         }
         color: mouse_area.pressed ? "#708090" : parent.color
     }
+    Chart_btn {
+        id: chart_btn
+        z: 1
+        anchors {
+            right: parent.right
+            bottomMargin: back_btn.anchors.bottomMargin
+            bottom: parent.bottom
+            rightMargin: back_btn.anchors.leftMargin
+        }
+        height: back_btn.height
+        width: height * 1.2
+        color: mouse_area.pressed ? "#708090" : parent.color
+    }
 
     ListView {
         id: days_list_view
@@ -95,6 +115,107 @@ Rectangle {
         spacing: 5
         model: days_model
 
+        headerPositioning: ListView.OverlayHeader
+        header: Rectangle {
+            z: 3
+            width: parent.width
+            height: 50
+            border.width: 1
+            color: root.color
+            Text {
+                id: sort_date
+                anchors {
+                    left: parent.left
+                    top: parent.top
+                }
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                width: parent.width * 0.4
+                height: parent.height
+                fontSizeMode: Text.Fit
+                minimumPointSize: 1
+                font.pointSize: 12
+                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
+                text: "Date"
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        days_model.sort_by_date()
+                    }
+                }
+            }
+            Text {
+                id: sort_reg_count
+                anchors {
+                    left: sort_date.right
+                    top: sort_date.top
+                }
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                width: (parent.width - sort_date.width) / 3
+                height: parent.height
+                fontSizeMode: Text.Fit
+                minimumPointSize: 1
+                font.pointSize: 12
+                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
+                text: "Reg."
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        days_model.sort_by_reg_count()
+                    }
+                }
+            }
+            Text {
+                id: sort_unreg_count
+                anchors {
+                    left: sort_reg_count.right
+                    top: sort_reg_count.top
+                }
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                width: sort_reg_count.width
+                height: parent.height
+                fontSizeMode: Text.Fit
+                minimumPointSize: 1
+                font.pointSize: 12
+                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
+                text: "Unreg."
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        days_model.sort_by_unreg_count()
+                    }
+                }
+            }
+            Text {
+                id: sort_sum_contacts
+                anchors {
+                    left: sort_unreg_count.right
+                    top: sort_unreg_count.top
+                }
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                width: sort_reg_count.width
+                height: parent.height
+                fontSizeMode: Text.Fit
+                minimumPointSize: 1
+                font.pointSize: 12
+                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
+                text: "Sum"
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        days_model.sort_by_sum()
+                    }
+                }
+            }
+        }
+
         delegate: Rectangle {
             id: delegate
             z: 2
@@ -115,7 +236,7 @@ Rectangle {
                 }
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-                width: parent.width * 0.7
+                width: parent.width * 0.4
                 height: parent.height
                 fontSizeMode: Text.Fit
                 minimumPointSize: 5

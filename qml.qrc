@@ -17,5 +17,8 @@
         <file>imgs/add.png</file>
         <file>qml_files/buttons/Add_contact_btn.qml</file>
         <file>imgs/remove.png</file>
+        <file>imgs/chart.png</file>
+        <file>qml_files/buttons/Chart_btn.qml</file>
+        <file>qml_files/stack_views/Chart_view.qml</file>
     </qresource>
 </RCC>

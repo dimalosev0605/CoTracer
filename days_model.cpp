@@ -67,3 +67,99 @@ void Days_model::receive_stats(const QVector<std::tuple<QString, int, int>>& sta
     });
     endInsertRows();
 }
+
+void Days_model::sort_by_date()
+{
+    beginRemoveRows(QModelIndex(), 0, m_stats.size() - 1);
+    endRemoveRows();
+
+    beginInsertRows(QModelIndex(), 0, m_stats.size() - 1);
+    std::sort(m_stats.begin(), m_stats.end(), [this](const std::tuple<QString, int, int>& lhs,
+                                                     const std::tuple<QString, int, int>& rhs)
+    {
+        if(m_date_sorted_decrease_order) {
+            return std::get<0>(lhs) < std::get<0>(rhs);
+        } else {
+            return std::get<0>(lhs) > std::get<0>(rhs);
+        }
+    });
+    endInsertRows();
+    m_date_sorted_decrease_order = !m_date_sorted_decrease_order;
+}
+
+void Days_model::sort_by_reg_count()
+{
+    beginRemoveRows(QModelIndex(), 0, m_stats.size() - 1);
+    endRemoveRows();
+
+    beginInsertRows(QModelIndex(), 0, m_stats.size() - 1);
+    std::sort(m_stats.begin(), m_stats.end(), [this](const std::tuple<QString, int, int>& lhs,
+                                                     const std::tuple<QString, int, int>& rhs)
+    {
+        if(m_reg_count_sorted_decrease_order) {
+            return std::get<1>(lhs) < std::get<1>(rhs);
+        } else {
+            return std::get<1>(lhs) > std::get<1>(rhs);
+        }
+    });
+    endInsertRows();
+    m_reg_count_sorted_decrease_order = !m_reg_count_sorted_decrease_order;
+}
+
+void Days_model::sort_by_unreg_count()
+{
+    beginRemoveRows(QModelIndex(), 0, m_stats.size() - 1);
+    endRemoveRows();
+
+    beginInsertRows(QModelIndex(), 0, m_stats.size() - 1);
+    std::sort(m_stats.begin(), m_stats.end(), [this](const std::tuple<QString, int, int>& lhs,
+                                                     const std::tuple<QString, int, int>& rhs)
+    {
+        if(m_unreg_count_sorted_decrease_order) {
+            return std::get<2>(lhs) < std::get<2>(rhs);
+        } else {
+            return std::get<2>(lhs) > std::get<2>(rhs);
+        }
+    });
+    endInsertRows();
+    m_unreg_count_sorted_decrease_order = !m_unreg_count_sorted_decrease_order;
+}
+
+void Days_model::sort_by_sum()
+{
+    beginRemoveRows(QModelIndex(), 0, m_stats.size() - 1);
+    endRemoveRows();
+
+    beginInsertRows(QModelIndex(), 0, m_stats.size() - 1);
+    std::sort(m_stats.begin(), m_stats.end(), [this](const std::tuple<QString, int, int>& lhs,
+                                                     const std::tuple<QString, int, int>& rhs)
+    {
+        int lhs_sum = std::get<1>(lhs) + std::get<2>(lhs);
+        int rhs_sum = std::get<1>(rhs) + std::get<2>(rhs);
+        if(m_sum_sorted_decrease_order) {
+            return lhs_sum < rhs_sum;
+        } else {
+            return lhs_sum > rhs_sum;
+        }
+    });
+    endInsertRows();
+    m_sum_sorted_decrease_order = !m_sum_sorted_decrease_order;
+}
+
+QVector<std::tuple<int, int>> Days_model::get_stats()
+{
+    auto temp = m_stats;
+
+    std::sort(temp.begin(), temp.end(), [](const std::tuple<QString, int, int>& lhs,
+                                           const std::tuple<QString, int, int>& rhs)
+    {
+        return std::get<0>(lhs) > std::get<0>(rhs);
+    });
+
+    QVector<std::tuple<int, int>> stats;
+    for(int i = 0; i < temp.size(); ++i) {
+        stats.push_back(std::make_tuple(std::get<1>(temp[i]), std::get<2>(temp[i])));
+    }
+
+    return stats;
+}

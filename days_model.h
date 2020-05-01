@@ -5,6 +5,7 @@
 #include <QDate>
 #include <QDebug>
 #include <QThread>
+#include <QTimer>
 
 class Days_model: public QAbstractListModel
 {
@@ -15,6 +16,11 @@ class Days_model: public QAbstractListModel
     QHash<int, QByteArray> m_roles;
 //    QVector<QString> m_dates;
     QVector<std::tuple<QString, int, int>> m_stats;
+
+    bool m_date_sorted_decrease_order = 1;
+    bool m_reg_count_sorted_decrease_order = 1;
+    bool m_unreg_count_sorted_decrease_order = 1;
+    bool m_sum_sorted_decrease_order = 1;
 
 private:
     QHash<int, QByteArray> roleNames() const override;
@@ -33,6 +39,11 @@ public:
 
 public slots:
     void receive_stats(const QVector<std::tuple<QString, int, int>>& stats);
+    void sort_by_date();
+    void sort_by_reg_count();
+    void sort_by_unreg_count();
+    void sort_by_sum();
+    QVector<std::tuple<int, int>> get_stats();
 };
 
 #endif // DAYS_MODEL_H

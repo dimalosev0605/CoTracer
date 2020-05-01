@@ -33,7 +33,7 @@ include_directories(${Boost_INCLUDE_DIR})
 
 link_directories(${Boost_LIBRARY_DIR})
 
-find_package(Qt5 COMPONENTS Core Quick REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Charts REQUIRED)
 
 if(ANDROID)
     add_library(mhc_client SHARED
@@ -45,6 +45,7 @@ if(ANDROID)
       communication_tcp_client.cpp
       base_tcp_client.cpp
       authorization_tcp_client.cpp
+      chart_data.cpp
     )
 else()
     add_executable(mhc_client
@@ -56,10 +57,11 @@ else()
       communication_tcp_client.cpp
       base_tcp_client.cpp
       authorization_tcp_client.cpp
+      chart_data.cpp
     )
 endif()
 
 target_compile_definitions(mhc_client
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(mhc_client
-  PRIVATE Qt5::Core Qt5::Quick)
+  PRIVATE Qt5::Core Qt5::Quick Qt5::Charts)

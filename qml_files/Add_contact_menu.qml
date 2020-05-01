@@ -96,7 +96,7 @@ Rectangle {
                 id: hours
                 function create_hour_arr() {
                     var array = ["00","01","02","03","04","05","06","07","08", "09"];
-                    for(var i = 10; i < 23; ++i) {
+                    for(var i = 10; i < 24; ++i) {
                         array.push(i.toString());
                     }
                     return array;
