@@ -4,20 +4,20 @@ import QtQuick.Controls 2.12
 Rectangle {
     id: root
 
-    property alias text: text
-    property alias busy_indicator: busy_indicator
-    property alias opacity_anim: opacity_anim
+    property string message
+    property int opacity_anim_duration
+    property bool is_busy_running
+    property bool is_static
 
-    function show_dialog(is_busy, message) {
-        my_dialog.busy_indicator.running = is_busy
-        my_dialog.text.text = message
-        my_dialog.visible = true
-    }
-
+    anchors.centerIn: parent
     color: "#c0c0c0"
     border.width: 1
     border.color: "#000000"
     radius: 5
+    opacity: 0.7
+
+    width: parent.width * 0.75
+    height: parent.height * 0.3
 
     BusyIndicator {
         id: busy_indicator
@@ -28,6 +28,7 @@ Rectangle {
         }
         height: parent.height * 0.5
         width: height
+        running: is_busy_running
     }
 
     Text {
@@ -46,18 +47,41 @@ Rectangle {
         font.pointSize: 15
         elide: Text.ElideRight
         wrapMode: Text.WordWrap
-        text: "Connecting to server..."
+        text: message
     }
     OpacityAnimator {
         id: opacity_anim
         target: root
         from: root.opacity
         to: 0
-        duration: 2500
-        running: false
+        duration: opacity_anim_duration
+        running: !is_static
         onFinished: {
-            root.opacity = 0.7
-            root.visible = false
+            root.destroy()
+        }
+    }
+    Connections {
+        target: client
+        ignoreUnknownSignals: true
+        onInfo: {
+            if(opacity_anim_duration === Animation.Infinite) {
+                root.destroy()
+            }
+        }
+        onContacts_received: {
+            if(opacity_anim_duration === Animation.Infinite) {
+                root.destroy()
+            }
+        }
+        onSuccess_contact_deletion: {
+            if(opacity_anim_duration === Animation.Infinite) {
+                root.destroy()
+            }
+        }
+        onSuccess_adding: {
+            if(opacity_anim_duration === Animation.Infinite) {
+                root.destroy()
+            }
         }
     }
 }

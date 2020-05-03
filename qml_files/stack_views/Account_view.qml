@@ -4,39 +4,17 @@ import QtQuick.Controls 2.12
 import Authorization_tcp_client_qml 1.0
 import "../buttons"
 import ".."
+import "../Create_dialog.js" as Create_dialog
 
 Rectangle {
+    id: root
     z: 0
     color: "#e00d0d"
-
-    My_dialog {
-        id: my_dialog
-        z: 2
-        anchors.centerIn: parent
-        width: if(parent.height > parent.width) {
-                   parent.width * 0.9
-               }
-               else {
-                   parent.width * 0.5
-               }
-
-        height: if(parent.height > parent.width) {
-                    parent.height * 0.2
-                }
-                else {
-                    parent.height * 0.5
-                }
-
-        visible: true
-        opacity: 0.7
-    }
 
     Authorization_tcp_client {
         id: client
         onInfo: {
-            my_dialog.busy_indicator.running = false
-            my_dialog.text.text = info_message
-            my_dialog.opacity_anim.start()
+            Create_dialog.create_dialog(root, 2, info_message, 2000, false, is_static)
         }
     }
 
@@ -50,6 +28,24 @@ Rectangle {
             topMargin: 5
         }
         color: mouse_area.pressed ? "#708090" : parent.color
+    }
+    Settings_btn {
+        id: settings_btn
+        z: 1
+        width: back_btn.width
+        height: back_btn.height
+        radius: back_btn.radius
+        anchors {
+            right: parent.right
+            rightMargin: back_btn.anchors.leftMargin
+            top: parent.top
+            topMargin: back_btn.anchors.topMargin
+        }
+        color: mouse_area.pressed ? "#708090" : parent.color
+        visible: client.is_authenticated
+        mouse_area.onClicked: {
+
+        }
     }
 
     Image {
@@ -118,7 +114,7 @@ Rectangle {
             if(nickname_field.text === "" || password_field.text === "") return
             if(client.is_connected) {
                 if(client.sing_up(nickname_field.text, password_field.text)) {
-                    my_dialog.show_dialog(true, "Please wait.")
+                    Create_dialog.create_dialog(root, 2, "Please wait.", Animation.Infinite, true, false)
                 }
             }
         }
@@ -141,7 +137,7 @@ Rectangle {
             if(nickname_field.text === "" || password_field.text === "") return
             if(client.is_connected) {
                 if(client.sing_in(nickname_field.text, password_field.text)) {
-                    my_dialog.show_dialog(true, "Please wait.")
+                    Create_dialog.create_dialog(root, 2, "Please wait.", Animation.Infinite, true, false)
                 }
             }
         }

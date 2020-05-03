@@ -2,48 +2,26 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 
 import "buttons"
+import "./Create_dialog.js" as Create_dialog
 
 Rectangle {
     id: root
     color: "#e00d0d"
-
-    My_dialog {
-        id: my_dialog
-        z: 3
-        anchors.centerIn: parent
-        width: if(parent.height > parent.width) {
-                   parent.width * 0.9
-               }
-               else {
-                   parent.width * 0.5
-               }
-
-        height: if(parent.height > parent.width) {
-                    parent.height * 0.2
-                }
-                else {
-                    parent.height * 0.5
-                }
-
-        visible: false
-        opacity: 0.7
-    }
+    z: 0
 
     Connections {
         target: client
         onInfo: {
-            my_dialog.busy_indicator.running = false
-            my_dialog.text.text = info_message
-            my_dialog.opacity_anim.start()
+            Create_dialog.create_dialog(root, 2, info_message, 2000, false, is_static)
         }
         onSuccess_adding: {
-            my_dialog.show_dialog(false, "Success adding")
-            my_dialog.opacity_anim.start()
+            Create_dialog.create_dialog(root, 2, nickname + " was added", 2000, false, false)
         }
     }
 
     Back_btn {
         id: back_btn
+        z: 0
         anchors {
             bottom: parent.bottom
             left: parent.left
@@ -58,6 +36,7 @@ Rectangle {
 
     TextField {
         id: nickname_field
+        z: 0
         y: parent.height * 0.25
         anchors {
             horizontalCenter: parent.horizontalCenter
@@ -69,6 +48,7 @@ Rectangle {
 
     Rectangle {
         id: time_rect
+        z: 0
         color: root.color
         anchors {
             horizontalCenter: parent.horizontalCenter
@@ -148,6 +128,7 @@ Rectangle {
     }
     Rectangle {
         id: is_reg_rect
+        z: 0
         color: root.color
         anchors {
             horizontalCenter: parent.horizontalCenter
@@ -212,6 +193,7 @@ Rectangle {
 
     Authorization_button {
         id: add_contact
+        z: 0
         anchors {
             top: is_reg_rect.bottom
             topMargin: 20
@@ -228,14 +210,14 @@ Rectangle {
             if(qstn.is_reg) {
                 if(client.is_connected) {
                     if(client.add_contact(2, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)) {
-                        my_dialog.show_dialog(true, "Please wait.")
+                        Create_dialog.create_dialog(root, 1, "Please wait.", Animation.Infinite, true, false)
                     }
                 }
             }
             else {
                 if(client.is_connected) {
                     if(client.add_contact(3, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)) {
-                        my_dialog.show_dialog(true, "Please wait.")
+                        Create_dialog.create_dialog(root, 1, "Please wait.", Animation.Infinite, true, false)
                     }
                 }
             }

@@ -2,12 +2,17 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 
 import "buttons"
+import "./Create_dialog.js" as Create_dialog
 
 Rectangle {
     id: root
     color: "#e00d0d"
 
     property string nickname
+
+    Component.onCompleted: {
+        Create_dialog.create_dialog(root, 3, "Please wait.", Animation.Infinite, true, false)
+    }
 
     Back_btn {
         id: back_btn

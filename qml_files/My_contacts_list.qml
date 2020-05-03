@@ -2,56 +2,36 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 
 import "buttons"
+import "./Create_dialog.js" as Create_dialog
 
 Rectangle {
     id: root
+    z: 0
     color: "#e00d0d"
-
-//    property alias my_dialog: my_dialog
 
     Component {
         id: add_contact_menu_comp
         Add_contact_menu {}
     }
 
-    My_dialog {
-        id: my_dialog
-        z: 3
-        anchors.centerIn: parent
-        width: if(parent.height > parent.width) {
-                   parent.width * 0.9
-               }
-               else {
-                   parent.width * 0.5
-               }
-
-        height: if(parent.height > parent.width) {
-                    parent.height * 0.2
-                }
-                else {
-                    parent.height * 0.5
-                }
-
-        visible: false
-        opacity: 0.7
-    }
-
     Connections {
         target: client
         onInfo: {
-            my_dialog.busy_indicator.running = false
-            my_dialog.text.text = info_message
-            my_dialog.opacity_anim.start()
+            Create_dialog.create_dialog(root, 1, info_message, 2000, false, is_static)
         }
         onSuccess_contact_deletion: {
-            my_dialog.show_dialog(false, "Contact was deleted.")
-            my_dialog.opacity_anim.start()
+            Create_dialog.create_dialog(root, 1, "Contact was deleted.", 2000, false, false)
         }
+    }
+
+    Component.onCompleted: {
+//        console.log("Completed")
+        Create_dialog.create_dialog(root, 1, "Please wait", Animation.Infinite, true, false)
     }
 
     Back_btn {
         id: back_btn
-//        z:
+        z: 0
         anchors {
             bottom: parent.bottom
             left: parent.left
@@ -66,6 +46,7 @@ Rectangle {
     }
     Add_contact_btn {
         id: add_contact_btn
+        z: 0
 
         width: back_btn.width
         height: width
@@ -84,6 +65,7 @@ Rectangle {
 
     ListView {
         id: contacts_list_view
+        z: 0
         anchors {
             top: parent.top
             topMargin: 10
@@ -206,7 +188,7 @@ Rectangle {
                                 if(client.remove_contact(7, contacts_list_view.currentItem.nickname.text,
                                                          contacts_list_view.currentItem.time.text, index))
                                 {
-                                    my_dialog.show_dialog(true, "Please wait.")
+                                    Create_dialog.create_dialog(root, 1, "Please wait.", Animation.Infinite, true, false)
                                 }
                             }
                         } else {
@@ -214,7 +196,7 @@ Rectangle {
                                 if(client.remove_contact(6, contacts_list_view.currentItem.nickname.text,
                                                                    contacts_list_view.currentItem.time.text, index))
                                 {
-                                    my_dialog.show_dialog(true, "Please wait.")
+                                    Create_dialog.create_dialog(root, 1, "Please wait.", Animation.Infinite, true, false)
                                 }
                             }
                         }

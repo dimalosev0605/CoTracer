@@ -63,7 +63,7 @@ signals:
     void is_authenticated_changed();
     void is_connected_changed();
 
-    void info(const QString& info_message);
+    void info(const QString& info_message, bool is_static);
 };
 
 #endif // BASE_TCP_CLIENT_H

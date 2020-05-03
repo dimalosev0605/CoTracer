@@ -138,11 +138,11 @@ void Communication_tcp_client::process_data()
         break;
     }
     case Protocol_codes::Response_code::such_user_not_exists: {
-        emit info("Such user not exists.");
+        emit info("Such user not exists.", false);
         break;
     }
     case Protocol_codes::Response_code::internal_server_error: {
-        emit info("Internal server error occured. Try later.");
+        emit info("Internal server error occured. Try later.", false);
         break;
     }
     case Protocol_codes::Response_code::unregistered_list: {
@@ -176,7 +176,7 @@ bool Communication_tcp_client::add_contact(int code, const QString& nickname, co
 {
     if(nickname == m_user_validator.get_nickname()) return false;
     if(!get_is_connected()) {
-        emit info("Connection error.");
+        emit info("Connection error.", true);
         return false;
     }
     if(occupy()) {
@@ -232,7 +232,7 @@ void Communication_tcp_client::on_request_sent(const boost::system::error_code& 
         set_is_connected(false);
         release();
         qWarning() << "undefined_error()";
-        emit info("Error occured.");
+        emit info("Error occured.", true);
     }
 }
 
@@ -245,7 +245,7 @@ void Communication_tcp_client::on_response_received(const boost::system::error_c
         set_is_connected(false);
         release();
         qWarning() << "undefined_error()";
-        emit info("Error occured.");
+        emit info("Error occured.", true);
     }
 }
 
@@ -276,7 +276,7 @@ const char* Communication_tcp_client::create_req_for_contacts(Protocol_codes::Re
 bool Communication_tcp_client::remove_contact(int code, const QString& nickname, const QString& time, int index)
 {
     if(!get_is_connected()) {
-        emit info("Connection error.");
+        emit info("Connection error.", true);
         return false;
     }
     if(occupy()) {

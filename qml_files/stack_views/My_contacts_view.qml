@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 
 import ".."
 import "../buttons"
+import "../Create_dialog.js" as Create_dialog
 import Days_model_qml 1.0
 import Communication_tcp_client_qml 1.0
 
@@ -27,46 +28,21 @@ Rectangle {
             id: chart_view
         }
     }
-
-    My_dialog {
-        id: my_dialog
-        z: 3
-        anchors.centerIn: parent
-        width: if(parent.height > parent.width) {
-                   parent.width * 0.9
-               }
-               else {
-                   parent.width * 0.5
-               }
-
-        height: if(parent.height > parent.width) {
-                    parent.height * 0.2
-                }
-                else {
-                    parent.height * 0.5
-                }
-
-        visible: true
-        opacity: 0.7
+    Component.onCompleted: {
+        Create_dialog.create_dialog(root, 2, "Please wait.", Animation.Infinite, true, false)
     }
 
     Communication_tcp_client {
         id: client
         onInfo: {
-            my_dialog.busy_indicator.running = false
-            my_dialog.text.text = info_message
-            my_dialog.opacity_anim.start()
+            Create_dialog.create_dialog(root, 2, info_message, 2000, false, is_static)
         }
         onStatistics_received: {
             days_model.receive_stats(m_stats)
-            my_dialog.busy_indicator.running = false
-            my_dialog.text.text = "Statistics was received."
-            my_dialog.opacity_anim.start()
+            Create_dialog.create_dialog(root, 3, "Statistic was received.", 2000, false, false)
         }
         onFetching_statistics: {
-            my_dialog.busy_indicator.running = true
-            my_dialog.text.text = message
-            my_dialog.visible = true
+            Create_dialog.create_dialog(root, 3, message, Animation.Infinite, true, false)
         }
     }
 

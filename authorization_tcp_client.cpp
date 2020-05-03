@@ -14,7 +14,7 @@ Authorization_tcp_client::~Authorization_tcp_client()
 bool Authorization_tcp_client::sing_in(const QString& nickname, const QString& password)
 {
     if(!get_is_connected()) {
-        emit info("Connection error");
+        emit info("Connection error", true);
         return false;
     }
     if(occupy()) {
@@ -39,7 +39,7 @@ bool Authorization_tcp_client::sing_in(const QString& nickname, const QString& p
 bool Authorization_tcp_client::sing_up(const QString& nickname, const QString& password)
 {
     if(!get_is_connected()) {
-        emit info("Connection error");
+        emit info("Connection error", true);
         return false;
     }
     if(occupy()) {
@@ -103,25 +103,25 @@ void Authorization_tcp_client::process_data()
     case Protocol_codes::Response_code::success_sign_up: {
         m_user_validator.save_user_info();
         set_is_authenticated(true);
-        emit info("Success sing up!");
+        emit info("Success sing up!", false);
         break;
     }
     case Protocol_codes::Response_code::sign_up_failure: {
-        emit info("Such user already exists.");
+        emit info("Such user already exists.", false);
         break;
     }
     case Protocol_codes::Response_code::success_sign_in: {
         m_user_validator.save_user_info();
         set_is_authenticated(true);
-        emit info("Success sign in!");
+        emit info("Success sign in!", false);
         break;
     }
     case Protocol_codes::Response_code::sign_in_failure: {
-        emit info("Incorrect nickname or password.");
+        emit info("Incorrect nickname or password.", false);
         break;
     }
     case Protocol_codes::Response_code::internal_server_error: {
-        emit info("Internal server error occured. Try later.");
+        emit info("Internal server error occured. Try later.", false);
         break;
     }
 
@@ -143,7 +143,7 @@ void Authorization_tcp_client::on_request_sent(const boost::system::error_code& 
     } else {
         set_is_connected(false);
         release();
-        emit info("Error occured.");
+        emit info("Error occured.", true);
     }
 }
 
@@ -155,6 +155,6 @@ void Authorization_tcp_client::on_response_received(const boost::system::error_c
     } else {
         set_is_connected(false);
         release();
-        emit info("Error occured.");
+        emit info("Error occured.", true);
     }
 }
