@@ -8,11 +8,10 @@ enum class Request_code: int {
     sign_in,
     add_registered_user,
     add_unregistered_user,
-    get_unregistered_contacts,
-    get_registered_contacts,
     remove_unregister_contact,
     remove_register_contact,
-    stats_for_14_days
+    stats_for_14_days,
+    get_contacts
 };
 
 enum class Response_code: int {
@@ -23,11 +22,10 @@ enum class Response_code: int {
     sign_in_failure,
     success_adding,
     such_user_not_exists,
-    unregistered_list,
-    registered_list,
     success_unregister_contact_deletion,
     success_register_contact_deletion,
-    success_fetch_stats_for_14_days
+    success_fetch_stats_for_14_days,
+    contacts_list
 };
 
 }

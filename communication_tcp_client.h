@@ -42,13 +42,13 @@ private:
     void on_request_sent(const boost::system::error_code& ec, size_t bytes_transferred);
     void on_response_received(const boost::system::error_code& ec, size_t bytes_transferred);
 
-    void request_contacts(Protocol_codes::Request_code code);
-    const char* create_req_for_contacts(Protocol_codes::Request_code code);
+    void request_contacts();
+    const char* create_request_for_contacts();
 
     const char* create_remove_contact_req(Protocol_codes::Request_code code, const QString& nickname, const QString& time);
 
     void parse_response(size_t bytes_transferred);
-    void parse_contacts(Protocol_codes::Response_code code, const QMap<QString, QVariant>& j_map);
+    void parse_contacts(const QMap<QString, QVariant>& j_map);
 
     void process_data();
 

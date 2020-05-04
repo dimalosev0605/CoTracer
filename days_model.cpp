@@ -6,7 +6,6 @@ Days_model::Days_model(QObject* parent)
     m_roles[(int)RolesNames::date] = "date";
     m_roles[(int)RolesNames::reg_count] = "reg_count";
     m_roles[(int)RolesNames::unreg_count] = "unreg_count";
-//    fill_m_dates();
 }
 
 QHash<int, QByteArray> Days_model::roleNames() const
@@ -16,7 +15,6 @@ QHash<int, QByteArray> Days_model::roleNames() const
 
 int Days_model::rowCount(const QModelIndex&) const
 {
-//    return m_dates.size();
     return m_stats.size();
 }
 
@@ -45,15 +43,6 @@ QVariant Days_model::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void Days_model::fill_m_dates()
-{
-//    m_dates.reserve(count_of_dates);
-//    auto today = QDate(QDate::currentDate());
-//    for(int i = 0; i < count_of_dates; ++i) {
-//        m_dates.push_back(today.toString("dd.MM.yy"));
-//        today = today.addDays(-1);
-//    }
-}
 
 void Days_model::receive_stats(const QVector<std::tuple<QString, int, int>>& stats)
 {
@@ -63,7 +52,9 @@ void Days_model::receive_stats(const QVector<std::tuple<QString, int, int>>& sta
     std::sort(m_stats.begin(), m_stats.end(), [](const std::tuple<QString, int, int>& lhs,
                                                  const std::tuple<QString, int, int>& rhs)
     {
-        return std::get<0>(lhs) > std::get<0>(rhs);
+        QDate lhs_date = QDate::fromString(std::get<0>(lhs), "dd.MM.yy");
+        QDate rhs_date = QDate::fromString(std::get<0>(rhs), "dd.MM.yy");
+        return lhs_date > rhs_date;
     });
     endInsertRows();
 }
@@ -77,10 +68,12 @@ void Days_model::sort_by_date()
     std::sort(m_stats.begin(), m_stats.end(), [this](const std::tuple<QString, int, int>& lhs,
                                                      const std::tuple<QString, int, int>& rhs)
     {
+        QDate lhs_date = QDate::fromString(std::get<0>(lhs), "dd.MM.yy");
+        QDate rhs_date = QDate::fromString(std::get<0>(rhs), "dd.MM.yy");
         if(m_date_sorted_decrease_order) {
-            return std::get<0>(lhs) < std::get<0>(rhs);
+            return lhs_date < rhs_date;
         } else {
-            return std::get<0>(lhs) > std::get<0>(rhs);
+            return lhs_date > rhs_date;
         }
     });
     endInsertRows();

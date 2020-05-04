@@ -185,7 +185,7 @@ Rectangle {
                         contacts_list_view.currentIndex = index
                         if(model.is_registered) {
                             if(client.is_connected) {
-                                if(client.remove_contact(7, contacts_list_view.currentItem.nickname.text,
+                                if(client.remove_contact(5, contacts_list_view.currentItem.nickname.text,
                                                          contacts_list_view.currentItem.time.text, index))
                                 {
                                     Create_dialog.create_dialog(root, 1, "Please wait.", Animation.Infinite, true, false)
@@ -193,7 +193,7 @@ Rectangle {
                             }
                         } else {
                             if(client.is_connected) {
-                                if(client.remove_contact(6, contacts_list_view.currentItem.nickname.text,
+                                if(client.remove_contact(4, contacts_list_view.currentItem.nickname.text,
                                                                    contacts_list_view.currentItem.time.text, index))
                                 {
                                     Create_dialog.create_dialog(root, 1, "Please wait.", Animation.Infinite, true, false)

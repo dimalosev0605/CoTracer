@@ -14,17 +14,15 @@ class Days_model: public QAbstractListModel
     static const int count_of_dates = 14;
 
     QHash<int, QByteArray> m_roles;
-//    QVector<QString> m_dates;
     QVector<std::tuple<QString, int, int>> m_stats;
 
-    bool m_date_sorted_decrease_order = 1;
-    bool m_reg_count_sorted_decrease_order = 1;
-    bool m_unreg_count_sorted_decrease_order = 1;
-    bool m_sum_sorted_decrease_order = 1;
+    bool m_date_sorted_decrease_order = true;
+    bool m_reg_count_sorted_decrease_order = true;
+    bool m_unreg_count_sorted_decrease_order = true;
+    bool m_sum_sorted_decrease_order = true;
 
 private:
     QHash<int, QByteArray> roleNames() const override;
-    void fill_m_dates();
 
 public:
     enum class RolesNames {
