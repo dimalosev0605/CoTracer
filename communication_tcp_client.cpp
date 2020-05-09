@@ -156,6 +156,7 @@ void Communication_tcp_client::process_data()
     }
     case Protocol_codes::Response_code::success_fetch_stats_for_14_days: {
         emit statistics_received(m_stats);
+        m_stats.clear();
         break;
     }
     case Protocol_codes::Response_code::contacts_list: {

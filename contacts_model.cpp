@@ -83,8 +83,19 @@ void Contacts_model::add_contact(const QString& nickname, const QString& time, b
 void Contacts_model::receive_contacts(const QVector<std::tuple<QString, QString, bool>>& contacts)
 {
     if(contacts.isEmpty()) return;
+
     beginInsertRows(QModelIndex(), 0, contacts.size() - 1);
     m_contacts = contacts;
+
+    std::sort(m_contacts.begin(), m_contacts.end(), [](const std::tuple<QString, QString, bool> lhs,
+                                                       const std::tuple<QString, QString, bool> rhs)
+    {
+        auto lhs_time = QTime::fromString(std::get<1>(lhs), "hh:mm");
+        auto rhs_time = QTime::fromString(std::get<1>(rhs), "hh:mm");
+        return lhs_time < rhs_time;
+    });
+
+
     endInsertRows();
 }
 

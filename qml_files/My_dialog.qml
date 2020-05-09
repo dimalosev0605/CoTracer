@@ -83,5 +83,10 @@ Rectangle {
                 root.destroy()
             }
         }
+        onStatistics_received: {
+            if(opacity_anim_duration === Animation.Infinite) {
+                root.destroy()
+            }
+        }
     }
 }

@@ -47,6 +47,13 @@ QVariant Days_model::data(const QModelIndex& index, int role) const
 void Days_model::receive_stats(const QVector<std::tuple<QString, int, int>>& stats)
 {
     if(stats.isEmpty()) return;
+
+    if(!m_stats.isEmpty()) {
+        beginRemoveRows(QModelIndex(), 0, m_stats.size() - 1);
+        m_stats.clear();
+        endRemoveRows();
+    }
+
     beginInsertRows(QModelIndex(), 0, stats.size() - 1);
     m_stats = stats;
     std::sort(m_stats.begin(), m_stats.end(), [](const std::tuple<QString, int, int>& lhs,
@@ -146,7 +153,9 @@ QVector<std::tuple<int, int>> Days_model::get_stats()
     std::sort(temp.begin(), temp.end(), [](const std::tuple<QString, int, int>& lhs,
                                            const std::tuple<QString, int, int>& rhs)
     {
-        return std::get<0>(lhs) > std::get<0>(rhs);
+        QDate lhs_date = QDate::fromString(std::get<0>(lhs), "dd.MM.yy");
+        QDate rhs_date = QDate::fromString(std::get<0>(rhs), "dd.MM.yy");
+        return lhs_date > rhs_date;
     });
 
     QVector<std::tuple<int, int>> stats;

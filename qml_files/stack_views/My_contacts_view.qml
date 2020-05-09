@@ -29,13 +29,13 @@ Rectangle {
         }
     }
     Component.onCompleted: {
-        Create_dialog.create_dialog(root, 2, "Please wait.", Animation.Infinite, true, false)
+        Create_dialog.create_dialog(root, 3, "Please wait.", Animation.Infinite, true, false)
     }
 
     Communication_tcp_client {
         id: client
         onInfo: {
-            Create_dialog.create_dialog(root, 2, info_message, 2000, false, is_static)
+            Create_dialog.create_dialog(root, 3, info_message, 2000, false, is_static)
         }
         onStatistics_received: {
             days_model.receive_stats(m_stats)
@@ -56,6 +56,21 @@ Rectangle {
             leftMargin: 10
         }
         color: mouse_area.pressed ? "#708090" : parent.color
+    }
+    Update_stats_btn {
+        id: update_stats_btn
+        z: 1
+        anchors {
+            bottom: parent.bottom
+            bottomMargin: back_btn.anchors.bottomMargin
+            horizontalCenter: parent.horizontalCenter
+        }
+        height: back_btn.height
+        width: height * 1.6
+        color: mouse_area.pressed ? "#708090" : parent.color
+        mouse_area.onClicked: {
+            client.request_for_14_days_stats()
+        }
     }
     Chart_btn {
         id: chart_btn

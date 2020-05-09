@@ -56,7 +56,6 @@ private:
     void parse_stat(const QMap<QString, QVariant>& j_map);
 
 private slots:
-    void request_for_14_days_stats();
 
 public:
     explicit Communication_tcp_client(QObject* parent = nullptr);
@@ -69,6 +68,8 @@ public slots:
 
     bool add_contact(int code, const QString& nickname, const QString& time);
     bool remove_contact(int code, const QString& nickname, const QString& time, int index);
+
+    void request_for_14_days_stats();
 
 signals:
     void success_adding(const QString& nickname, const QString& time, bool is_reg);
