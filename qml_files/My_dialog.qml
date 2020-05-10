@@ -16,8 +16,18 @@ Rectangle {
     radius: 5
     opacity: 0.7
 
-    width: parent.width * 0.75
-    height: parent.height * 0.3
+    width: if(parent.width < parent.height) {
+               parent.width * 0.70
+           }
+           else {
+               parent.width * 0.4
+           }
+    height: if(parent.height > parent.width) {
+                parent.height * 0.25
+            }
+            else {
+                parent.height * 0.4
+            }
 
     BusyIndicator {
         id: busy_indicator

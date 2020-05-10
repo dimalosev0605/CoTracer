@@ -9,22 +9,24 @@ Rectangle {
 
     Component {
         id: account_view_comp
-        Account_view {}
-    }
-    Component {
-        id: my_contacts_view_comp
-        My_contacts_view {}
+        Account_view {
+            color: root.color
+        }
     }
 
+    Component {
+        id: my_contacts_view_comp
+        My_contacts_view {
+            color: root.color
+        }
+    }
 
     Text {
         id: app_label
-
         anchors {
             top: parent.top
             left: parent.left
         }
-
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
@@ -39,13 +41,11 @@ Rectangle {
 
     Image {
         id: bio_hazard_symbol_img
-
         anchors {
             top: app_label.bottom
             topMargin: 10
             horizontalCenter: parent.horizontalCenter
         }
-
         width: if(parent.height > parent.width) {
                    parent.width * 0.6
                }
@@ -53,10 +53,8 @@ Rectangle {
                    parent.height * 0.4
                }
         height: width
-
         source: "qrc:/imgs/biohazard_symbol.png"
     }
-
 
     Column {
         id: btns_col
@@ -68,7 +66,6 @@ Rectangle {
             bottomMargin: 5
             horizontalCenter: parent.horizontalCenter
         }
-
         width: parent.width * 0.9
 
         property int btns_count: 3
@@ -93,6 +90,7 @@ Rectangle {
                 stack_view.push(account_view_comp)
             }
         }
+
         Main_menu_btn {
             id: my_contacts_btn
             anchors.horizontalCenter: parent.horizontalCenter
@@ -105,6 +103,7 @@ Rectangle {
                 stack_view.push(my_contacts_view_comp)
             }
         }
+
         Main_menu_btn {
             id: exit_btn
             anchors.horizontalCenter: parent.horizontalCenter

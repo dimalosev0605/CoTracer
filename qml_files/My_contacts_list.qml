@@ -7,7 +7,6 @@ import "./Create_dialog.js" as Create_dialog
 Rectangle {
     id: root
     z: 0
-    color: "#e00d0d"
 
     Component {
         id: add_contact_menu_comp

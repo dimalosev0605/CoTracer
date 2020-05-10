@@ -9,7 +9,10 @@ import "../Create_dialog.js" as Create_dialog
 Rectangle {
     id: root
     z: 0
-    color: "#e00d0d"
+
+    Component.onCompleted: {
+        Create_dialog.create_dialog(root, 2, "Connecting to server...", Animation.Infinite, true, false)
+    }
 
     Authorization_tcp_client {
         id: client
@@ -29,6 +32,7 @@ Rectangle {
         }
         color: mouse_area.pressed ? "#708090" : parent.color
     }
+
     Settings_btn {
         id: settings_btn
         z: 1
@@ -62,7 +66,6 @@ Rectangle {
                 else {
                     nickname_field.y * 0.75
                 }
-
         source: "qrc:/imgs/microorganism.png"
     }
 
@@ -119,6 +122,7 @@ Rectangle {
             }
         }
     }
+
     Authorization_button {
         id: sign_in_btn
         z: 1
@@ -142,6 +146,7 @@ Rectangle {
             }
         }
     }
+
     Authorization_button {
         id: exit_from_account_btn
         z: 1

@@ -6,8 +6,8 @@ import "./stack_views"
 
 Window {
     visible: true
-    width: 300
-    height: 600
+    width: 392
+    height: 761
     StackView {
         id: stack_view
         anchors.fill: parent

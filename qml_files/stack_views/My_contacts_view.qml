@@ -10,7 +10,10 @@ import Communication_tcp_client_qml 1.0
 Rectangle {
     id: root
     z: 0
-    color: "#e00d0d"
+
+    Component.onCompleted: {
+        Create_dialog.create_dialog(root, 3, "Connecting to server...", Animation.Infinite, true, false)
+    }
 
     Days_model {
         id: days_model
@@ -20,17 +23,18 @@ Rectangle {
         id: my_contacts_list_comp
         My_contacts_list {
             id: my_contacts_list
+            color: root.color
         }
     }
+
     Component {
         id: chart_view_comp
         Chart_view {
             id: chart_view
+            color: root.color
         }
     }
-    Component.onCompleted: {
-        Create_dialog.create_dialog(root, 3, "Please wait.", Animation.Infinite, true, false)
-    }
+
 
     Communication_tcp_client {
         id: client
@@ -57,6 +61,7 @@ Rectangle {
         }
         color: mouse_area.pressed ? "#708090" : parent.color
     }
+
     Update_stats_btn {
         id: update_stats_btn
         z: 1
@@ -72,6 +77,7 @@ Rectangle {
             client.request_for_14_days_stats()
         }
     }
+
     Chart_btn {
         id: chart_btn
         z: 1

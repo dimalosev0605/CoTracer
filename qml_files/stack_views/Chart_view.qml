@@ -7,7 +7,6 @@ import Chart_data_qml 1.0
 
 Rectangle {
     id: root
-    color: "#e00d0d"
 
     property alias chart_data: chart_data
 
