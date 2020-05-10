@@ -8,6 +8,10 @@ Rectangle {
     id: root
     z: 0
 
+    Component.onCompleted: {
+        Create_dialog.create_dialog(root, 1, "Please wait", Animation.Infinite, true, false)
+    }
+
     Component {
         id: add_contact_menu_comp
         Add_contact_menu {}
@@ -15,17 +19,13 @@ Rectangle {
 
     Connections {
         target: client
+        ignoreUnknownSignals: true
         onInfo: {
             Create_dialog.create_dialog(root, 1, info_message, 2000, false, is_static)
         }
         onSuccess_contact_deletion: {
             Create_dialog.create_dialog(root, 1, "Contact was deleted.", 2000, false, false)
         }
-    }
-
-    Component.onCompleted: {
-//        console.log("Completed")
-        Create_dialog.create_dialog(root, 1, "Please wait", Animation.Infinite, true, false)
     }
 
     Back_btn {
@@ -43,6 +43,7 @@ Rectangle {
             client.destroy_model()
         }
     }
+
     Add_contact_btn {
         id: add_contact_btn
         z: 0

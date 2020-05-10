@@ -55,6 +55,8 @@ private:
     const char* create_req_for_14_days_stats();
     void parse_stat(const QMap<QString, QVariant>& j_map);
 
+    void async_write();
+
 private slots:
 
 public:

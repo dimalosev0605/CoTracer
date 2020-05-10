@@ -26,7 +26,7 @@ Base_tcp_client::~Base_tcp_client()
 
 void Base_tcp_client::connect_to_server()
 {
-    m_session = std::unique_ptr<Session>(new Session(m_ios, "127.0.0.1", 1234));
+    m_session = std::unique_ptr<Session>(new Session(m_ios, "192.168.1.140", 1234));
     m_session->m_socket.open(m_session->m_ep.protocol());
     m_session->m_socket.async_connect(m_session->m_ep, [this](const boost::system::error_code& ec)
     {

@@ -56,6 +56,17 @@ void Communication_tcp_client::destroy_model()
     }
 }
 
+void Communication_tcp_client::async_write()
+{
+    boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
+                             boost::bind
+                             (&Communication_tcp_client::on_request_sent,
+                              boost::ref(*this),
+                              boost::placeholders::_1,
+                              boost::placeholders::_2)
+                             );
+}
+
 void Communication_tcp_client::parse_response(size_t bytes_transferred)
 {
     std::string data = std::string{boost::asio::buffers_begin(m_session->m_response.data()),
@@ -187,14 +198,7 @@ bool Communication_tcp_client::add_contact(int code, const QString& nickname, co
         } else {
             m_add_contact_is_reg = false;
         }
-
-        boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                                 boost::bind
-                                 (&Communication_tcp_client::on_request_sent,
-                                  boost::ref(*this),
-                                  boost::placeholders::_1,
-                                  boost::placeholders::_2)
-                                 );
+        async_write();
         return true;
     } else {
         return false;
@@ -250,13 +254,7 @@ void Communication_tcp_client::on_response_received(const boost::system::error_c
 void Communication_tcp_client::request_contacts()
 {
     m_session->m_request = create_request_for_contacts();
-    boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                             boost::bind
-                             (&Communication_tcp_client::on_request_sent,
-                              boost::ref(*this),
-                              boost::placeholders::_1,
-                              boost::placeholders::_2)
-                             );
+    async_write();
 }
 
 const char* Communication_tcp_client::create_request_for_contacts()
@@ -281,14 +279,7 @@ bool Communication_tcp_client::remove_contact(int code, const QString& nickname,
     if(occupy()) {
         m_session->m_request = create_remove_contact_req((Protocol_codes::Request_code)code, nickname, time);
         m_index_for_deletion = index;
-
-        boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                                 boost::bind
-                                 (&Communication_tcp_client::on_request_sent,
-                                  boost::ref(*this),
-                                  boost::placeholders::_1,
-                                  boost::placeholders::_2)
-                                 );
+        async_write();
         return true;
     } else {
         return false;
@@ -319,13 +310,7 @@ void Communication_tcp_client::request_for_14_days_stats()
             emit fetching_statistics("Fetching statistics...");
             m_session->m_request = create_req_for_14_days_stats();
 //            qDebug() << "My request: " << QString::fromStdString(m_session->m_request);
-            boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                                     boost::bind
-                                     (&Communication_tcp_client::on_request_sent,
-                                      boost::ref(*this),
-                                      boost::placeholders::_1,
-                                      boost::placeholders::_2)
-                                     );
+            async_write();
         }
     }
 }

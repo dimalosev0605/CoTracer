@@ -23,6 +23,6 @@ void Chart_data::receive_stats(const QVector<std::tuple<int, int>>& stats)
             max = m_points_sum[i].y();
         }
     }
-    qDebug() << "Max = " << max;
-    emit set_max(max + 2);
+    int max_value_on_y_axis = max + 1;
+    emit set_max(max_value_on_y_axis);
 }
