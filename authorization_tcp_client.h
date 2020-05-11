@@ -27,6 +27,9 @@ public slots:
     bool sing_up(const QString& nickname, const QString& password);
     void exit_from_account();
 
+    bool change_avatar(const QString& img_path);
+    bool create_req_for_change_avatar(const QString& img_path);
+
     QString get_nickname() const { return m_user_validator.get_nickname(); }
     QString get_password() const { return m_user_validator.get_password(); }
 };

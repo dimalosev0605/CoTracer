@@ -303,6 +303,7 @@ const char* Communication_tcp_client::create_remove_contact_req(Protocol_codes::
 void Communication_tcp_client::request_for_14_days_stats()
 {
     if(!get_is_connected()) {
+        // emit info?
         return;
     }
     else {

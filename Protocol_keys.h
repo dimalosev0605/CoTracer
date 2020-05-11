@@ -19,6 +19,7 @@ const QString statistics_for_14_days = "stat";
 const QString registered_quantity = "reg_qnt";
 const QString unregisterd_quantity = "unreg_qnt";
 const QString date = "date";
+const QString avatar = "avatar";
 
 }
 

@@ -124,6 +124,11 @@ void Authorization_tcp_client::process_data()
         emit info("Internal server error occured. Try later.", false);
         break;
     }
+    case Protocol_codes::Response_code::success_avatar_changing: {
+//        emit BlaBla
+        qDebug() << "Hooray!!!!!";
+        break;
+    }
 
     }
     release();
@@ -131,6 +136,7 @@ void Authorization_tcp_client::process_data()
 
 void Authorization_tcp_client::on_request_sent(const boost::system::error_code& ec, size_t bytes_transferred)
 {
+    qDebug() << "Bytes transferred: " << bytes_transferred;
     m_session->m_request.clear();
     if(ec.value() == 0) {
         boost::asio::async_read_until(m_session->m_socket, m_session->m_response, Protocol_keys::end_of_message.toStdString(),
@@ -157,4 +163,57 @@ void Authorization_tcp_client::on_response_received(const boost::system::error_c
         release();
         emit info("Error occured.", true);
     }
+}
+
+bool Authorization_tcp_client::change_avatar(const QString& img_path)
+{
+    if(!get_is_connected()) {
+        emit info("Connection error.", true);
+        return false;
+    }
+    if(occupy()) {
+//        emit blabla
+        if(create_req_for_change_avatar(img_path)) {
+            boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
+                                     boost::bind
+                                     (&Authorization_tcp_client::on_request_sent,
+                                      boost::ref(*this),
+                                      boost::placeholders::_1,
+                                      boost::placeholders::_2)
+                                     );
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Authorization_tcp_client::create_req_for_change_avatar(const QString& img_path)
+{
+    QString processed_img_path = img_path;
+    processed_img_path.remove("file://");
+
+    QJsonObject j_obj;
+
+    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::change_avatar);
+    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+
+    QFile img_file(processed_img_path);
+    QByteArray base64_img;
+    if(img_file.open(QIODevice::ReadOnly)) {
+        QByteArray b_arr = img_file.readAll();
+        base64_img = b_arr.toBase64();
+        img_file.close();
+    }
+    if(base64_img.isEmpty()) return false;
+
+    j_obj.insert(Protocol_keys::avatar, QString::fromLatin1(base64_img));
+
+    QJsonDocument j_doc(j_obj);
+
+    std::string temp = j_doc.toJson().constData();
+    temp += Protocol_keys::end_of_message.toStdString();
+    m_session->m_request = temp;
+
+    return true;
 }

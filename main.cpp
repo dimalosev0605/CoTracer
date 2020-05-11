@@ -6,6 +6,7 @@
 #include "days_model.h"
 #include "contacts_model.h"
 #include "chart_data.h"
+#include "file_dialog_model.h"
 
 int main(int argc, char *argv[])
 {
@@ -18,6 +19,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<Days_model>("Days_model_qml", 1, 0, "Days_model");
     qmlRegisterType<Contacts_model>("Contacts_model_qml", 1, 0, "Contacts_model");
     qmlRegisterType<Chart_data>("Chart_data_qml", 1, 0, "Chart_data");
+    qmlRegisterType<File_dialog_model>("File_dialog_model_qml", 1, 0, "File_dialog_model");
 
     qRegisterMetaType<QVector<std::tuple<QString, QString, bool>>>("QVector<std::tuple<QString, QString, bool>>");
     qRegisterMetaType<QVector<std::tuple<QString, int, int>>>("QVector<std::tuple<QString, int, int>>");

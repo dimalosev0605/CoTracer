@@ -14,6 +14,14 @@ Rectangle {
         Create_dialog.create_dialog(root, 2, "Connecting to server...", Animation.Infinite, true, false)
     }
 
+    Component {
+        id: account_settings_view_comp
+        Account_settings_view {
+            id: account_settings_view
+            color: root.color
+        }
+    }
+
     Authorization_tcp_client {
         id: client
         onInfo: {
@@ -48,7 +56,7 @@ Rectangle {
         color: mouse_area.pressed ? "#708090" : parent.color
         visible: client.is_authenticated
         mouse_area.onClicked: {
-
+            stack_view.push(account_settings_view_comp)
         }
     }
 

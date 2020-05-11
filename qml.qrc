@@ -24,5 +24,8 @@
         <file>imgs/settings.png</file>
         <file>qml_files/buttons/Settings_btn.qml</file>
         <file>qml_files/buttons/Update_stats_btn.qml</file>
+        <file>qml_files/stack_views/Account_settings_view.qml</file>
+        <file>qml_files/stack_views/File_dialog.qml</file>
+        <file>qml_files/buttons/Return_back_btn.qml</file>
     </qresource>
 </RCC>
