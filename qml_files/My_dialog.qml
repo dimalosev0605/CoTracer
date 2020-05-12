@@ -98,5 +98,10 @@ Rectangle {
                 root.destroy()
             }
         }
+        onSuccess_avatar_changing: {
+            if(opacity_anim_duration === Animation.Infinite) {
+                root.destroy()
+            }
+        }
     }
 }

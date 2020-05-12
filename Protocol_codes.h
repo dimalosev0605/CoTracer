@@ -12,7 +12,8 @@ enum class Request_code: int {
     remove_register_contact,
     stats_for_14_days,
     get_contacts,
-    change_avatar
+    change_avatar,
+    get_my_avatar
 };
 
 enum class Response_code: int {
@@ -27,7 +28,8 @@ enum class Response_code: int {
     success_register_contact_deletion,
     success_fetch_stats_for_14_days,
     contacts_list,
-    success_avatar_changing
+    success_avatar_changing,
+    success_fetching_avatar
 };
 
 }

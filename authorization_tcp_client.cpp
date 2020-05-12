@@ -11,6 +11,17 @@ Authorization_tcp_client::~Authorization_tcp_client()
 //    qDebug() << "Derived dtor";
 }
 
+void Authorization_tcp_client::async_write()
+{
+    boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
+                             boost::bind
+                             (&Authorization_tcp_client::on_request_sent,
+                              boost::ref(*this),
+                              boost::placeholders::_1,
+                              boost::placeholders::_2)
+                             );
+}
+
 bool Authorization_tcp_client::sing_in(const QString& nickname, const QString& password)
 {
     if(!get_is_connected()) {
@@ -22,14 +33,7 @@ bool Authorization_tcp_client::sing_in(const QString& nickname, const QString& p
         m_user_validator.set_password(password);
 
         m_session->m_request = create_request(Protocol_codes::Request_code::sign_in, nickname, password);
-
-        boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                                 boost::bind
-                                 (&Authorization_tcp_client::on_request_sent,
-                                  boost::ref(*this),
-                                  boost::placeholders::_1,
-                                  boost::placeholders::_2)
-                                 );
+        async_write();
         return true;
     } else {
         return false;
@@ -47,14 +51,7 @@ bool Authorization_tcp_client::sing_up(const QString& nickname, const QString& p
         m_user_validator.set_password(password);
 
         m_session->m_request = create_request(Protocol_codes::Request_code::sign_up, nickname, password);
-
-        boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                                 boost::bind
-                                 (&Authorization_tcp_client::on_request_sent,
-                                  boost::ref(*this),
-                                  boost::placeholders::_1,
-                                  boost::placeholders::_2)
-                                 );
+        async_write();
         return true;
     } else {
         return false;
@@ -93,6 +90,28 @@ void Authorization_tcp_client::parse_response(std::size_t bytes_transferred)
         auto j_obj = j_doc.object();
         auto j_map = j_obj.toVariantMap();
         m_session->m_res_code = (Protocol_codes::Response_code)j_map[Protocol_keys::response].toInt();
+
+        if(m_session->m_res_code == Protocol_codes::Response_code::success_fetching_avatar) {
+            save_avatar(j_map);
+        }
+    }
+}
+
+void Authorization_tcp_client::save_avatar(QMap<QString, QVariant>& j_map)
+{
+    QString str_avatar = j_map[Protocol_keys::avatar].toString();
+    m_avatar = QByteArray::fromBase64(str_avatar.toLatin1());
+
+    QString file_path = m_user_validator.get_avatar_path_for_saving();
+    m_user_validator.save_avatar_path(file_path);
+    file_path.remove("file://");
+    QFile file(file_path);
+    if(file.open(QIODevice::WriteOnly)) {
+        qDebug() << "Save avatar in:" << file.fileName();
+        qDebug() << "m_avatar_size = " << m_avatar.size();
+        file.write(m_avatar);
+        file.close();
+        m_avatar.clear();
     }
 }
 
@@ -113,7 +132,9 @@ void Authorization_tcp_client::process_data()
     case Protocol_codes::Response_code::success_sign_in: {
         m_user_validator.save_user_info();
         set_is_authenticated(true);
-        emit info("Success sign in!", false);
+//        emit info("Success sign in!", false);
+        release();
+        get_my_avatar();
         break;
     }
     case Protocol_codes::Response_code::sign_in_failure: {
@@ -125,8 +146,13 @@ void Authorization_tcp_client::process_data()
         break;
     }
     case Protocol_codes::Response_code::success_avatar_changing: {
+        m_user_validator.save_avatar(m_avatar_path);
+        emit success_avatar_changing();
+        break;
+    }
+    case Protocol_codes::Response_code::success_fetching_avatar: {
 //        emit BlaBla
-        qDebug() << "Hooray!!!!!";
+        emit info("Success sign in!", false);
         break;
     }
 
@@ -172,26 +198,25 @@ bool Authorization_tcp_client::change_avatar(const QString& img_path)
         return false;
     }
     if(occupy()) {
-//        emit blabla
         if(create_req_for_change_avatar(img_path)) {
-            boost::asio::async_write(m_session->m_socket, boost::asio::buffer(m_session->m_request),
-                                     boost::bind
-                                     (&Authorization_tcp_client::on_request_sent,
-                                      boost::ref(*this),
-                                      boost::placeholders::_1,
-                                      boost::placeholders::_2)
-                                     );
+            async_write();
             return true;
         }
+        else {
+            release();
+            return false;
+        }
     }
-
-    return false;
+    else {
+        return false;
+    }
 }
 
 bool Authorization_tcp_client::create_req_for_change_avatar(const QString& img_path)
 {
     QString processed_img_path = img_path;
     processed_img_path.remove("file://");
+    m_avatar_path = processed_img_path;
 
     QJsonObject j_obj;
 
@@ -216,4 +241,32 @@ bool Authorization_tcp_client::create_req_for_change_avatar(const QString& img_p
     m_session->m_request = temp;
 
     return true;
+}
+
+bool Authorization_tcp_client::get_my_avatar()
+{
+    if(!get_is_connected()) {
+        emit info("Connection error", true);
+        return false;
+    }
+    if(occupy()) {
+        m_session->m_request = create_req_for_get_my_avatar();
+        qDebug() << QString::fromStdString(m_session->m_request);
+        async_write();
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+const char* Authorization_tcp_client::create_req_for_get_my_avatar()
+{
+    QJsonObject j_obj;
+
+    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::get_my_avatar);
+    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+
+    QJsonDocument j_doc(j_obj);
+    return j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }

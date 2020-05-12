@@ -2,6 +2,7 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 
 import "../buttons"
+import "../Create_dialog.js" as Create_dialog
 
 Rectangle {
     id: root
@@ -37,6 +38,7 @@ Rectangle {
         }
         width: parent.width * 0.8
         height: width
+        source: client.get_avatar_path()
     }
 
     Main_menu_btn {
@@ -57,7 +59,7 @@ Rectangle {
     }
 
     TextField {
-        id: user_nickname_field
+        id: nickname_field
         z: 1
         anchors {
             top: select_avatar_btn.bottom
@@ -67,6 +69,43 @@ Rectangle {
         height: 30
         width: select_avatar_btn.width
         text: client.get_nickname()
+        inputMethodHints: Qt.ImhNoPredictiveText
+    }
+
+    TextField {
+        id: password_field
+        z: 1
+        anchors {
+            top: nickname_field.bottom
+            topMargin: 10
+            horizontalCenter: parent.horizontalCenter
+        }
+        height: nickname_field.height
+        width: nickname_field.width
+        text: client.get_password()
+        echoMode: TextInput.Password
+        inputMethodHints: Qt.ImhNoPredictiveText
+        rightPadding: show_password_btn.width + show_password_btn.anchors.rightMargin * 2
+        Show_password_btn {
+            id: show_password_btn
+            height: parent.height * 0.9
+            width: height
+            anchors {
+                verticalCenter: parent.verticalCenter
+                right: parent.right
+                rightMargin: 2
+            }
+            mouse_area.onClicked: {
+                if(is_visible) {
+                    is_visible = false
+                    password_field.echoMode = TextInput.Password
+                }
+                else {
+                    password_field.echoMode = TextInput.Normal
+                    is_visible = true
+                }
+            }
+        }
     }
 
     Main_menu_btn {
@@ -81,8 +120,16 @@ Rectangle {
         width: parent.width * 0.7
         color: mouse_area.pressed ? "#b22222" : root.color
         text.text: "Save Changes"
+        visible: if(nickname_field.text === client.get_nickname() && password_field.text === client.get_password()) {
+                     false
+                 }
+                 else {
+                     true
+                 }
         mouse_area.onClicked: {
-            client.change_avatar(avatar.source)
+            if(client.change_avatar(avatar.source)) {
+                Create_dialog.create_dialog(root, 2, "Please wait", Animation.Infinite, true, false)
+            }
         }
     }
 }

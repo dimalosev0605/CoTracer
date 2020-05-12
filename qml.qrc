@@ -27,5 +27,9 @@
         <file>qml_files/stack_views/Account_settings_view.qml</file>
         <file>qml_files/stack_views/File_dialog.qml</file>
         <file>qml_files/buttons/Return_back_btn.qml</file>
+        <file>imgs/edit.png</file>
+        <file>qml_files/buttons/Show_password_btn.qml</file>
+        <file>imgs/opened_eye.png</file>
+        <file>imgs/closed_eye.png</file>
     </qresource>
 </RCC>
