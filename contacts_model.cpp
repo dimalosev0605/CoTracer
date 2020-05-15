@@ -6,6 +6,7 @@ Contacts_model::Contacts_model(QObject* parent)
     m_roles[(int)RolesNames::nickname] = "nickname";
     m_roles[(int)RolesNames::time] = "time";
     m_roles[(int)RolesNames::is_registered] = "is_registered";
+    m_roles[(int)RolesNames::avatar_path] = "avatar_path";
 }
 
 Contacts_model::Contacts_model(const QVector<QString>& previous_links, QObject* parent)
@@ -15,6 +16,7 @@ Contacts_model::Contacts_model(const QVector<QString>& previous_links, QObject* 
     m_roles[(int)RolesNames::nickname] = "nickname";
     m_roles[(int)RolesNames::time] = "time";
     m_roles[(int)RolesNames::is_registered] = "is_registered";
+    m_roles[(int)RolesNames::avatar_path] = "avatar_path";
 
     qDebug() << "In model:";
     for(int i = 0; i < m_previous_links.size(); ++i) {
@@ -57,6 +59,11 @@ QVariant Contacts_model::data(const QModelIndex& index, int role) const
             return false;
         }
         return std::get<2>(m_contacts[row]);
+    }
+    case (int)RolesNames::avatar_path: {
+        QString path = "file://" + QCoreApplication::applicationDirPath() + '/' + "user_files" + '/' + "avatars" + '/' + std::get<0>(m_contacts[row]);
+        qDebug() << "path = " << path;
+        return path;
     }
 
     }

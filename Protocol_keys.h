@@ -20,6 +20,7 @@ const QString registered_quantity = "reg_qnt";
 const QString unregisterd_quantity = "unreg_qnt";
 const QString date = "date";
 const QString avatar = "avatar";
+const QString avatars = "avatars";
 
 }
 

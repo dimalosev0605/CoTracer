@@ -31,5 +31,6 @@
         <file>qml_files/buttons/Show_password_btn.qml</file>
         <file>imgs/opened_eye.png</file>
         <file>imgs/closed_eye.png</file>
+        <file>imgs/default_avatar.png</file>
     </qresource>
 </RCC>

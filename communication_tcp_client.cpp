@@ -109,6 +109,8 @@ void Communication_tcp_client::parse_contacts(const QMap<QString, QVariant>& j_m
     }
     m_previous_links_count.push_back(j_arr_of_reg_contacts.size());
 
+    // avatars deserialization
+    parse_arr_of_avatars(j_map);
     //
 
     QJsonArray j_arr_of_unreg_contacts = j_map[Protocol_keys::unregistered_list].toJsonArray();
@@ -121,6 +123,36 @@ void Communication_tcp_client::parse_contacts(const QMap<QString, QVariant>& j_m
                                    contact_j_obj_map[Protocol_keys::contact_time].toString());
 
         m_received_contacts.push_back(std::make_tuple(pair.first, pair.second, false));
+    }
+}
+
+void Communication_tcp_client::parse_arr_of_avatars(const QMap<QString, QVariant>& j_map)
+{
+    QDir dir_with_avatars(QCoreApplication::applicationDirPath() + '/' + "user_files");
+    dir_with_avatars.mkdir("avatars");
+    dir_with_avatars.cd("avatars");
+
+    QJsonArray avatars = j_map[Protocol_keys::avatars].toJsonArray();
+
+    for(int i = 0; i < avatars.size(); ++i) {
+        auto avatar_obj = avatars[i].toObject();
+        auto map = avatar_obj.toVariantMap();
+
+        QString nickname = map[Protocol_keys::nickname].toString();
+
+        QString avatar_str = map[Protocol_keys::avatar].toString();
+        QByteArray avatar = QByteArray::fromBase64(avatar_str.toLatin1());
+
+        QString avatar_path(dir_with_avatars.absolutePath() + '/' + nickname);
+        QFile file(avatar_path);
+
+        if(file.exists()) {
+            continue;
+        }
+
+        if(file.open(QIODevice::WriteOnly)) {
+            file.write(avatar);
+        }
     }
 }
 

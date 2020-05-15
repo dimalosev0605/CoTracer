@@ -8,6 +8,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QThread>
+#include <QImage>
+#include <QPixmap>
 
 #include <boost/bind/bind.hpp>
 
@@ -49,6 +51,7 @@ private:
 
     void parse_response(size_t bytes_transferred);
     void parse_contacts(const QMap<QString, QVariant>& j_map);
+    void parse_arr_of_avatars(const QMap<QString, QVariant>& j_map);
 
     void process_data();
 

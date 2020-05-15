@@ -5,6 +5,7 @@
 #include <QDate>
 #include <QDebug>
 #include <QThread>
+#include <QCoreApplication>
 
 #include <tuple>
 
@@ -27,7 +28,8 @@ public:
     enum class RolesNames {
         nickname = Qt::UserRole,
         time = Qt::UserRole + 1,
-        is_registered = Qt::UserRole + 2
+        is_registered = Qt::UserRole + 2,
+        avatar_path = Qt::UserRole + 3,
     };
 
     virtual int rowCount(const QModelIndex &index = QModelIndex()) const override;

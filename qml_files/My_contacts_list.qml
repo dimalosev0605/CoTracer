@@ -1,5 +1,6 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.12
+import QtGraphicalEffects 1.0
 
 import "buttons"
 import "./Create_dialog.js" as Create_dialog
@@ -88,7 +89,7 @@ Rectangle {
             property alias time: time
 
             width: parent.width
-            height: 40
+            height: 70
 
             border.width: 1
             border.color: "#000000"
@@ -111,16 +112,43 @@ Rectangle {
                 wrapMode: Text.WordWrap
                 text: index + 1
             }
+            Image {
+                id: avatar
+                anchors {
+                    left: number.right
+                    top: number.top
+                }
+                height: parent.height
+                width: height
+                source: model.avatar_path
+                mipmap: true
+                property bool rounded: true
+                property bool adapt: true
+
+                layer.enabled: rounded
+                layer.effect: OpacityMask {
+                    maskSource: Item {
+                        width: avatar.width
+                        height: avatar.height
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: avatar.adapt ? avatar.width : Math.min(avatar.width, avatar.height)
+                            height: avatar.adapt ? avatar.height : width
+                            radius: Math.min(width, height)
+                        }
+                    }
+                }
+            }
             Text {
                 id: nickname
                 anchors {
-                    left: number.right
+                    left: avatar.right
                     verticalCenter: parent.verticalCenter
                 }
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 height: parent.height
-                width: (parent.width - number.width - remove_contact_rect.width) / 2
+                width: (parent.width - number.width - avatar.width - remove_contact_rect.width) / 2
                 fontSizeMode: Text.Fit
                 minimumPointSize: 5
                 font.pointSize: 12
