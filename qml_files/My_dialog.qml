@@ -6,8 +6,9 @@ Rectangle {
 
     property string message
     property int opacity_anim_duration
-    property bool is_busy_running
-    property bool is_static
+    property bool is_busy_indicator_running
+    property bool is_opacity_anim_running
+    property bool is_destroy
 
     anchors.centerIn: parent
     color: "#c0c0c0"
@@ -38,7 +39,7 @@ Rectangle {
         }
         height: parent.height * 0.5
         width: height
-        running: is_busy_running
+        running: is_busy_indicator_running
     }
 
     Text {
@@ -65,43 +66,23 @@ Rectangle {
         from: root.opacity
         to: 0
         duration: opacity_anim_duration
-        running: !is_static
+        running: !is_opacity_anim_running
         onFinished: {
-            root.destroy()
+            if(is_destroy) {
+                root.destroy()
+            }
         }
     }
     Connections {
         target: client
         ignoreUnknownSignals: true
-        onInfo: {
-            if(opacity_anim_duration === Animation.Infinite) {
-                root.destroy()
-            }
-        }
-        onContacts_received: {
-            if(opacity_anim_duration === Animation.Infinite) {
-                root.destroy()
-            }
-        }
-        onSuccess_contact_deletion: {
-            if(opacity_anim_duration === Animation.Infinite) {
-                root.destroy()
-            }
-        }
-        onSuccess_adding: {
-            if(opacity_anim_duration === Animation.Infinite) {
-                root.destroy()
-            }
-        }
-        onStatistics_received: {
-            if(opacity_anim_duration === Animation.Infinite) {
-                root.destroy()
-            }
-        }
-        onSuccess_avatar_changing: {
-            if(opacity_anim_duration === Animation.Infinite) {
-                root.destroy()
-            }
+        onChange_dialog: {
+            message = m_message;
+            opacity_anim_duration = m_opacity_anim_duration;
+            is_busy_indicator_running = m_is_busy_indicator_running;
+            is_opacity_anim_running = m_is_opacity_anim_running;
+            is_destroy = m_is_destroy;
+            opacity_anim.restart()
         }
     }
 }

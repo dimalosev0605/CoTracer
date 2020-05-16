@@ -11,7 +11,7 @@ Rectangle {
     z: 0
 
     Component.onCompleted: {
-        Create_dialog.create_dialog(root, 2, "Connecting to server...", Animation.Infinite, true, false)
+        client.connect_to_server()
     }
 
     Component {
@@ -24,8 +24,11 @@ Rectangle {
 
     Authorization_tcp_client {
         id: client
-        onInfo: {
-            Create_dialog.create_dialog(root, 2, info_message, 2000, false, is_static)
+        onCreate_dialog: {
+                Create_dialog.create_dialog(stack_view.currentItem, 2, m_message, m_opacity_anim_duration,
+                                            m_is_busy_indicator_running,
+                                            m_is_opacity_anim_running,
+                                            m_is_destroy);
         }
     }
 
@@ -123,11 +126,7 @@ Rectangle {
         text.text: "Sing up"
         mouse_area.onClicked: {
             if(nickname_field.text === "" || password_field.text === "") return
-            if(client.is_connected) {
-                if(client.sing_up(nickname_field.text, password_field.text)) {
-                    Create_dialog.create_dialog(root, 2, "Please wait.", Animation.Infinite, true, false)
-                }
-            }
+            client.sign_up(nickname_field.text, password_field.text)
         }
     }
 
@@ -147,11 +146,7 @@ Rectangle {
         text.text: "Sing in"
         mouse_area.onClicked: {
             if(nickname_field.text === "" || password_field.text === "") return
-            if(client.is_connected) {
-                if(client.sing_in(nickname_field.text, password_field.text)) {
-                    Create_dialog.create_dialog(root, 2, "Please wait.", Animation.Infinite, true, false)
-                }
-            }
+            client.sign_in(nickname_field.text, password_field.text)
         }
     }
 
@@ -170,9 +165,10 @@ Rectangle {
         visible: client.is_authenticated
         text.text: "Exit"
         mouse_area.onClicked: {
-            client.exit_from_account()
-            nickname_field.text = ""
-            password_field.text = ""
+            if(client.exit_from_account()) {
+                nickname_field.text = ""
+                password_field.text = ""
+            }
         }
     }
 }

@@ -47,6 +47,7 @@ if(ANDROID)
       authorization_tcp_client.cpp
       chart_data.cpp
       file_dialog_model.cpp
+      path_finder.cpp
     )
 else()
     add_executable(mhc_client
@@ -60,6 +61,7 @@ else()
       authorization_tcp_client.cpp
       chart_data.cpp
       file_dialog_model.cpp
+      path_finder.cpp
     )
 endif()
 

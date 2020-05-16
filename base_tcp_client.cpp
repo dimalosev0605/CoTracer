@@ -6,48 +6,32 @@ Base_tcp_client::Base_tcp_client(QObject *parent)
 {
     m_thread.reset(new std::thread([this]()
     {
-//        qDebug() << "network thread" << QThread::currentThreadId();
         m_ios.run();
     }));
-
-//    qDebug() << "Base ctor";
-//    qDebug() << "main thread: " << QThread::currentThreadId();
-
-    connect_to_server();
-    check_authentication();
+    set_is_authenticated(m_user_validator.get_is_authorized());
 }
 
 Base_tcp_client::~Base_tcp_client()
 {
     m_thread->detach();
     m_work.reset();
-//    qDebug() << "Base dtor";
 }
 
 void Base_tcp_client::connect_to_server()
 {
+    emit create_dialog("Connecting to server...", -2, true, false, false);
     m_session = std::unique_ptr<Session>(new Session(m_ios, "192.168.1.140", 1234));
     m_session->m_socket.open(m_session->m_ep.protocol());
     m_session->m_socket.async_connect(m_session->m_ep, [this](const boost::system::error_code& ec)
     {
-//        qDebug() << "callback_thread: " << QThread::currentThreadId();
         if(ec.value() == 0) {
             set_is_connected(true);
-            emit info("Success connection to server!", false);
+            emit change_dialog("Success connection to server!", 2000, false, true, true);
         } else {
-            emit info("Connection error.", true);
+            std::this_thread::sleep_for(std::chrono::milliseconds(500)); // LOL
+            emit change_dialog("Connection error.", -2, false, false, false);
         }
     });
-}
-
-void Base_tcp_client::check_authentication()
-{
-    if(m_user_validator.get_is_authorized()) {
-        set_is_authenticated(true);
-    }
-    else {
-        set_is_authenticated(false);
-    }
 }
 
 void Base_tcp_client::set_is_authenticated(bool v)
@@ -73,7 +57,7 @@ void Base_tcp_client::cancel_operation()
 {
     m_session->m_socket.cancel();
     m_session->m_request.clear();
-    m_session->m_response.consume(UINT_MAX); // ЫЫЫ
+    m_session->m_response.consume(UINT_MAX); // LOL
     release();
 }
 

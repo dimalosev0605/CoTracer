@@ -39,10 +39,6 @@ protected:
     std::unique_ptr<Session> m_session;
     User_validator m_user_validator;
 
-private:
-    void connect_to_server();
-    void check_authentication();
-
 public:
     explicit Base_tcp_client(QObject *parent = nullptr);
     virtual ~Base_tcp_client();
@@ -58,12 +54,25 @@ public:
 
 public slots:
     void cancel_operation();
+    void connect_to_server();
 
 signals:
     void is_authenticated_changed();
     void is_connected_changed();
 
     void info(const QString& info_message, bool is_static);
+
+    // Animation.Infinite = -2
+    void create_dialog(const QString& m_message,
+                       int m_opacity_anim_duration,
+                       bool m_is_busy_indicator_running,
+                       bool m_is_opacity_anim_running,
+                       bool m_is_destroy);
+    void change_dialog(const QString& m_message,
+                       int m_opacity_anim_duration,
+                       bool m_is_busy_indicator_running,
+                       bool m_is_opacity_anim_running,
+                       bool m_is_destroy);
 };
 
 #endif // BASE_TCP_CLIENT_H

@@ -3,12 +3,10 @@
 Authorization_tcp_client::Authorization_tcp_client(QObject* parent)
     : Base_tcp_client(parent)
 {
-//    qDebug() << "Derived ctor";
 }
 
 Authorization_tcp_client::~Authorization_tcp_client()
 {
-//    qDebug() << "Derived dtor";
 }
 
 void Authorization_tcp_client::async_write()
@@ -22,50 +20,41 @@ void Authorization_tcp_client::async_write()
                              );
 }
 
-bool Authorization_tcp_client::sing_in(const QString& nickname, const QString& password)
+void Authorization_tcp_client::sign_in(const QString& nickname, const QString& password)
 {
     if(!get_is_connected()) {
-        emit info("Connection error", true);
-        return false;
+        emit create_dialog("Connection error.", -2, false, false, false);
     }
     if(occupy()) {
+        emit create_dialog("Please wait", -2, true, false, false);
         m_user_validator.set_nickname(nickname);
         m_user_validator.set_password(password);
-
         m_session->m_request = create_request(Protocol_codes::Request_code::sign_in, nickname, password);
         async_write();
-        return true;
-    } else {
-        return false;
     }
 }
 
-bool Authorization_tcp_client::sing_up(const QString& nickname, const QString& password)
+void Authorization_tcp_client::sign_up(const QString& nickname, const QString& password)
 {
     if(!get_is_connected()) {
-        emit info("Connection error", true);
-        return false;
+        emit create_dialog("Connection error.", -2, false, false, false);
     }
     if(occupy()) {
+        emit create_dialog("Please wait", -2, true, false, false);
         m_user_validator.set_nickname(nickname);
         m_user_validator.set_password(password);
-
         m_session->m_request = create_request(Protocol_codes::Request_code::sign_up, nickname, password);
         async_write();
-        return true;
-    } else {
-        return false;
     }
 }
 
-void Authorization_tcp_client::exit_from_account()
+bool Authorization_tcp_client::exit_from_account()
 {
     if(m_user_validator.exit_from_account()) {
         set_is_authenticated(false);
+        return true;
     }
-    else {
-        set_is_authenticated(true);
-    }
+    return false;
 }
 
 const char* Authorization_tcp_client::create_request(Protocol_codes::Request_code code, const QString& nickname, const QString& password)
@@ -91,28 +80,16 @@ void Authorization_tcp_client::parse_response(std::size_t bytes_transferred)
         auto j_map = j_obj.toVariantMap();
         m_session->m_res_code = (Protocol_codes::Response_code)j_map[Protocol_keys::response].toInt();
 
-        if(m_session->m_res_code == Protocol_codes::Response_code::success_fetching_avatar) {
-            save_avatar(j_map);
+        if(m_session->m_res_code == Protocol_codes::Response_code::success_sign_in) {
+            parse_avatar(j_map);
         }
     }
 }
 
-void Authorization_tcp_client::save_avatar(QMap<QString, QVariant>& j_map)
+void Authorization_tcp_client::parse_avatar(QMap<QString, QVariant>& j_map)
 {
     QString str_avatar = j_map[Protocol_keys::avatar].toString();
     m_avatar = QByteArray::fromBase64(str_avatar.toLatin1());
-
-    QString file_path = m_user_validator.get_avatar_path_for_saving();
-    m_user_validator.save_avatar_path(file_path);
-    file_path.remove("file://");
-    QFile file(file_path);
-    if(file.open(QIODevice::WriteOnly)) {
-        qDebug() << "Save avatar in:" << file.fileName();
-        qDebug() << "m_avatar_size = " << m_avatar.size();
-        file.write(m_avatar);
-        file.close();
-        m_avatar.clear();
-    }
 }
 
 void Authorization_tcp_client::process_data()
@@ -120,39 +97,41 @@ void Authorization_tcp_client::process_data()
     switch (m_session->m_res_code) {
 
     case Protocol_codes::Response_code::success_sign_up: {
-        m_user_validator.save_user_info();
-        set_is_authenticated(true);
-        emit info("Success sing up!", false);
+        if(m_user_validator.save_user_info()) {
+            set_is_authenticated(true);
+            emit change_dialog("Success sign up!", 2000, false, true, true);
+        }
+        else {
+            emit change_dialog("File system error", 2000, false, true, true);
+        }
         break;
     }
     case Protocol_codes::Response_code::sign_up_failure: {
-        emit info("Such user already exists.", false);
+        emit change_dialog("Such user already exists", 2000, false, true, true);
         break;
     }
     case Protocol_codes::Response_code::success_sign_in: {
-        m_user_validator.save_user_info();
-        set_is_authenticated(true);
-//        emit info("Success sign in!", false);
-        release();
-        get_my_avatar();
+        if(m_user_validator.save_user_info() && m_user_validator.save_user_avatar(m_avatar)) {
+            m_avatar.clear();
+            set_is_authenticated(true);
+            emit change_dialog("Success sign in!", 2000, false, true, true);
+        }
+        else {
+            emit change_dialog("File system error", 2000, false, true, true);
+        }
         break;
     }
     case Protocol_codes::Response_code::sign_in_failure: {
-        emit info("Incorrect nickname or password.", false);
+        emit change_dialog("Incorrect nickname or password.", 2000, false, true, true);
         break;
     }
     case Protocol_codes::Response_code::internal_server_error: {
-        emit info("Internal server error occured. Try later.", false);
+        emit change_dialog("Internal server error", 2000, false, true, true);
         break;
     }
     case Protocol_codes::Response_code::success_avatar_changing: {
         m_user_validator.save_avatar(m_avatar_path);
-        emit success_avatar_changing();
-        break;
-    }
-    case Protocol_codes::Response_code::success_fetching_avatar: {
-//        emit BlaBla
-        emit info("Success sign in!", false);
+        emit change_dialog("Avatar was successfully changed!", 2000, false, true, true);
         break;
     }
 
@@ -162,7 +141,6 @@ void Authorization_tcp_client::process_data()
 
 void Authorization_tcp_client::on_request_sent(const boost::system::error_code& ec, size_t bytes_transferred)
 {
-    qDebug() << "Bytes transferred: " << bytes_transferred;
     m_session->m_request.clear();
     if(ec.value() == 0) {
         boost::asio::async_read_until(m_session->m_socket, m_session->m_response, Protocol_keys::end_of_message.toStdString(),
@@ -175,7 +153,8 @@ void Authorization_tcp_client::on_request_sent(const boost::system::error_code& 
     } else {
         set_is_connected(false);
         release();
-        emit info("Error occured.", true);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // LOL
+        emit change_dialog("Error occured.", -2, false, false, false);
     }
 }
 
@@ -187,28 +166,25 @@ void Authorization_tcp_client::on_response_received(const boost::system::error_c
     } else {
         set_is_connected(false);
         release();
-        emit info("Error occured.", true);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // LOL
+        emit change_dialog("Error occured.", -2, false, false, false);
     }
 }
 
-bool Authorization_tcp_client::change_avatar(const QString& img_path)
+void Authorization_tcp_client::change_avatar(const QString& img_path)
 {
     if(!get_is_connected()) {
-        emit info("Connection error.", true);
-        return false;
+        emit create_dialog("Connection error.", -2, false, false, false);
     }
     if(occupy()) {
         if(create_req_for_change_avatar(img_path)) {
+            emit create_dialog("Please wait", -2, true, false, false);
             async_write();
-            return true;
         }
         else {
+            emit create_dialog("Cant open file", 2000, false, true, true);
             release();
-            return false;
         }
-    }
-    else {
-        return false;
     }
 }
 
@@ -241,32 +217,4 @@ bool Authorization_tcp_client::create_req_for_change_avatar(const QString& img_p
     m_session->m_request = temp;
 
     return true;
-}
-
-bool Authorization_tcp_client::get_my_avatar()
-{
-    if(!get_is_connected()) {
-        emit info("Connection error", true);
-        return false;
-    }
-    if(occupy()) {
-        m_session->m_request = create_req_for_get_my_avatar();
-        qDebug() << QString::fromStdString(m_session->m_request);
-        async_write();
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-const char* Authorization_tcp_client::create_req_for_get_my_avatar()
-{
-    QJsonObject j_obj;
-
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::get_my_avatar);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
-
-    QJsonDocument j_doc(j_obj);
-    return j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }

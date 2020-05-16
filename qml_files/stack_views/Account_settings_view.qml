@@ -38,7 +38,7 @@ Rectangle {
         }
         width: parent.width * 0.8
         height: width
-        source: client.get_avatar_path()
+        source: client.get_avatar_path(true)
     }
 
     Main_menu_btn {
@@ -127,9 +127,7 @@ Rectangle {
                      true
                  }
         mouse_area.onClicked: {
-            if(client.change_avatar(avatar.source)) {
-                Create_dialog.create_dialog(root, 2, "Please wait", Animation.Infinite, true, false)
-            }
+            client.change_avatar(avatar.source)
         }
     }
 }
