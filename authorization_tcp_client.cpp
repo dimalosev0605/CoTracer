@@ -22,11 +22,10 @@ void Authorization_tcp_client::async_write()
 
 void Authorization_tcp_client::sign_in(const QString& nickname, const QString& password)
 {
-    if(!get_is_connected()) {
-        emit create_dialog("Connection error.", -2, false, false, false);
+    if(!is_connected()) {
+        connect_to_server();
     }
-    if(occupy()) {
-        emit create_dialog("Please wait", -2, true, false, false);
+    if(try_occupy()) {
         m_user_validator.set_nickname(nickname);
         m_user_validator.set_password(password);
         m_session->m_request = create_request(Protocol_codes::Request_code::sign_in, nickname, password);
@@ -36,11 +35,10 @@ void Authorization_tcp_client::sign_in(const QString& nickname, const QString& p
 
 void Authorization_tcp_client::sign_up(const QString& nickname, const QString& password)
 {
-    if(!get_is_connected()) {
-        emit create_dialog("Connection error.", -2, false, false, false);
+    if(!is_connected()) {
+        connect_to_server();
     }
-    if(occupy()) {
-        emit create_dialog("Please wait", -2, true, false, false);
+    if(try_occupy()) {
         m_user_validator.set_nickname(nickname);
         m_user_validator.set_password(password);
         m_session->m_request = create_request(Protocol_codes::Request_code::sign_up, nickname, password);
@@ -99,39 +97,39 @@ void Authorization_tcp_client::process_data()
     case Protocol_codes::Response_code::success_sign_up: {
         if(m_user_validator.save_user_info()) {
             set_is_authenticated(true);
-            emit change_dialog("Success sign up!", 2000, false, true, true);
+//            emit change_dialog("Success sign up!", 2000, false, true, true);
         }
         else {
-            emit change_dialog("File system error", 2000, false, true, true);
+//            emit change_dialog("File system error", 2000, false, true, true);
         }
         break;
     }
     case Protocol_codes::Response_code::sign_up_failure: {
-        emit change_dialog("Such user already exists", 2000, false, true, true);
+//        emit change_dialog("Such user already exists", 2000, false, true, true);
         break;
     }
     case Protocol_codes::Response_code::success_sign_in: {
         if(m_user_validator.save_user_info() && m_user_validator.save_user_avatar(m_avatar)) {
             m_avatar.clear();
             set_is_authenticated(true);
-            emit change_dialog("Success sign in!", 2000, false, true, true);
+//            emit change_dialog("Success sign in!", 2000, false, true, true);
         }
         else {
-            emit change_dialog("File system error", 2000, false, true, true);
+//            emit change_dialog("File system error", 2000, false, true, true);
         }
         break;
     }
     case Protocol_codes::Response_code::sign_in_failure: {
-        emit change_dialog("Incorrect nickname or password.", 2000, false, true, true);
+//        emit change_dialog("Incorrect nickname or password.", 2000, false, true, true);
         break;
     }
     case Protocol_codes::Response_code::internal_server_error: {
-        emit change_dialog("Internal server error", 2000, false, true, true);
+//        emit change_dialog("Internal server error", 2000, false, true, true);
         break;
     }
     case Protocol_codes::Response_code::success_avatar_changing: {
         m_user_validator.save_avatar(m_avatar_path);
-        emit change_dialog("Avatar was successfully changed!", 2000, false, true, true);
+//        emit change_dialog("Avatar was successfully changed!", 2000, false, true, true);
         break;
     }
 
@@ -152,9 +150,6 @@ void Authorization_tcp_client::on_request_sent(const boost::system::error_code& 
                                       );
     } else {
         set_is_connected(false);
-        release();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // LOL
-        emit change_dialog("Error occured.", -2, false, false, false);
     }
 }
 
@@ -165,24 +160,19 @@ void Authorization_tcp_client::on_response_received(const boost::system::error_c
         process_data();
     } else {
         set_is_connected(false);
-        release();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // LOL
-        emit change_dialog("Error occured.", -2, false, false, false);
     }
 }
 
 void Authorization_tcp_client::change_avatar(const QString& img_path)
 {
-    if(!get_is_connected()) {
-        emit create_dialog("Connection error.", -2, false, false, false);
+    if(!is_connected()) {
+        connect_to_server();
     }
-    if(occupy()) {
+    if(try_occupy()) {
         if(create_req_for_change_avatar(img_path)) {
-            emit create_dialog("Please wait", -2, true, false, false);
             async_write();
         }
         else {
-            emit create_dialog("Cant open file", 2000, false, true, true);
             release();
         }
     }

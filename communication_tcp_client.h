@@ -71,8 +71,8 @@ public slots:
 
     void destroy_model();
 
-    bool add_contact(int code, const QString& nickname, const QString& time);
-    bool remove_contact(int code, const QString& nickname, const QString& time, int index);
+    void add_contact(int code, const QString& nickname, const QString& time);
+    void remove_contact(int code, const QString& nickname, const QString& time, int index);
 
     void request_for_14_days_stats();
 

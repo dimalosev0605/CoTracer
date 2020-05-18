@@ -12,7 +12,7 @@ Rectangle {
     z: 0
 
     Component.onCompleted: {
-        Create_dialog.create_dialog(root, 3, "Connecting to server...", Animation.Infinite, true, false)
+        client.connect_to_server()
     }
 
     Days_model {
@@ -38,15 +38,14 @@ Rectangle {
 
     Communication_tcp_client {
         id: client
-        onInfo: {
-            Create_dialog.create_dialog(root, 3, info_message, 2000, false, is_static)
-        }
+//        onCreate_dialog: {
+//                Create_dialog.create_dialog(stack_view.currentItem, 3, m_message, m_opacity_anim_duration,
+//                                            m_is_busy_indicator_running,
+//                                            m_is_opacity_anim_running,
+//                                            m_is_destroy);
+//        }
         onStatistics_received: {
             days_model.receive_stats(m_stats)
-            Create_dialog.create_dialog(root, 3, "Statistic was received.", 2000, false, false)
-        }
-        onFetching_statistics: {
-            Create_dialog.create_dialog(root, 3, message, Animation.Infinite, true, false)
         }
     }
 

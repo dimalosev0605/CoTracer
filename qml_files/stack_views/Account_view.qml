@@ -24,12 +24,12 @@ Rectangle {
 
     Authorization_tcp_client {
         id: client
-        onCreate_dialog: {
-                Create_dialog.create_dialog(stack_view.currentItem, 2, m_message, m_opacity_anim_duration,
-                                            m_is_busy_indicator_running,
-                                            m_is_opacity_anim_running,
-                                            m_is_destroy);
-        }
+//        onCreate_dialog: {
+//                Create_dialog.create_dialog(stack_view.currentItem, 2, m_message, m_opacity_anim_duration,
+//                                            m_is_busy_indicator_running,
+//                                            m_is_opacity_anim_running,
+//                                            m_is_destroy);
+//        }
     }
 
     Back_btn {

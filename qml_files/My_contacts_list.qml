@@ -10,7 +10,7 @@ Rectangle {
     z: 0
 
     Component.onCompleted: {
-        Create_dialog.create_dialog(root, 1, "Please wait", Animation.Infinite, true, false)
+//        Create_dialog.create_dialog(root, 1, "Please wait", Animation.Infinite, true, false)
     }
 
     Component {
@@ -21,12 +21,12 @@ Rectangle {
     Connections {
         target: client
         ignoreUnknownSignals: true
-        onInfo: {
-            Create_dialog.create_dialog(root, 1, info_message, 2000, false, is_static)
-        }
-        onSuccess_contact_deletion: {
-            Create_dialog.create_dialog(root, 1, "Contact was deleted.", 2000, false, false)
-        }
+//        onInfo: {
+//            Create_dialog.create_dialog(root, 1, info_message, 2000, false, is_static)
+//        }
+//        onSuccess_contact_deletion: {
+//            Create_dialog.create_dialog(root, 1, "Contact was deleted.", 2000, false, false)
+//        }
     }
 
     Back_btn {
@@ -212,21 +212,12 @@ Rectangle {
                     onClicked: {
                         contacts_list_view.currentIndex = index
                         if(model.is_registered) {
-                            if(client.is_connected) {
-                                if(client.remove_contact(5, contacts_list_view.currentItem.nickname.text,
-                                                         contacts_list_view.currentItem.time.text, index))
-                                {
-                                    Create_dialog.create_dialog(root, 1, "Please wait.", Animation.Infinite, true, false)
-                                }
-                            }
+                            client.remove_contact(5, contacts_list_view.currentItem.nickname.text,
+                                                  contacts_list_view.currentItem.time.text, index)
+
                         } else {
-                            if(client.is_connected) {
-                                if(client.remove_contact(4, contacts_list_view.currentItem.nickname.text,
-                                                                   contacts_list_view.currentItem.time.text, index))
-                                {
-                                    Create_dialog.create_dialog(root, 1, "Please wait.", Animation.Infinite, true, false)
-                                }
-                            }
+                            client.remove_contact(4, contacts_list_view.currentItem.nickname.text,
+                                                  contacts_list_view.currentItem.time.text, index)
                         }
                     }
                 }

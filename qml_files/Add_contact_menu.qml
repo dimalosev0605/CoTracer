@@ -11,12 +11,12 @@ Rectangle {
 
     Connections {
         target: client
-        onInfo: {
-            Create_dialog.create_dialog(root, 2, info_message, 2000, false, is_static)
-        }
-        onSuccess_adding: {
-            Create_dialog.create_dialog(root, 2, nickname + " was added", 2000, false, false)
-        }
+//        onInfo: {
+//            Create_dialog.create_dialog(root, 2, info_message, 2000, false, is_static)
+//        }
+//        onSuccess_adding: {
+//            Create_dialog.create_dialog(root, 2, nickname + " was added", 2000, false, false)
+//        }
     }
 
     Back_btn {
@@ -208,18 +208,10 @@ Rectangle {
         mouse_area.onClicked: {
             if(nickname_field.text === "") return;
             if(qstn.is_reg) {
-                if(client.is_connected) {
-                    if(client.add_contact(2, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)) {
-                        Create_dialog.create_dialog(root, 1, "Please wait.", Animation.Infinite, true, false)
-                    }
-                }
+                client.add_contact(2, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)
             }
             else {
-                if(client.is_connected) {
-                    if(client.add_contact(3, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)) {
-                        Create_dialog.create_dialog(root, 1, "Please wait.", Animation.Infinite, true, false)
-                    }
-                }
+                client.add_contact(3, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)
             }
         }
     }

@@ -75,8 +75,6 @@ void Communication_tcp_client::parse_response(size_t bytes_transferred)
     auto j_doc = QJsonDocument::fromJson(data.c_str());
     m_session->m_response.consume(bytes_transferred);
 
-//    qDebug() << "Data: " << QString::fromStdString(data);
-
     if(!j_doc.isEmpty()) {
         auto j_obj = j_doc.object();
         auto j_map = j_obj.toVariantMap();
@@ -182,11 +180,11 @@ void Communication_tcp_client::process_data()
         break;
     }
     case Protocol_codes::Response_code::such_user_not_exists: {
-        emit info("Such user not exists.", false);
+//        emit info("Such user not exists.", false);
         break;
     }
     case Protocol_codes::Response_code::internal_server_error: {
-        emit info("Internal server error occured. Try later.", false);
+//        emit info("Internal server error occured. Try later.", false);
         break;
     }
     case Protocol_codes::Response_code::success_register_contact_deletion: {
@@ -200,6 +198,7 @@ void Communication_tcp_client::process_data()
     case Protocol_codes::Response_code::success_fetch_stats_for_14_days: {
         emit statistics_received(m_stats);
         m_stats.clear();
+//        emit change_dialog("Statistics was received!", 2000, false, false, true);
         break;
     }
     case Protocol_codes::Response_code::contacts_list: {
@@ -213,14 +212,13 @@ void Communication_tcp_client::process_data()
     release();
 }
 
-bool Communication_tcp_client::add_contact(int code, const QString& nickname, const QString& time)
+void Communication_tcp_client::add_contact(int code, const QString& nickname, const QString& time)
 {
-    if(nickname == m_user_validator.get_nickname()) return false;
-    if(!get_is_connected()) {
-        emit info("Connection error.", true);
-        return false;
+    if(nickname == m_user_validator.get_nickname()) return;
+    if(!is_connected()) {
+        connect_to_server();
     }
-    if(occupy()) {
+    if(try_occupy()) {
         m_session->m_request = create_add_contact_req((Protocol_codes::Request_code)code, nickname, time);
 
         m_add_contact_nickname = nickname;
@@ -231,9 +229,6 @@ bool Communication_tcp_client::add_contact(int code, const QString& nickname, co
             m_add_contact_is_reg = false;
         }
         async_write();
-        return true;
-    } else {
-        return false;
     }
 }
 
@@ -264,9 +259,6 @@ void Communication_tcp_client::on_request_sent(const boost::system::error_code& 
                                       );
     } else {
         set_is_connected(false);
-        release();
-        qWarning() << "undefined_error()";
-        emit info("Error occured.", true);
     }
 }
 
@@ -277,16 +269,18 @@ void Communication_tcp_client::on_response_received(const boost::system::error_c
         process_data();
     } else {
         set_is_connected(false);
-        release();
-        qWarning() << "undefined_error()";
-        emit info("Error occured.", true);
     }
 }
 
 void Communication_tcp_client::request_contacts()
 {
-    m_session->m_request = create_request_for_contacts();
-    async_write();
+    if(!is_connected()) {
+        connect_to_server();
+    }
+    if(try_occupy()) {
+        m_session->m_request = create_request_for_contacts();
+        async_write();
+    }
 }
 
 const char* Communication_tcp_client::create_request_for_contacts()
@@ -302,19 +296,15 @@ const char* Communication_tcp_client::create_request_for_contacts()
 }
 
 
-bool Communication_tcp_client::remove_contact(int code, const QString& nickname, const QString& time, int index)
+void Communication_tcp_client::remove_contact(int code, const QString& nickname, const QString& time, int index)
 {
-    if(!get_is_connected()) {
-        emit info("Connection error.", true);
-        return false;
+    if(!is_connected()) {
+        connect_to_server();
     }
-    if(occupy()) {
+    if(try_occupy()) {
         m_session->m_request = create_remove_contact_req((Protocol_codes::Request_code)code, nickname, time);
         m_index_for_deletion = index;
         async_write();
-        return true;
-    } else {
-        return false;
     }
 }
 
@@ -334,17 +324,12 @@ const char* Communication_tcp_client::create_remove_contact_req(Protocol_codes::
 
 void Communication_tcp_client::request_for_14_days_stats()
 {
-    if(!get_is_connected()) {
-        // emit info?
-        return;
+    if(!is_connected()) {
+        connect_to_server();
     }
-    else {
-        if(occupy()) {
-            emit fetching_statistics("Fetching statistics...");
-            m_session->m_request = create_req_for_14_days_stats();
-//            qDebug() << "My request: " << QString::fromStdString(m_session->m_request);
-            async_write();
-        }
+    if(try_occupy()) {
+        m_session->m_request = create_req_for_14_days_stats();
+        async_write();
     }
 }
 
