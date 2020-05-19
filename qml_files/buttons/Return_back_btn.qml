@@ -7,7 +7,7 @@ Rectangle {
 
     Image {
         anchors.fill: parent
-//        source: ""
+        source: "qrc:/imgs/back.png"
     }
     MouseArea {
         id: mouse_area

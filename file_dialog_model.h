@@ -13,14 +13,19 @@ class File_dialog_model : public QAbstractListModel
     QHash<int, QByteArray> m_roles;
 
     QString m_curr_abs_path;
-    QVector<QString> m_entry_list;
+    QVector<std::tuple<QString, bool>> m_entry_list;
+    QStringList m_filters;
+    QDir m_dir;
 
 private:
     QHash<int, QByteArray> roleNames() const override;
+    void clear();
+    void insert();
 
 public:
     enum class RolesNames {
         entry_name = Qt::UserRole,
+        is_dir_or_file = Qt::UserRole + 1, // true -> dir
     };
 
     explicit File_dialog_model(QObject *parent = nullptr);
@@ -30,10 +35,11 @@ public:
 public slots:
     bool try_cd(const QString& enrty);
     void return_back();
-    bool try_choose_photo(const QString& entry);
+    bool try_choose_avatar(const QString& entry);
+    void refresh();
 
 signals:
-    void photo(const QString& path);
+    void selected(const QString& path);
 };
 
 #endif // FILE_DIALOG_MODEL_H

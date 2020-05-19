@@ -48,6 +48,7 @@ if(ANDROID)
       chart_data.cpp
       file_dialog_model.cpp
       path_finder.cpp
+      settings_model.cpp
     )
 else()
     add_executable(mhc_client
@@ -62,6 +63,7 @@ else()
       chart_data.cpp
       file_dialog_model.cpp
       path_finder.cpp
+      settings_model.cpp
     )
 endif()
 
