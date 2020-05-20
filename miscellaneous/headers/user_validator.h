@@ -10,7 +10,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
-#include "path_finder.h"
+#include "fad_manager.h"
 
 class User_validator : public QObject
 {
@@ -25,10 +25,10 @@ private:
     QString m_nickname;
     QString m_password;
 
+    FAD_manager m_fad_manager;
     Path_finder m_path_finder;
 
 private:
-    void create_user_files_dir();
     void load_user_info();
 
 public:

@@ -6,14 +6,11 @@
 
 class Path_finder
 {
-    // make static?
-    const QString user_files_dir_name = "user_files";
-    const QString user_avatar_file_name = "avatar";
-    const QString user_info_file_name = "user_info";
-    const QString avatars_dir_name = "avatars";
-    const QString file_path_prefix = "file://";
-
-private:
+    static const QString user_files_dir_name;
+    static const QString user_avatar_file_name;
+    static const QString user_info_file_name;
+    static const QString avatars_dir_name;
+    static const QString file_path_prefix;
 
 public:
     QString get_app_dir_path() const;
