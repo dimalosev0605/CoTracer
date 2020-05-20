@@ -1,4 +1,4 @@
-#include "days_model.h"
+#include "./models/headers/days_model.h"
 
 Days_model::Days_model(QObject* parent)
     : QAbstractListModel(parent)

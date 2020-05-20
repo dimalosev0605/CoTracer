@@ -1,4 +1,4 @@
-#include "chart_data.h"
+#include "./models/headers/chart_data.h"
 
 Chart_data::Chart_data(QObject *parent) : QObject(parent)
 {

@@ -1,4 +1,4 @@
-#include "communication_tcp_client.h"
+#include "./networking/headers/communication_tcp_client.h"
 
 Communication_tcp_client::Communication_tcp_client(QObject* parent)
     : Base_tcp_client(parent)

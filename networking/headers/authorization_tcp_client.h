@@ -2,7 +2,7 @@
 #define AUTHORIZATION_TCP_CLIENT_H
 
 #include "base_tcp_client.h"
-#include "path_finder.h"
+#include "miscellaneous/headers/path_finder.h"
 
 #include "boost/bind/bind.hpp"
 

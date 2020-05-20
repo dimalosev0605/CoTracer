@@ -6,7 +6,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "user_validator.h"
+#include "./miscellaneous/headers/user_validator.h"
 #include "Session.h"
 #include "Protocol_keys.h"
 

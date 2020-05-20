@@ -1,4 +1,4 @@
-#include "contacts_model.h"
+#include "./models/headers/contacts_model.h"
 
 Contacts_model::Contacts_model(QObject* parent)
     : QAbstractListModel(parent)

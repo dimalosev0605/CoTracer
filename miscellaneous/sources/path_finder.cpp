@@ -1,4 +1,4 @@
-#include "path_finder.h"
+#include "./miscellaneous/headers/path_finder.h"
 
 QString Path_finder::get_app_dir_path() const
 {

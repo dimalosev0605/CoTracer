@@ -1,4 +1,4 @@
-#include "user_validator.h"
+#include "./miscellaneous/headers/user_validator.h"
 
 const QString User_validator::nickname_key = "nickname";
 const QString User_validator::password_key = "password";

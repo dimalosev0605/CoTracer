@@ -1,4 +1,4 @@
-#include "authorization_tcp_client.h"
+#include "./networking/headers/authorization_tcp_client.h"
 
 Authorization_tcp_client::Authorization_tcp_client(QObject* parent)
     : Base_tcp_client(parent)

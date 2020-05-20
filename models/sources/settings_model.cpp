@@ -1,4 +1,4 @@
-#include "settings_model.h"
+#include "./models/headers/settings_model.h"
 
 Settings_model::Settings_model(QObject *parent)
     : QAbstractListModel(parent)

@@ -1,13 +1,13 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
 
-#include "authorization_tcp_client.h"
-#include "communication_tcp_client.h"
-#include "days_model.h"
-#include "contacts_model.h"
-#include "chart_data.h"
-#include "file_dialog_model.h"
-#include "settings_model.h"
+#include "./networking/headers/authorization_tcp_client.h"
+#include "./networking/headers/communication_tcp_client.h"
+#include "./models/headers/days_model.h"
+#include "./models/headers/contacts_model.h"
+#include "./models/headers/chart_data.h"
+#include "./models/headers/file_dialog_model.h"
+#include "./models/headers/settings_model.h"
 
 int main(int argc, char *argv[])
 {

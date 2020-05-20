@@ -13,10 +13,8 @@
 
 #include <boost/bind/bind.hpp>
 
-#include "user_validator.h"
 #include "base_tcp_client.h"
-#include "contacts_model.h"
-#include "path_finder.h"
+#include "./models/headers/contacts_model.h"
 
 class Communication_tcp_client: public Base_tcp_client
 {

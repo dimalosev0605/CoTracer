@@ -1,4 +1,4 @@
-#include "file_dialog_model.h"
+#include "./models/headers/file_dialog_model.h"
 
 File_dialog_model::File_dialog_model(QObject *parent)
     : QAbstractListModel(parent)
