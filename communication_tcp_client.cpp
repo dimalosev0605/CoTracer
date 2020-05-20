@@ -126,9 +126,7 @@ void Communication_tcp_client::parse_contacts(const QMap<QString, QVariant>& j_m
 
 void Communication_tcp_client::parse_arr_of_avatars(const QMap<QString, QVariant>& j_map)
 {
-    QDir dir_with_avatars(QCoreApplication::applicationDirPath() + '/' + "user_files");
-    dir_with_avatars.mkdir("avatars");
-    dir_with_avatars.cd("avatars");
+    QDir dir_with_avatars(m_path_finder.get_path_to_avatars_dir());
 
     QJsonArray avatars = j_map[Protocol_keys::avatars].toJsonArray();
 
@@ -143,10 +141,6 @@ void Communication_tcp_client::parse_arr_of_avatars(const QMap<QString, QVariant
 
         QString avatar_path(dir_with_avatars.absolutePath() + '/' + nickname);
         QFile file(avatar_path);
-
-        if(file.exists()) {
-            continue;
-        }
 
         if(file.open(QIODevice::WriteOnly)) {
             file.write(avatar);

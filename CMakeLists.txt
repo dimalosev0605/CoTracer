@@ -49,6 +49,7 @@ if(ANDROID)
       file_dialog_model.cpp
       path_finder.cpp
       settings_model.cpp
+      fad_manager.cpp
     )
 else()
     add_executable(mhc_client
@@ -64,6 +65,7 @@ else()
       file_dialog_model.cpp
       path_finder.cpp
       settings_model.cpp
+      fad_manager.cpp
     )
 endif()
 

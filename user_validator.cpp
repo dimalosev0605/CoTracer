@@ -105,4 +105,5 @@ void User_validator::create_user_files_dir()
 {
     QDir dir(m_path_finder.get_app_dir_path());
     dir.mkdir(m_path_finder.get_path_to_user_files_dir());
+    dir.mkdir(m_path_finder.get_path_to_avatars_dir());
 }
