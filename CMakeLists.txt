@@ -30,7 +30,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 include_directories("home/dima/Documents/Qt_projects/mhc_client/networking/headers")
 include_directories("home/dima/Documents/Qt_projects/mhc_client/models/headers")
-include_directories("home/dima/Documents/Qt_projects/mhc_client/miscallaneous")
+include_directories("home/dima/Documents/Qt_projects/mhc_client/miscallaneous/headers")
 include_directories(${Boost_INCLUDE_DIR})
 
 link_directories(${Boost_LIBRARY_DIR})
@@ -77,6 +77,9 @@ else()
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/base_tcp_client.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/communication_tcp_client.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/authorization_tcp_client.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Protocol_codes.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Session.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Protocol_keys.h
       #---
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/base_tcp_client.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/communication_tcp_client.cpp
