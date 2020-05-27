@@ -13,6 +13,7 @@ enum class Request_code: int {
     stats_for_14_days,
     get_contacts,
     change_avatar,
+    change_password
 };
 
 enum class Response_code: int {
@@ -28,6 +29,7 @@ enum class Response_code: int {
     success_fetch_stats_for_14_days,
     contacts_list,
     success_avatar_changing,
+    success_password_changing
 };
 
 }

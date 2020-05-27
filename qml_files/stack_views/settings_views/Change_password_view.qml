@@ -106,6 +106,7 @@ Rectangle {
             color: mouse_area.pressed ? "#b22222" : root.color
             text.text: "Change password"
             mouse_area.onClicked: {
+                client.change_password(new_password_field.text)
             }
         }
     }

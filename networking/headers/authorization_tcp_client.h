@@ -13,6 +13,7 @@ class Authorization_tcp_client: public Base_tcp_client
     QString m_avatar_path;
     QByteArray m_avatar;
     Path_finder m_path_finder;
+    QString m_new_password;
 
 private:
     const char* create_request(Protocol_codes::Request_code code, const QString& nickname, const QString& password);
@@ -38,9 +39,14 @@ public slots:
     void change_avatar(const QString& img_path);
     bool create_req_for_change_avatar(const QString& img_path);
 
+    void change_password(const QString& new_password);
+
     QString get_nickname() const { return m_user_validator.get_nickname(); }
     QString get_password() const { return m_user_validator.get_password(); }
     QString get_avatar_path(bool prefix) const { return m_path_finder.get_path_to_user_avatar(prefix); }
+
+signals:
+    void update_password_field();
 };
 
 #endif // AUTHORIZATION_TCP_CLIENT_H

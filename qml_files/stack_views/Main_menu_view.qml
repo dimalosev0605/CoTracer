@@ -15,6 +15,14 @@ Rectangle {
     }
 
     Component {
+        id: my_friends_view_comp
+        My_friends_view {
+            id: my_friends_view
+            color: root.color
+        }
+    }
+
+    Component {
         id: my_contacts_view_comp
         My_contacts_view {
             color: root.color
@@ -68,7 +76,7 @@ Rectangle {
         }
         width: parent.width * 0.9
 
-        property int btns_count: 3
+        property int btns_count: 4
         property real btns_height:
             (height - spacing * (btns_count - 1)) / btns_count / 2
         property real btns_width: width
@@ -88,6 +96,19 @@ Rectangle {
             text.text: "My account"
             mouse_area.onClicked: {
                 stack_view.push(account_view_comp)
+            }
+        }
+
+        Main_menu_btn {
+            id: my_friends_btn
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.btns_width > parent.max_btns_width ? parent.max_btns_width : parent.btns_width
+            height: parent.btns_height < parent.min_btns_height ? parent.btns_height * 2 : parent.btns_height
+            color: mouse_area.pressed ? parent.btns_pressed_color : root.color
+
+            text.text: "My friends"
+            mouse_area.onClicked: {
+                stack_view.push(my_friends_view_comp)
             }
         }
 
