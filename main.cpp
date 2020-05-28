@@ -8,6 +8,7 @@
 #include "./models/headers/chart_data.h"
 #include "./models/headers/file_dialog_model.h"
 #include "./models/headers/settings_model.h"
+#include "./networking/headers/client.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<Chart_data>("Chart_data_qml", 1, 0, "Chart_data");
     qmlRegisterType<File_dialog_model>("File_dialog_model_qml", 1, 0, "File_dialog_model");
     qmlRegisterType<Settings_model>("Settings_model_qml", 1, 0, "Settings_model");
+    qmlRegisterType<Client>("Client_qml", 1, 0, "Client");
 
     qRegisterMetaType<QVector<std::tuple<QString, QString, bool>>>("QVector<std::tuple<QString, QString, bool>>");
     qRegisterMetaType<QVector<std::tuple<QString, int, int>>>("QVector<std::tuple<QString, int, int>>");

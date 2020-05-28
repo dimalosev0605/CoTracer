@@ -32,11 +32,13 @@ Rectangle {
     Back_btn {
         id: back_btn
         z: 1
+        height: exit_from_account_btn.height
+        width: height
         anchors {
             left: parent.left
             leftMargin: 5
-            top: parent.top
-            topMargin: 5
+            bottom: parent.bottom
+            bottomMargin: exit_from_account_btn.anchors.bottomMargin
         }
         color: mouse_area.pressed ? "#708090" : parent.color
     }
@@ -50,8 +52,8 @@ Rectangle {
         anchors {
             right: parent.right
             rightMargin: back_btn.anchors.leftMargin
-            top: parent.top
-            topMargin: back_btn.anchors.topMargin
+            bottom: parent.bottom
+            bottomMargin: back_btn.anchors.bottomMargin
         }
         color: mouse_area.pressed ? "#708090" : parent.color
         visible: client.is_authenticated
@@ -155,7 +157,16 @@ Rectangle {
             bottomMargin: sign_up_btn.anchors.bottomMargin
             horizontalCenter: sign_up_btn.anchors.horizontalCenter
         }
-        width: sign_up_btn.width
+        width: if(sign_up_btn.width  > parent.width - back_btn.width - settings_btn.width - back_btn.anchors.leftMargin -
+                  settings_btn.anchors.rightMargin - 2 * back_btn.anchors.leftMargin)
+               {
+                   parent.width - back_btn.width - settings_btn.width - back_btn.anchors.leftMargin -
+                   settings_btn.anchors.rightMargin - 2 * back_btn.anchors.leftMargin
+               }
+               else
+               {
+                   sign_up_btn.width
+               }
         height: sign_up_btn.height
         color: mouse_area.pressed ? "#af1111" : "#b22222"
 

@@ -77,6 +77,7 @@ else()
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/base_tcp_client.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/communication_tcp_client.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/authorization_tcp_client.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/client.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Protocol_codes.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Session.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Protocol_keys.h
@@ -84,6 +85,7 @@ else()
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/base_tcp_client.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/communication_tcp_client.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/authorization_tcp_client.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/client.cpp
       #####
 
       #####

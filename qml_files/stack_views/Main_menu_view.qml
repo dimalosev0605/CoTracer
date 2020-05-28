@@ -2,6 +2,7 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 
 import "../buttons"
+import Client_qml 1.0
 
 Rectangle {
     id: root
@@ -27,6 +28,10 @@ Rectangle {
         My_contacts_view {
             color: root.color
         }
+    }
+
+    Client {
+        id: client
     }
 
     Text {
