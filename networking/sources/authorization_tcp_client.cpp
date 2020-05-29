@@ -121,7 +121,7 @@ void Authorization_tcp_client::process_data()
         break;
     }
     case Protocol_codes::Response_code::success_avatar_changing: {
-        m_user_validator.save_avatar(m_avatar_path);
+        m_user_validator.save_user_avatar(m_avatar_path);
         break;
     }
     case Protocol_codes::Response_code::success_password_changing: {

@@ -3,9 +3,8 @@
 const QString User_validator::nickname_key = "nickname";
 const QString User_validator::password_key = "password";
 
-User_validator::User_validator(QObject *parent)
-    : QObject(parent),
-      m_is_authorized(false)
+User_validator::User_validator()
+    : m_is_authorized(false)
 {
     load_user_info();
 }
@@ -18,6 +17,16 @@ void User_validator::set_nickname(const QString& nickname)
 void User_validator::set_password(const QString& password)
 {
     m_password = password;
+}
+
+void User_validator::set_new_password(const QString& new_password)
+{
+    m_new_password = new_password;
+}
+
+void User_validator::set_new_avatar_path(const QString& path)
+{
+    m_new_avatar_path = path;
 }
 
 bool User_validator::save_user_info()
@@ -68,7 +77,6 @@ void User_validator::load_user_info()
                 m_password.clear();
             }
         }
-
     }
 }
 
@@ -85,10 +93,10 @@ bool User_validator::exit_from_account()
     }
 }
 
-bool User_validator::save_avatar(const QString& img_path)
+bool User_validator::reset_user_avatar()
 {
     m_fad_manager.delete_user_avatar_file();
-    QFile copy_from_file(img_path);
+    QFile copy_from_file(m_new_avatar_path);
     return copy_from_file.copy(m_path_finder.get_path_to_user_avatar(false));
 }
 

@@ -1,7 +1,7 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.12
 
-import Authorization_tcp_client_qml 1.0
+//import Authorization_tcp_client_qml 1.0
 import "../buttons"
 import ".."
 import "../Create_dialog.js" as Create_dialog
@@ -10,9 +10,9 @@ Rectangle {
     id: root
     z: 0
 
-    Component.onCompleted: {
-        client.connect_to_server()
-    }
+//    Component.onCompleted: {
+//        client.connect_to_server()
+//    }
 
     Component {
         id: account_settings_view_comp
@@ -22,12 +22,19 @@ Rectangle {
         }
     }
 
-    Authorization_tcp_client {
-        id: client
+    Connections {
+        target: client
+        ignoreUnknownSignals: true
         onUpdate_password_field: {
             password_field.text = client.get_password()
         }
     }
+//    Authorization_tcp_client {
+//        id: client
+//        onUpdate_password_field: {
+//            password_field.text = client.get_password()
+//        }
+//    }
 
     Back_btn {
         id: back_btn
@@ -56,7 +63,7 @@ Rectangle {
             bottomMargin: back_btn.anchors.bottomMargin
         }
         color: mouse_area.pressed ? "#708090" : parent.color
-        visible: client.is_authenticated
+        visible: client.is_authorized
         mouse_area.onClicked: {
             stack_view.push(account_settings_view_comp)
         }
@@ -121,7 +128,7 @@ Rectangle {
         height: parent.btns_height
         color: mouse_area.pressed ? "#ffffff" : parent.color
 
-        visible: !client.is_authenticated
+        visible: !client.is_authorized
         text.text: "Sing up"
         mouse_area.onClicked: {
             if(nickname_field.text === "" || password_field.text === "") return
@@ -141,7 +148,7 @@ Rectangle {
         height: parent.btns_height
         color: mouse_area.pressed ? "#af1111" : "#b22222"
 
-        visible: !client.is_authenticated
+        visible: !client.is_authorized
         text.text: "Sing in"
         mouse_area.onClicked: {
             if(nickname_field.text === "" || password_field.text === "") return
@@ -170,7 +177,7 @@ Rectangle {
         height: sign_up_btn.height
         color: mouse_area.pressed ? "#af1111" : "#b22222"
 
-        visible: client.is_authenticated
+        visible: client.is_authorized
         text.text: "Exit"
         mouse_area.onClicked: {
             if(client.exit_from_account()) {

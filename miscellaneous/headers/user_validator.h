@@ -12,10 +12,8 @@
 
 #include "fad_manager.h"
 
-class User_validator : public QObject
+class User_validator
 {
-    Q_OBJECT
-
     static const QString nickname_key;
     static const QString password_key;
 
@@ -24,6 +22,8 @@ private:
 
     QString m_nickname;
     QString m_password;
+    QString m_new_password;
+    QString m_new_avatar_path;
 
     FAD_manager m_fad_manager;
     Path_finder m_path_finder;
@@ -32,20 +32,24 @@ private:
     void load_user_info();
 
 public:
-    explicit User_validator(QObject *parent = nullptr);
+    User_validator();
 
     bool get_is_authorized() const { return m_is_authorized; }
 
     QString get_nickname() const { return m_nickname; }
     QString get_password() const { return m_password; };
+    QString get_new_password() const { return m_new_password; }
+    QString get_new_avatar_path() const { return m_new_avatar_path; }
 
     void set_nickname(const QString& nickname);
     void set_password(const QString& password);
+    void set_new_password(const QString& new_password);
+    void set_new_avatar_path(const QString& path);
 
     bool save_user_info();
     bool save_user_avatar(const QByteArray& avatar);
     bool exit_from_account();
-    bool save_avatar(const QString& img_path);
+    bool reset_user_avatar();
 };
 
 #endif // USER_VALIDATOR_H

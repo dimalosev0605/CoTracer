@@ -48,7 +48,6 @@ if(ANDROID)
       ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/settings_model.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/base_tcp_client.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/communication_tcp_client.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/authorization_tcp_client.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/user_validator.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/path_finder.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/fad_manager.cpp
@@ -76,7 +75,6 @@ else()
       #####
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/base_tcp_client.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/communication_tcp_client.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/authorization_tcp_client.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/client.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Protocol_codes.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Session.h
@@ -84,7 +82,6 @@ else()
       #---
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/base_tcp_client.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/communication_tcp_client.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/authorization_tcp_client.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/client.cpp
       #####
 
