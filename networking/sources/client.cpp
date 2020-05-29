@@ -12,6 +12,7 @@ Client::Client(QObject *parent)
     m_thread->detach();
 
     set_is_authorized(m_user_validator.get_is_authorized());
+    m_previous_contacts.push_back(m_user_validator.get_nickname());
 }
 
 void Client::connect_to_server()
@@ -133,7 +134,7 @@ void Client::sign_up(const QString& nickname, const QString& password)
     if(occupy_sock()) {
         m_user_validator.set_nickname(nickname);
         m_user_validator.set_password(password);
-        create_sing_up_req(nickname, password);
+        create_sign_up_req(nickname, password);
         async_write();
     }
 }
@@ -175,6 +176,62 @@ bool Client::exit_from_account()
     return false;
 }
 
+void Client::fetch_14_days_stat()
+{
+    if(!get_is_connected()) {
+        connect_to_server();
+        return;
+    }
+    if(occupy_sock()) {
+        create_fetch_14_days_stat_req();
+        async_write();
+    }
+}
+
+Contacts_model* Client::create_model_based_on_date(const QString& date)
+{
+    Contacts_model* new_model = new Contacts_model(this);
+
+    connect(this, &Client::contacts_received, new_model, &Contacts_model::receive_contacts,
+            Qt::QueuedConnection);
+    connect(this, &Client::success_contact_deletion, new_model, &Contacts_model::remove_contact,
+            Qt::QueuedConnection);
+    connect(this, &Client::success_contact_adding, new_model, &Contacts_model::add_contact,
+            Qt::QueuedConnection);
+
+    m_models.push_back(new_model);
+    fetch_contacts_based_on_date(date);
+    return new_model;
+}
+
+Contacts_model* Client::create_model_based_on_nickname(const QString& nickname, const QString& date)
+{
+    Contacts_model* new_model = new Contacts_model(m_previous_contacts, this);
+
+    connect(this, &Client::contacts_received, new_model, &Contacts_model::receive_contacts,
+            Qt::QueuedConnection);
+    m_models.push_back(new_model);
+    fetch_contacts_based_on_nickname(nickname, date);
+    return new_model;
+}
+
+void Client::pop_model()
+{
+    if(!m_models.isEmpty()) {
+        auto poped_model = m_models.back();
+        m_models.pop_back();
+        delete poped_model;
+
+        if(!m_previous_contacts_count.isEmpty()) {
+            int must_poped = m_previous_contacts_count.back();
+            m_previous_contacts_count.pop_back();
+            for(int i = 0; i < must_poped; ++i) {
+                m_previous_contacts.pop_back();
+            }
+        }
+    }
+}
+
 void Client::create_sign_in_req(const QString& nickname, const QString& password)
 {
     QJsonObject j_obj;
@@ -185,7 +242,7 @@ void Client::create_sign_in_req(const QString& nickname, const QString& password
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
 
-void Client::create_sing_up_req(const QString& nickname, const QString& password)
+void Client::create_sign_up_req(const QString& nickname, const QString& password)
 {
     QJsonObject j_obj;
     j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::sign_up);
@@ -233,6 +290,35 @@ bool Client::create_change_avatar_req(const QString& new_avatar_path)
     return true;
 }
 
+void Client::create_fetch_14_days_stat_req()
+{
+    QJsonObject j_obj;
+    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::stats_for_14_days);
+    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+    QJsonDocument j_doc(j_obj);
+    m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
+}
+
+void Client::create_fetch_contacts_based_on_date_req(const QString& date)
+{
+    QJsonObject j_obj;
+    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::get_contacts);
+    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::contact_date, date);
+    QJsonDocument j_doc(j_obj);
+    m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
+}
+
+void Client::create_fetch_contacts_based_on_nickname_req(const QString& nickname, const QString& date)
+{
+    QJsonObject j_obj;
+    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::get_contacts);
+    j_obj.insert(Protocol_keys::nickname, nickname);
+    j_obj.insert(Protocol_keys::contact_date, date);
+    QJsonDocument j_doc(j_obj);
+    m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
+}
+
 void Client::process_data(std::size_t bytes_transferred)
 {
     std::string data((const char*)m_session->m_response.data().data(), bytes_transferred - Protocol_keys::end_of_message.size());
@@ -261,6 +347,14 @@ void Client::process_data(std::size_t bytes_transferred)
         }
         case Protocol_codes::Response_code::success_avatar_changing: {
             m_user_validator.reset_user_avatar();
+            break;
+        }
+        case Protocol_codes::Response_code::success_fetching_stats_for_14_days: {
+            process_success_fetching_stat_for_14_days(j_map);
+            break;
+        }
+        case Protocol_codes::Response_code::contacts_list: {
+            process_contacts_list(j_map);
             break;
         }
         case Protocol_codes::Response_code::internal_server_error: {
@@ -295,4 +389,104 @@ void Client::process_success_password_changing()
     m_user_validator.set_password(m_user_validator.get_new_password());
     m_user_validator.save_user_info();
     emit update_password_field();
+}
+
+void Client::process_success_fetching_stat_for_14_days(QMap<QString, QVariant>& j_map)
+{
+    auto j_arr_of_stats = j_map[Protocol_keys::statistics_for_14_days].toJsonArray();
+
+    QVector<std::tuple<QString, int, int>> stats;
+
+    for(int i = 0; i < j_arr_of_stats.size(); ++i) {
+        auto j_stat_for_day = j_arr_of_stats[i].toObject();
+        auto day_map = j_stat_for_day.toVariantMap();
+
+        QString date = day_map[Protocol_keys::date].toString();
+        int unreg_qnt = day_map[Protocol_keys::unregisterd_quantity].toInt();
+        int reg_qnt = day_map[Protocol_keys::registered_quantity].toInt();
+
+        stats.push_back(std::make_tuple(date, reg_qnt, unreg_qnt));
+    }
+    emit statistic_received(stats);
+}
+
+void Client::process_contacts_list(QMap<QString, QVariant>& j_map)
+{
+    QJsonArray j_arr_of_reg_contacts = j_map[Protocol_keys::registered_list].toJsonArray();
+
+    QVector<std::tuple<QString, QString, bool>> received_contacts;
+
+    for(int i = 0; i < j_arr_of_reg_contacts.size(); ++i) {
+        auto contact_j_obj = j_arr_of_reg_contacts[i].toObject();
+        auto contact_j_obj_map = contact_j_obj.toVariantMap();
+
+        auto pair = std::make_pair(contact_j_obj_map[Protocol_keys::nickname].toString(),
+                                   contact_j_obj_map[Protocol_keys::contact_time].toString());
+
+        received_contacts.push_back(std::make_tuple(pair.first, pair.second, true));
+        m_previous_contacts.push_back(pair.first);
+    }
+    m_previous_contacts_count.push_back(j_arr_of_reg_contacts.size());
+
+    // begin parse array of avatars
+    QDir dir_with_avatars(m_path_finder.get_path_to_avatars_dir());
+
+    QJsonArray avatars = j_map[Protocol_keys::avatars].toJsonArray();
+
+    for(int i = 0; i < avatars.size(); ++i) {
+        auto avatar_obj = avatars[i].toObject();
+        auto map = avatar_obj.toVariantMap();
+
+        QString nickname = map[Protocol_keys::nickname].toString();
+
+        QString avatar_str = map[Protocol_keys::avatar].toString();
+        QByteArray avatar = QByteArray::fromBase64(avatar_str.toLatin1());
+
+        QString avatar_path(dir_with_avatars.absolutePath() + '/' + nickname);
+        QFile file(avatar_path);
+
+        if(file.open(QIODevice::WriteOnly)) {
+            file.write(avatar);
+        }
+    }
+    // end parse array of avatars
+
+    QJsonArray j_arr_of_unreg_contacts = j_map[Protocol_keys::unregistered_list].toJsonArray();
+
+    for(int i = 0; i < j_arr_of_unreg_contacts.size(); ++i) {
+        auto contact_j_obj = j_arr_of_unreg_contacts[i].toObject();
+        auto contact_j_obj_map = contact_j_obj.toVariantMap();
+
+        auto pair = std::make_pair(contact_j_obj_map[Protocol_keys::nickname].toString(),
+                                   contact_j_obj_map[Protocol_keys::contact_time].toString());
+
+        received_contacts.push_back(std::make_tuple(pair.first, pair.second, false));
+    }
+
+    emit contacts_received(received_contacts);
+    disconnect(this, &Client::contacts_received, nullptr, nullptr);
+}
+
+void Client::fetch_contacts_based_on_date(const QString& date)
+{
+    if(!get_is_connected()) {
+        connect_to_server();
+        return;
+    }
+    if(occupy_sock()) {
+        create_fetch_contacts_based_on_date_req(date);
+        async_write();
+    }
+}
+
+void Client::fetch_contacts_based_on_nickname(const QString &nickname, const QString& date)
+{
+    if(!get_is_connected()) {
+        connect_to_server();
+        return;
+    }
+    if(occupy_sock()) {
+        create_fetch_contacts_based_on_nickname_req(nickname, date);
+        async_write();
+    }
 }

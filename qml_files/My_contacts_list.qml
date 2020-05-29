@@ -9,24 +9,9 @@ Rectangle {
     id: root
     z: 0
 
-    Component.onCompleted: {
-//        Create_dialog.create_dialog(root, 1, "Please wait", Animation.Infinite, true, false)
-    }
-
     Component {
         id: add_contact_menu_comp
         Add_contact_menu {}
-    }
-
-    Connections {
-        target: client
-        ignoreUnknownSignals: true
-//        onInfo: {
-//            Create_dialog.create_dialog(root, 1, info_message, 2000, false, is_static)
-//        }
-//        onSuccess_contact_deletion: {
-//            Create_dialog.create_dialog(root, 1, "Contact was deleted.", 2000, false, false)
-//        }
     }
 
     Back_btn {
@@ -41,7 +26,7 @@ Rectangle {
         color: mouse_area.pressed ? "#708090" : parent.color
         mouse_area.onClicked: {
             // poped define in Back_btn.qml
-            client.destroy_model()
+            client.pop_model()
         }
     }
 
@@ -64,11 +49,32 @@ Rectangle {
         }
     }
 
+    Text {
+        id: date
+        z: 0
+        anchors {
+            top: parent.top
+            topMargin: 5
+            horizontalCenter: parent.horizontalCenter
+
+        }
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        width: parent.width - 10
+        height: 30
+        fontSizeMode: Text.Fit
+        minimumPointSize: 5
+        font.pointSize: 12
+        elide: Text.ElideRight
+        wrapMode: Text.WordWrap
+        text: days_list_view.currentItem.date
+    }
+
     ListView {
         id: contacts_list_view
         z: 0
         anchors {
-            top: parent.top
+            top: date.bottom
             topMargin: 10
             left: parent.left
             leftMargin: 5
@@ -184,7 +190,7 @@ Rectangle {
                     contacts_list_view.currentIndex = index
                     if(model.is_registered) {
                         var comp = Qt.createComponent("Contacts_list.qml");
-                        var obj = comp.createObject(root, { nickname: nickname.text } );
+                        var obj = comp.createObject(root, { nickname: nickname.text, date: date.text } );
                         stack_view.push(obj);
                     }
                 }

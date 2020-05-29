@@ -5,14 +5,14 @@ import ".."
 import "../buttons"
 import "../Create_dialog.js" as Create_dialog
 import Days_model_qml 1.0
-import Communication_tcp_client_qml 1.0
+//import Communication_tcp_client_qml 1.0
 
 Rectangle {
     id: root
     z: 0
 
     Component.onCompleted: {
-        client.connect_to_server()
+        client.fetch_14_days_stat()
     }
 
     Days_model {
@@ -35,19 +35,26 @@ Rectangle {
         }
     }
 
+    Connections {
+        target: client
+        ignoreUnknownSignals: true
+        onStatistic_received: {
+            days_model.receive_stats(stats)
+        }
+    }
 
-    Communication_tcp_client {
-        id: client
+//    Communication_tcp_client {
+//        id: client
 //        onCreate_dialog: {
 //                Create_dialog.create_dialog(stack_view.currentItem, 3, m_message, m_opacity_anim_duration,
 //                                            m_is_busy_indicator_running,
 //                                            m_is_opacity_anim_running,
 //                                            m_is_destroy);
 //        }
-        onStatistics_received: {
-            days_model.receive_stats(m_stats)
-        }
-    }
+//        onStatistic_received: {
+//            days_model.receive_stats(m_stats)
+//        }
+//    }
 
     Back_btn {
         id: back_btn

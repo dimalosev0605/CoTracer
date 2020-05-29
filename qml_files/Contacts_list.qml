@@ -10,10 +10,7 @@ Rectangle {
     color: "#e00d0d"
 
     property string nickname
-
-    Component.onCompleted: {
-        Create_dialog.create_dialog(root, 3, "Please wait.", Animation.Infinite, true, false)
-    }
+    property string date
 
     Back_btn {
         id: back_btn
@@ -25,15 +22,36 @@ Rectangle {
         }
         color: mouse_area.pressed ? "#708090" : parent.color
         mouse_area.onClicked: {
-            client.destroy_model()
+            client.pop_model()
             root.destroy()
         }
+    }
+
+    Text {
+        id: date
+        z: 0
+        anchors {
+            top: parent.top
+            topMargin: 5
+            horizontalCenter: parent.horizontalCenter
+
+        }
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        width: parent.width - 10
+        height: 30
+        fontSizeMode: Text.Fit
+        minimumPointSize: 5
+        font.pointSize: 12
+        elide: Text.ElideRight
+        wrapMode: Text.WordWrap
+        text: root.date
     }
 
     ListView {
         id: contacts_list_view
         anchors {
-            top: parent.top
+            top: date.bottom
             topMargin: 10
             left: parent.left
             leftMargin: 5
@@ -47,7 +65,7 @@ Rectangle {
         clip: true
         spacing: 5
 
-        model: client.create_model_based_on_nickname(nickname)
+        model: client.create_model_based_on_nickname(nickname, root.date)
         delegate: Rectangle {
             id: delegate
 
@@ -142,7 +160,7 @@ Rectangle {
                     contacts_list_view.currentIndex = index
                     if(model.is_registered) {
                         var comp = Qt.createComponent("Contacts_list.qml");
-                        var obj = comp.createObject(root, { nickname: nickname.text } );
+                        var obj = comp.createObject(root, { nickname: nickname.text, date: date.text } );
                         stack_view.push(obj);
                     }
                 }

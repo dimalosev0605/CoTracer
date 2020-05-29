@@ -26,7 +26,7 @@ enum class Response_code: int {
     such_user_not_exists,
     success_unregister_contact_deletion,
     success_register_contact_deletion,
-    success_fetch_stats_for_14_days,
+    success_fetching_stats_for_14_days,
     contacts_list,
     success_avatar_changing,
     success_password_changing
