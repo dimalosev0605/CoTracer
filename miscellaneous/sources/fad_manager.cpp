@@ -36,9 +36,18 @@ bool FAD_manager::delete_avatars_dir() const
     return dir.removeRecursively();
 }
 
-bool FAD_manager::delete_all_files() const
+bool FAD_manager::delete_all_user_files() const
 {
+    delete_avatars_dir_content();
     return delete_user_info_file() &&
-           delete_user_avatar_file() &&
-           delete_avatars_dir();
+           delete_user_avatar_file();
+}
+
+void FAD_manager::delete_avatars_dir_content() const
+{
+    QDir dir(m_path_finder.get_path_to_avatars_dir());
+    auto files = dir.entryList();
+    for(const auto& i : files) {
+        dir.remove(i);
+    }
 }

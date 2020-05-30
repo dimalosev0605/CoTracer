@@ -2,7 +2,6 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 
 import "buttons"
-import "./Create_dialog.js" as Create_dialog
 
 Rectangle {
     id: root
@@ -11,12 +10,6 @@ Rectangle {
 
     Connections {
         target: client
-//        onInfo: {
-//            Create_dialog.create_dialog(root, 2, info_message, 2000, false, is_static)
-//        }
-//        onSuccess_adding: {
-//            Create_dialog.create_dialog(root, 2, nickname + " was added", 2000, false, false)
-//        }
     }
 
     Back_btn {

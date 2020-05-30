@@ -3,9 +3,7 @@ import QtQuick.Controls 2.12
 
 import ".."
 import "../buttons"
-import "../Create_dialog.js" as Create_dialog
 import Days_model_qml 1.0
-//import Communication_tcp_client_qml 1.0
 
 Rectangle {
     id: root
@@ -43,19 +41,6 @@ Rectangle {
         }
     }
 
-//    Communication_tcp_client {
-//        id: client
-//        onCreate_dialog: {
-//                Create_dialog.create_dialog(stack_view.currentItem, 3, m_message, m_opacity_anim_duration,
-//                                            m_is_busy_indicator_running,
-//                                            m_is_opacity_anim_running,
-//                                            m_is_destroy);
-//        }
-//        onStatistic_received: {
-//            days_model.receive_stats(m_stats)
-//        }
-//    }
-
     Back_btn {
         id: back_btn
         z: 1
@@ -66,6 +51,9 @@ Rectangle {
             leftMargin: 10
         }
         color: mouse_area.pressed ? "#708090" : parent.color
+        mouse_area.onClicked: {
+            client.cancel_operation()
+        }
     }
 
     Update_stats_btn {

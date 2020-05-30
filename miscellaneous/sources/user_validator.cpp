@@ -82,7 +82,7 @@ void User_validator::load_user_info()
 
 bool User_validator::exit_from_account()
 {
-    if(m_fad_manager.delete_all_files()) {
+    if(m_fad_manager.delete_all_user_files()) {
         m_is_authorized = false;
         m_nickname.clear();
         m_password.clear();

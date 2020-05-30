@@ -1,18 +1,12 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.12
 
-//import Authorization_tcp_client_qml 1.0
 import "../buttons"
 import ".."
-import "../Create_dialog.js" as Create_dialog
 
 Rectangle {
     id: root
     z: 0
-
-//    Component.onCompleted: {
-//        client.connect_to_server()
-//    }
 
     Component {
         id: account_settings_view_comp
@@ -29,12 +23,6 @@ Rectangle {
             password_field.text = client.get_password()
         }
     }
-//    Authorization_tcp_client {
-//        id: client
-//        onUpdate_password_field: {
-//            password_field.text = client.get_password()
-//        }
-//    }
 
     Back_btn {
         id: back_btn

@@ -2,7 +2,6 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 
 import "../buttons"
-import "../Create_dialog.js" as Create_dialog
 import "./settings_views"
 import Settings_model_qml 1.0
 

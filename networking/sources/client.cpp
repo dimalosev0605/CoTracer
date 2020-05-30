@@ -12,11 +12,15 @@ Client::Client(QObject *parent)
     m_thread->detach();
 
     set_is_authorized(m_user_validator.get_is_authorized());
-    m_previous_contacts.push_back(m_user_validator.get_nickname());
 }
 
 void Client::connect_to_server()
 {
+    {
+        std::lock_guard<std::mutex> lock(m_is_sock_free_mutex);
+        m_is_sock_free = false;
+    }
+
     m_session = std::unique_ptr<Session>(new Session(m_ios, "192.168.1.140", 1234));
     m_session->m_socket.open(m_session->m_ep.protocol());
     m_session->m_socket.async_connect(m_session->m_ep, [this](const boost::system::error_code& ec)
@@ -25,15 +29,16 @@ void Client::connect_to_server()
             set_is_connected(true);
             qDebug() << "Success connection!";
         } else {
-            qDebug() << "Connection error!";
             set_is_connected(false);
+            qDebug() << "Connection error!";
         }
+        free_sock();
     });
 }
 
 bool Client::occupy_sock()
 {
-    std::lock_guard<std::mutex> lock(m_is_free_sock_mutex);
+    std::lock_guard<std::mutex> lock(m_is_sock_free_mutex);
     if(m_is_sock_free) {
         m_is_sock_free = false;
         return true;
@@ -45,7 +50,7 @@ bool Client::occupy_sock()
 
 void Client::free_sock()
 {
-    std::lock_guard<std::mutex> lock(m_is_free_sock_mutex);
+    std::lock_guard<std::mutex> lock(m_is_sock_free_mutex);
     m_is_sock_free = true;
 }
 
@@ -72,8 +77,15 @@ void Client::on_request_sent(const boost::system::error_code& ec, size_t bytes_t
                                        boost::placeholders::_2)
                                       );
     } else {
-        set_is_connected(false);
+        if(ec == boost::asio::error::operation_aborted) {
+            qDebug() << "Operation canceled";
+            free_sock();
+            set_is_connected(false);
+            connect_to_server();
+            return;
+        }
         free_sock();
+        set_is_connected(false);
         connect_to_server();
     }
 }
@@ -83,21 +95,29 @@ void Client::on_response_received(const boost::system::error_code& ec, size_t by
     if(ec.value() == 0) {
         process_data(bytes_transferred);
     } else {
-        set_is_connected(false);
+        if(ec == boost::asio::error::operation_aborted) {
+            qDebug() << "Operation canceled";
+            free_sock();
+            set_is_connected(false);
+            connect_to_server();
+            return;
+        }
         free_sock();
+        set_is_connected(false);
         connect_to_server();
     }
 }
 
 bool Client::get_is_connected()
 {
+    std::lock_guard<std::mutex> lock(m_is_connected_mutex);
     return m_is_connected;
 }
 
 void Client::set_is_connected(bool value)
 {
+    std::lock_guard<std::mutex> lock(m_is_connected_mutex);
     m_is_connected = value;
-    emit is_connected_changed();
 }
 
 bool Client::get_is_authorized()
@@ -115,7 +135,6 @@ void Client::sign_in(const QString& nickname, const QString& password)
 {
     if(!get_is_connected()) {
         connect_to_server();
-        return;
     }
     if(occupy_sock()) {
         m_user_validator.set_nickname(nickname);
@@ -129,7 +148,6 @@ void Client::sign_up(const QString& nickname, const QString& password)
 {
     if(!get_is_connected()) {
         connect_to_server();
-        return;
     }
     if(occupy_sock()) {
         m_user_validator.set_nickname(nickname);
@@ -143,7 +161,6 @@ void Client::change_password(const QString& new_password)
 {
     if(!get_is_connected()) {
         connect_to_server();
-        return;
     }
     if(occupy_sock()) {
         create_change_password_req(new_password);
@@ -155,7 +172,6 @@ void Client::change_avatar(const QString& new_avatar_path)
 {
     if(!get_is_connected()) {
         connect_to_server();
-        return;
     }
     if(occupy_sock()) {
         if(create_change_avatar_req(new_avatar_path)) {
@@ -180,7 +196,6 @@ void Client::fetch_14_days_stat()
 {
     if(!get_is_connected()) {
         connect_to_server();
-        return;
     }
     if(occupy_sock()) {
         create_fetch_14_days_stat_req();
@@ -206,7 +221,7 @@ Contacts_model* Client::create_model_based_on_date(const QString& date)
 
 Contacts_model* Client::create_model_based_on_nickname(const QString& nickname, const QString& date)
 {
-    Contacts_model* new_model = new Contacts_model(m_previous_contacts, this);
+    Contacts_model* new_model = new Contacts_model(this);
 
     connect(this, &Client::contacts_received, new_model, &Contacts_model::receive_contacts,
             Qt::QueuedConnection);
@@ -221,14 +236,14 @@ void Client::pop_model()
         auto poped_model = m_models.back();
         m_models.pop_back();
         delete poped_model;
+    }
+}
 
-        if(!m_previous_contacts_count.isEmpty()) {
-            int must_poped = m_previous_contacts_count.back();
-            m_previous_contacts_count.pop_back();
-            for(int i = 0; i < must_poped; ++i) {
-                m_previous_contacts.pop_back();
-            }
-        }
+void Client::cancel_operation()
+{
+    m_session->m_socket.cancel();
+    if(!get_is_connected()) {
+        connect_to_server();
     }
 }
 
@@ -424,9 +439,7 @@ void Client::process_contacts_list(QMap<QString, QVariant>& j_map)
                                    contact_j_obj_map[Protocol_keys::contact_time].toString());
 
         received_contacts.push_back(std::make_tuple(pair.first, pair.second, true));
-        m_previous_contacts.push_back(pair.first);
     }
-    m_previous_contacts_count.push_back(j_arr_of_reg_contacts.size());
 
     // begin parse array of avatars
     QDir dir_with_avatars(m_path_finder.get_path_to_avatars_dir());
@@ -471,7 +484,6 @@ void Client::fetch_contacts_based_on_date(const QString& date)
 {
     if(!get_is_connected()) {
         connect_to_server();
-        return;
     }
     if(occupy_sock()) {
         create_fetch_contacts_based_on_date_req(date);
@@ -483,7 +495,6 @@ void Client::fetch_contacts_based_on_nickname(const QString &nickname, const QSt
 {
     if(!get_is_connected()) {
         connect_to_server();
-        return;
     }
     if(occupy_sock()) {
         create_fetch_contacts_based_on_nickname_req(nickname, date);

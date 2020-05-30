@@ -5,8 +5,6 @@
 
 #include "boost/asio.hpp"
 
-#include "Protocol_codes.h"
-
 struct Session
 {
     boost::asio::ip::tcp::socket m_socket;
@@ -14,9 +12,6 @@ struct Session
 
     std::string m_request;
     boost::asio::streambuf m_response;
-
-    Protocol_codes::Request_code m_req_code;
-    Protocol_codes::Response_code m_res_code;
 
     Session(boost::asio::io_service& ios, const std::string& raw_ip, unsigned short port_number)
         : m_socket(ios),

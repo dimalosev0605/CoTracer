@@ -28,9 +28,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 #    endif()
 #endif()
 
-include_directories("home/dima/Documents/Qt_projects/mhc_client/networking/headers")
-include_directories("home/dima/Documents/Qt_projects/mhc_client/models/headers")
-include_directories("home/dima/Documents/Qt_projects/mhc_client/miscallaneous/headers")
+#include_directories("home/dima/Documents/Qt_projects/mhc_client/networking/headers")
+#include_directories("home/dima/Documents/Qt_projects/mhc_client/models/headers")
+#include_directories("home/dima/Documents/Qt_projects/mhc_client/miscallaneous/headers")
 include_directories(${Boost_INCLUDE_DIR})
 
 link_directories(${Boost_LIBRARY_DIR})
@@ -46,7 +46,6 @@ if(ANDROID)
       ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/chart_data.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/file_dialog_model.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/settings_model.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/base_tcp_client.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/user_validator.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/path_finder.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/fad_manager.cpp
@@ -72,13 +71,11 @@ else()
       #####
 
       #####
-      ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/base_tcp_client.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/client.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Protocol_codes.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Session.h
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Protocol_keys.h
       #---
-      ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/base_tcp_client.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/client.cpp
       #####
 

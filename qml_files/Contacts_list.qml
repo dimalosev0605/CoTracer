@@ -3,7 +3,6 @@ import QtQuick.Controls 2.12
 import QtGraphicalEffects 1.0
 
 import "buttons"
-import "./Create_dialog.js" as Create_dialog
 
 Rectangle {
     id: root
@@ -22,6 +21,7 @@ Rectangle {
         }
         color: mouse_area.pressed ? "#708090" : parent.color
         mouse_area.onClicked: {
+            client.cancel_operation()
             client.pop_model()
             root.destroy()
         }

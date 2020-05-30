@@ -20,7 +20,8 @@ public:
     bool delete_user_info_file() const;
     bool delete_user_avatar_file() const;
     bool delete_avatars_dir() const;
-    bool delete_all_files() const;
+    bool delete_all_user_files() const;
+    void delete_avatars_dir_content() const;
 };
 
 #endif // FAD_MANAGER_H

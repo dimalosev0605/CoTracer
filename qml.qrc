@@ -20,7 +20,6 @@
         <file>imgs/chart.png</file>
         <file>qml_files/buttons/Chart_btn.qml</file>
         <file>qml_files/stack_views/Chart_view.qml</file>
-        <file>qml_files/Create_dialog.js</file>
         <file>imgs/settings.png</file>
         <file>qml_files/buttons/Settings_btn.qml</file>
         <file>qml_files/buttons/Update_stats_btn.qml</file>

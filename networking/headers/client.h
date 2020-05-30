@@ -19,14 +19,12 @@
 #include "./miscellaneous/headers/path_finder.h"
 #include "./models/headers/contacts_model.h"
 #include "Session.h"
+#include "Protocol_codes.h"
 #include "Protocol_keys.h"
 
 class Client: public QObject
 {
     Q_OBJECT
-
-    Q_PROPERTY(bool is_connected READ get_is_connected WRITE set_is_connected NOTIFY is_connected_changed)
-    bool m_is_connected = false;
 
     Q_PROPERTY(bool is_authorized READ get_is_authorized WRITE set_is_authorized NOTIFY is_authorized_changed)
     bool m_is_authorized = false;
@@ -37,14 +35,15 @@ class Client: public QObject
     std::unique_ptr<std::thread> m_thread;
 
     bool m_is_sock_free = true;
-    std::mutex m_is_free_sock_mutex;
+    std::mutex m_is_sock_free_mutex;
+
+    bool m_is_connected = false;
+    std::mutex m_is_connected_mutex;
 
     User_validator m_user_validator;
     Path_finder m_path_finder;
 
     QVector<Contacts_model*> m_models;
-    QVector<QString> m_previous_contacts;
-    QVector<int> m_previous_contacts_count;
 
 private:
     void connect_to_server();
@@ -94,6 +93,7 @@ public slots:
     Contacts_model* create_model_based_on_date(const QString& date);
     Contacts_model* create_model_based_on_nickname(const QString& nickname, const QString& date);
     void pop_model();
+    void cancel_operation();
 
     QString get_nickname() const { return m_user_validator.get_nickname(); }
     QString get_password() const { return m_user_validator.get_password(); }
