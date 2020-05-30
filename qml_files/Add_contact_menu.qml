@@ -8,6 +8,8 @@ Rectangle {
     color: "#e00d0d"
     z: 0
 
+    property string date
+
     Connections {
         target: client
     }
@@ -201,10 +203,10 @@ Rectangle {
         mouse_area.onClicked: {
             if(nickname_field.text === "") return;
             if(qstn.is_reg) {
-                client.add_contact(2, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)
+                client.add_contact(2, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text, root.date)
             }
             else {
-                client.add_contact(3, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text)
+                client.add_contact(3, nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text, root.date)
             }
         }
     }

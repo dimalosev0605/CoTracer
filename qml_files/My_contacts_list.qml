@@ -10,7 +10,9 @@ Rectangle {
 
     Component {
         id: add_contact_menu_comp
-        Add_contact_menu {}
+        Add_contact_menu {
+            date: days_list_view.currentItem.date
+        }
     }
 
     Back_btn {
@@ -219,11 +221,13 @@ Rectangle {
                         contacts_list_view.currentIndex = index
                         if(model.is_registered) {
                             client.remove_contact(5, contacts_list_view.currentItem.nickname.text,
-                                                  contacts_list_view.currentItem.time.text, index)
+                                                  contacts_list_view.currentItem.time.text, index,
+                                                  days_list_view.currentItem.date)
 
                         } else {
                             client.remove_contact(4, contacts_list_view.currentItem.nickname.text,
-                                                  contacts_list_view.currentItem.time.text, index)
+                                                  contacts_list_view.currentItem.time.text, index,
+                                                  days_list_view.currentItem.date)
                         }
                     }
                 }

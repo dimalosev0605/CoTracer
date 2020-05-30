@@ -11,6 +11,7 @@
 #include <mutex>
 #include <thread>
 #include <tuple>
+#include <any>
 
 #include "boost/bind/bind.hpp"
 #include "boost/asio.hpp"
@@ -44,6 +45,7 @@ class Client: public QObject
     Path_finder m_path_finder;
 
     QVector<Contacts_model*> m_models;
+    std::vector<std::any> lol;
 
 private:
     void connect_to_server();
@@ -61,6 +63,8 @@ private:
     void create_fetch_14_days_stat_req();
     void create_fetch_contacts_based_on_date_req(const QString& date);
     void create_fetch_contacts_based_on_nickname_req(const QString& nickname, const QString& date);
+    void create_add_contact_req(int code, const QString& nickname, const QString& time, const QString& date);
+    void create_remove_contact_req(int code, const QString& nickname, const QString& time, int index, const QString& date);
 
     // process response functions
     void process_data(std::size_t bytes_transferred);
@@ -69,6 +73,8 @@ private:
     void process_success_password_changing();
     void process_success_fetching_stat_for_14_days(QMap<QString, QVariant>& j_map);
     void process_contacts_list(QMap<QString, QVariant>& j_map);
+    void process_success_adding();
+    void process_success_contact_deletion();
 
     void fetch_contacts_based_on_date(const QString& date);
     void fetch_contacts_based_on_nickname(const QString& nickname, const QString& date);
@@ -90,6 +96,8 @@ public slots:
     bool exit_from_account();
 
     void fetch_14_days_stat();
+    void add_contact(int code, const QString& nickname, const QString& time, const QString& date);
+    void remove_contact(int code, const QString& nickname, const QString& time, int index, const QString& date);
     Contacts_model* create_model_based_on_date(const QString& date);
     Contacts_model* create_model_based_on_nickname(const QString& nickname, const QString& date);
     void pop_model();

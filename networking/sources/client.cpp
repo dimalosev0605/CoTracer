@@ -203,6 +203,29 @@ void Client::fetch_14_days_stat()
     }
 }
 
+void Client::add_contact(int code, const QString& nickname, const QString& time, const QString& date)
+{
+    if(nickname == m_user_validator.get_nickname()) return;
+    if(!get_is_connected()) {
+        connect_to_server();
+    }
+    if(occupy_sock()) {
+        create_add_contact_req(code, nickname, time, date);
+        async_write();
+    }
+}
+
+void Client::remove_contact(int code, const QString& nickname, const QString& time, int index, const QString& date)
+{
+    if(!get_is_connected()) {
+        connect_to_server();
+    }
+    if(occupy_sock()) {
+        create_remove_contact_req(code, nickname, time, index, date);
+        async_write();
+    }
+}
+
 Contacts_model* Client::create_model_based_on_date(const QString& date)
 {
     Contacts_model* new_model = new Contacts_model(this);
@@ -334,6 +357,45 @@ void Client::create_fetch_contacts_based_on_nickname_req(const QString& nickname
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
 
+void Client::create_add_contact_req(int code, const QString& nickname, const QString& time, const QString& date)
+{
+    QJsonObject j_obj;
+
+    lol.push_back(QString(nickname));
+    lol.push_back(QString(time));
+    if(Protocol_codes::Request_code::add_registered_user == (Protocol_codes::Request_code)code) {
+        lol.push_back(true);
+    }
+    else {
+        lol.push_back(false);
+    }
+
+    j_obj.insert(Protocol_keys::request, (int)code);
+    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::contact, nickname);
+    j_obj.insert(Protocol_keys::contact_date, date);
+    j_obj.insert(Protocol_keys::contact_time, time);
+
+    QJsonDocument j_doc(j_obj);
+    m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
+}
+
+void Client::create_remove_contact_req(int code, const QString& nickname, const QString& time, int index, const QString& date)
+{
+    QJsonObject j_obj;
+
+    lol.push_back(int(index));
+
+    j_obj.insert(Protocol_keys::request, (int)code);
+    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::contact_date, date);
+    j_obj.insert(Protocol_keys::contact, nickname);
+    j_obj.insert(Protocol_keys::contact_time, time);
+
+    QJsonDocument j_doc(j_obj);
+    m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
+}
+
 void Client::process_data(std::size_t bytes_transferred)
 {
     std::string data((const char*)m_session->m_response.data().data(), bytes_transferred - Protocol_keys::end_of_message.size());
@@ -370,6 +432,15 @@ void Client::process_data(std::size_t bytes_transferred)
         }
         case Protocol_codes::Response_code::contacts_list: {
             process_contacts_list(j_map);
+            break;
+        }
+        case Protocol_codes::Response_code::success_adding: {
+            process_success_adding();
+            break;
+        }
+        case Protocol_codes::Response_code::success_register_contact_deletion:
+        case Protocol_codes::Response_code::success_unregister_contact_deletion: {
+            process_success_contact_deletion();
             break;
         }
         case Protocol_codes::Response_code::internal_server_error: {
@@ -478,6 +549,22 @@ void Client::process_contacts_list(QMap<QString, QVariant>& j_map)
 
     emit contacts_received(received_contacts);
     disconnect(this, &Client::contacts_received, nullptr, nullptr);
+}
+
+void Client::process_success_adding()
+{
+    QString nickname = std::any_cast<QString>(lol[0]);
+    QString time = std::any_cast<QString>(lol[1]);
+    bool is_reg = std::any_cast<bool>(lol[2]);
+    lol.clear();
+    emit success_contact_adding(nickname, time, is_reg);
+}
+
+void Client::process_success_contact_deletion()
+{
+    int index = std::any_cast<int>(lol[0]);
+    lol.clear();
+    emit success_contact_deletion(index);
 }
 
 void Client::fetch_contacts_based_on_date(const QString& date)
