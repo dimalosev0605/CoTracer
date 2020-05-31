@@ -24,8 +24,7 @@ Rectangle {
         id: column
         z: 1
         anchors {
-            top: parent.top
-            topMargin: 10
+            verticalCenter: parent.verticalCenter
             horizontalCenter: parent.horizontalCenter
         }
         width: parent.width * 0.7
@@ -35,23 +34,25 @@ Rectangle {
             id: old_password_field
             width: parent.width
             height: 30
-            placeholderText: "Input old password"
+            placeholderText: "Input current password"
             echoMode: TextInput.Password
             inputMethodHints: Qt.ImhNoPredictiveText
             onTextChanged: if(old_password_field.text !== client.get_password()) {
-                               info_text.text = "Incorrect password"
-                               new_password_field.enabled = false
-                               repeat_password_field.enabled = false
+                               info_text.text = "Wrong password!"
+                               info_text.visible = true
+                               new_password_field.visible = false
+                               repeat_password_field.visible = false
                            }
                            else {
-                               new_password_field.enabled = true
-                               repeat_password_field.enabled = true
+                               new_password_field.visible = true
+                               repeat_password_field.visible = true
                                info_text.text = ""
                                if(new_password_field.text !== repeat_password_field.text) {
                                    info_text.text = "Passwords don't match!"
+                                   info_text.visible = true
                                }
                                else {
-                                   info_text.text = ""
+                                   info_text.visible = false
                                }
                            }
         }
@@ -60,15 +61,16 @@ Rectangle {
             width: parent.width
             height: old_password_field.height
             placeholderText: "Input new password"
-            enabled: false
+            visible: false
             echoMode: TextInput.Password
             inputMethodHints: Qt.ImhNoPredictiveText
             onTextChanged: {
                 if(new_password_field.text !== repeat_password_field.text) {
                     info_text.text = "Passwords don't match!"
+                    info_text.visible = true
                 }
                 else {
-                    info_text.text = ""
+                    info_text.visible = false
                 }
             }
         }
@@ -79,23 +81,25 @@ Rectangle {
             placeholderText: "Repeat new password"
             echoMode: TextInput.Password
             inputMethodHints: Qt.ImhNoPredictiveText
-            enabled: false
+            visible: false
             onTextChanged: if(new_password_field.text !== repeat_password_field.text) {
                                info_text.text = "Passwords don't match!"
+                               info_text.visible = true
                            }
                            else {
-                               info_text.text = ""
+                               info_text.visible = false
                            }
         }
         Text {
             id: info_text
             width: parent.width
             height: 40
+            visible: false
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             fontSizeMode: Text.Fit
             minimumPointSize: 5
-            font.pointSize: 12
+            font.pointSize: 15
             elide: Text.ElideRight
             wrapMode: Text.WordWrap
         }
@@ -104,15 +108,19 @@ Rectangle {
             width: parent.width
             height: 50
             color: mouse_area.pressed ? "#b22222" : root.color
+            visible: if(old_password_field.text === client.get_password() &&
+                        new_password_field.text === repeat_password_field.text &&
+                        new_password_field.text !== "" &&
+                        repeat_password_field.text !== "")
+                     {
+                         true
+                     }
+                     else {
+                         false
+                     }
             text.text: "Change password"
             mouse_area.onClicked: {
-                if(old_password_field.text === client.get_password() &&
-                   new_password_field.text === repeat_password_field.text &&
-                   new_password_field.text !== "" &&
-                   repeat_password_field.text !== "")
-                {
-                    client.change_password(new_password_field.text)
-                }
+                client.change_password(new_password_field.text)
             }
         }
     }
