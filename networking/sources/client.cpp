@@ -198,30 +198,41 @@ void Client::fetch_14_days_stat()
         connect_to_server();
     }
     if(occupy_sock()) {
-        create_fetch_14_days_stat_req();
+        create_fetch_stat_for_14_days_req();
         async_write();
     }
 }
 
-void Client::add_contact(int code, const QString& nickname, const QString& time, const QString& date)
+void Client::add_contact(const QString& nickname, const QString& time, const QString& date)
 {
     if(nickname == m_user_validator.get_nickname()) return;
     if(!get_is_connected()) {
         connect_to_server();
     }
     if(occupy_sock()) {
-        create_add_contact_req(code, nickname, time, date);
+        create_add_contact_req(nickname, time, date);
+
+        // lol
+        lol_vector.push_back(QString(nickname));
+        lol_vector.push_back(QString(time));
+        // lol
+
         async_write();
     }
 }
 
-void Client::remove_contact(int code, const QString& nickname, const QString& time, int index, const QString& date)
+void Client::remove_contact(const QString& nickname, const QString& time, const QString& date, int index_in_table)
 {
     if(!get_is_connected()) {
         connect_to_server();
     }
     if(occupy_sock()) {
-        create_remove_contact_req(code, nickname, time, index, date);
+        create_remove_contact_req(nickname, time, date);
+
+        // lol
+        lol_vector.push_back((int)index_in_table);
+        // lol
+
         async_write();
     }
 }
@@ -242,7 +253,7 @@ Contacts_model* Client::create_model_based_on_date(const QString& date)
     return new_model;
 }
 
-Contacts_model* Client::create_model_based_on_nickname(const QString& nickname, const QString& date)
+Contacts_model* Client::create_model_based_on_date_and_nickname(const QString& nickname, const QString& date)
 {
     Contacts_model* new_model = new Contacts_model(this);
 
@@ -273,9 +284,9 @@ void Client::cancel_operation()
 void Client::create_sign_in_req(const QString& nickname, const QString& password)
 {
     QJsonObject j_obj;
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::sign_in);
-    j_obj.insert(Protocol_keys::nickname, nickname);
-    j_obj.insert(Protocol_keys::password, password);
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::sign_in);
+    j_obj.insert(Protocol_keys::user_nickname, nickname);
+    j_obj.insert(Protocol_keys::user_password, password);
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
@@ -283,9 +294,9 @@ void Client::create_sign_in_req(const QString& nickname, const QString& password
 void Client::create_sign_up_req(const QString& nickname, const QString& password)
 {
     QJsonObject j_obj;
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::sign_up);
-    j_obj.insert(Protocol_keys::nickname, nickname);
-    j_obj.insert(Protocol_keys::password, password);
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::sign_up);
+    j_obj.insert(Protocol_keys::user_nickname, nickname);
+    j_obj.insert(Protocol_keys::user_password, password);
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
@@ -293,9 +304,9 @@ void Client::create_sign_up_req(const QString& nickname, const QString& password
 void Client::create_change_password_req(const QString& new_password)
 {
     QJsonObject j_obj;
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::change_password);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
-    j_obj.insert(Protocol_keys::password, new_password);
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::change_password);
+    j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::user_password, new_password);
     m_user_validator.set_new_password(new_password);
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
@@ -309,8 +320,8 @@ bool Client::create_change_avatar_req(const QString& new_avatar_path)
 
     QJsonObject j_obj;
 
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::change_avatar);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::change_avatar);
+    j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
 
     QFile avatar_file(avatar_path);
     QByteArray base64_img;
@@ -320,7 +331,7 @@ bool Client::create_change_avatar_req(const QString& new_avatar_path)
     }
     if(base64_img.isEmpty()) return false;
 
-    j_obj.insert(Protocol_keys::avatar, QString::fromLatin1(base64_img));
+    j_obj.insert(Protocol_keys::avatar_data, QString::fromLatin1(base64_img));
 
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
@@ -328,11 +339,11 @@ bool Client::create_change_avatar_req(const QString& new_avatar_path)
     return true;
 }
 
-void Client::create_fetch_14_days_stat_req()
+void Client::create_fetch_stat_for_14_days_req()
 {
     QJsonObject j_obj;
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::stats_for_14_days);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::fetch_stat_for_14_days);
+    j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
@@ -340,8 +351,8 @@ void Client::create_fetch_14_days_stat_req()
 void Client::create_fetch_contacts_based_on_date_req(const QString& date)
 {
     QJsonObject j_obj;
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::get_contacts);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::fetch_contacts);
+    j_obj.insert(Protocol_keys::contact_nickname, m_user_validator.get_nickname());
     j_obj.insert(Protocol_keys::contact_date, date);
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
@@ -350,29 +361,20 @@ void Client::create_fetch_contacts_based_on_date_req(const QString& date)
 void Client::create_fetch_contacts_based_on_nickname_req(const QString& nickname, const QString& date)
 {
     QJsonObject j_obj;
-    j_obj.insert(Protocol_keys::request, (int)Protocol_codes::Request_code::get_contacts);
-    j_obj.insert(Protocol_keys::nickname, nickname);
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::fetch_contacts);
+    j_obj.insert(Protocol_keys::contact_nickname, nickname);
     j_obj.insert(Protocol_keys::contact_date, date);
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
 
-void Client::create_add_contact_req(int code, const QString& nickname, const QString& time, const QString& date)
+void Client::create_add_contact_req(const QString& nickname, const QString& time, const QString& date)
 {
     QJsonObject j_obj;
 
-    lol.push_back(QString(nickname));
-    lol.push_back(QString(time));
-    if(Protocol_codes::Request_code::add_registered_user == (Protocol_codes::Request_code)code) {
-        lol.push_back(true);
-    }
-    else {
-        lol.push_back(false);
-    }
-
-    j_obj.insert(Protocol_keys::request, (int)code);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
-    j_obj.insert(Protocol_keys::contact, nickname);
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::add_contact);
+    j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::contact_nickname, nickname);
     j_obj.insert(Protocol_keys::contact_date, date);
     j_obj.insert(Protocol_keys::contact_time, time);
 
@@ -380,16 +382,14 @@ void Client::create_add_contact_req(int code, const QString& nickname, const QSt
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
 
-void Client::create_remove_contact_req(int code, const QString& nickname, const QString& time, int index, const QString& date)
+void Client::create_remove_contact_req(const QString& nickname, const QString& time, const QString& date)
 {
     QJsonObject j_obj;
 
-    lol.push_back(int(index));
-
-    j_obj.insert(Protocol_keys::request, (int)code);
-    j_obj.insert(Protocol_keys::nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::remove_contact);
+    j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
     j_obj.insert(Protocol_keys::contact_date, date);
-    j_obj.insert(Protocol_keys::contact, nickname);
+    j_obj.insert(Protocol_keys::contact_nickname, nickname);
     j_obj.insert(Protocol_keys::contact_time, time);
 
     QJsonDocument j_doc(j_obj);
@@ -406,7 +406,7 @@ void Client::process_data(std::size_t bytes_transferred)
         auto j_obj = j_doc.object();
         auto j_map = j_obj.toVariantMap();
 
-        Protocol_codes::Response_code res_code = (Protocol_codes::Response_code)j_map[Protocol_keys::response].toInt();
+        Protocol_codes::Response_code res_code = (Protocol_codes::Response_code)j_map[Protocol_keys::response_code].toInt();
 
         switch (res_code) {
 
@@ -423,27 +423,31 @@ void Client::process_data(std::size_t bytes_transferred)
             break;
         }
         case Protocol_codes::Response_code::success_avatar_changing: {
-            m_user_validator.reset_user_avatar();
+            process_success_avatar_changing();
             break;
         }
-        case Protocol_codes::Response_code::success_fetching_stats_for_14_days: {
+        case Protocol_codes::Response_code::success_fetching_stat_for_14_days: {
             process_success_fetching_stat_for_14_days(j_map);
             break;
         }
-        case Protocol_codes::Response_code::contacts_list: {
-            process_contacts_list(j_map);
+        case Protocol_codes::Response_code::success_fetching_contacts: {
+            process_success_fetching_contacts(j_map);
             break;
         }
-        case Protocol_codes::Response_code::success_adding: {
-            process_success_adding();
+        case Protocol_codes::Response_code::success_contact_adding: {
+            process_success_contact_adding();
             break;
         }
-        case Protocol_codes::Response_code::success_register_contact_deletion:
-        case Protocol_codes::Response_code::success_unregister_contact_deletion: {
+        case Protocol_codes::Response_code::such_contact_not_exists: {
+            process_such_contact_not_exists();
+            break;
+        }
+        case Protocol_codes::Response_code::success_contact_deletion: {
             process_success_contact_deletion();
             break;
         }
         case Protocol_codes::Response_code::internal_server_error: {
+            process_internal_server_error();
             break;
         }
 
@@ -455,7 +459,7 @@ void Client::process_data(std::size_t bytes_transferred)
 
 void Client::process_success_sign_in(QMap<QString, QVariant>& j_map)
 {
-    QString avatar_str = j_map[Protocol_keys::avatar].toString();
+    QString avatar_str = j_map[Protocol_keys::avatar_data].toString();
     QByteArray avatar_byte_arr = QByteArray::fromBase64(avatar_str.toLatin1());
 
     if(m_user_validator.save_user_info() && m_user_validator.save_user_avatar(avatar_byte_arr)) {
@@ -477,53 +481,57 @@ void Client::process_success_password_changing()
     emit update_password_field();
 }
 
+void Client::process_success_avatar_changing()
+{
+    m_user_validator.reset_user_avatar();
+}
+
 void Client::process_success_fetching_stat_for_14_days(QMap<QString, QVariant>& j_map)
 {
-    auto j_arr_of_stats = j_map[Protocol_keys::statistics_for_14_days].toJsonArray();
+    auto j_arr_of_stats = j_map[Protocol_keys::statistic_for_14_days].toJsonArray();
 
-    QVector<std::tuple<QString, int, int>> stats;
+    QVector<std::tuple<QString, int>> statistic;
 
     for(int i = 0; i < j_arr_of_stats.size(); ++i) {
         auto j_stat_for_day = j_arr_of_stats[i].toObject();
         auto day_map = j_stat_for_day.toVariantMap();
 
-        QString date = day_map[Protocol_keys::date].toString();
-        int unreg_qnt = day_map[Protocol_keys::unregisterd_quantity].toInt();
-        int reg_qnt = day_map[Protocol_keys::registered_quantity].toInt();
+        QString date = day_map[Protocol_keys::stat_date].toString();
+        int reg_qnt = day_map[Protocol_keys::quantity_of_contacts].toInt();
 
-        stats.push_back(std::make_tuple(date, reg_qnt, unreg_qnt));
+        statistic.push_back(std::make_tuple(date, reg_qnt));
     }
-    emit statistic_received(stats);
+    emit statistic_received(statistic);
 }
 
-void Client::process_contacts_list(QMap<QString, QVariant>& j_map)
+void Client::process_success_fetching_contacts(QMap<QString, QVariant>& j_map)
 {
-    QJsonArray j_arr_of_reg_contacts = j_map[Protocol_keys::registered_list].toJsonArray();
+    QJsonArray j_arr_of_reg_contacts = j_map[Protocol_keys::contact_list].toJsonArray();
 
-    QVector<std::tuple<QString, QString, bool>> received_contacts;
+    QVector<std::tuple<QString, QString>> received_contacts;
 
     for(int i = 0; i < j_arr_of_reg_contacts.size(); ++i) {
         auto contact_j_obj = j_arr_of_reg_contacts[i].toObject();
         auto contact_j_obj_map = contact_j_obj.toVariantMap();
 
-        auto pair = std::make_pair(contact_j_obj_map[Protocol_keys::nickname].toString(),
+        auto pair = std::make_pair(contact_j_obj_map[Protocol_keys::contact_nickname].toString(),
                                    contact_j_obj_map[Protocol_keys::contact_time].toString());
 
-        received_contacts.push_back(std::make_tuple(pair.first, pair.second, true));
+        received_contacts.push_back(std::make_tuple(pair.first, pair.second));
     }
 
     // begin parse array of avatars
     QDir dir_with_avatars(m_path_finder.get_path_to_avatars_dir());
 
-    QJsonArray avatars = j_map[Protocol_keys::avatars].toJsonArray();
+    QJsonArray avatars = j_map[Protocol_keys::avatar_list].toJsonArray();
 
     for(int i = 0; i < avatars.size(); ++i) {
         auto avatar_obj = avatars[i].toObject();
         auto map = avatar_obj.toVariantMap();
 
-        QString nickname = map[Protocol_keys::nickname].toString();
+        QString nickname = map[Protocol_keys::contact_nickname].toString();
 
-        QString avatar_str = map[Protocol_keys::avatar].toString();
+        QString avatar_str = map[Protocol_keys::avatar_data].toString();
         QByteArray avatar = QByteArray::fromBase64(avatar_str.toLatin1());
 
         QString avatar_path(dir_with_avatars.absolutePath() + '/' + nickname);
@@ -535,36 +543,33 @@ void Client::process_contacts_list(QMap<QString, QVariant>& j_map)
     }
     // end parse array of avatars
 
-    QJsonArray j_arr_of_unreg_contacts = j_map[Protocol_keys::unregistered_list].toJsonArray();
-
-    for(int i = 0; i < j_arr_of_unreg_contacts.size(); ++i) {
-        auto contact_j_obj = j_arr_of_unreg_contacts[i].toObject();
-        auto contact_j_obj_map = contact_j_obj.toVariantMap();
-
-        auto pair = std::make_pair(contact_j_obj_map[Protocol_keys::nickname].toString(),
-                                   contact_j_obj_map[Protocol_keys::contact_time].toString());
-
-        received_contacts.push_back(std::make_tuple(pair.first, pair.second, false));
-    }
-
     emit contacts_received(received_contacts);
     disconnect(this, &Client::contacts_received, nullptr, nullptr);
 }
 
-void Client::process_success_adding()
+void Client::process_success_contact_adding()
 {
-    QString nickname = std::any_cast<QString>(lol[0]);
-    QString time = std::any_cast<QString>(lol[1]);
-    bool is_reg = std::any_cast<bool>(lol[2]);
-    lol.clear();
-    emit success_contact_adding(nickname, time, is_reg);
+    QString nickname = std::any_cast<QString>(lol_vector[0]);
+    QString time = std::any_cast<QString>(lol_vector[1]);
+    lol_vector.clear();
+    emit success_contact_adding(nickname, time);
+}
+
+void Client::process_such_contact_not_exists()
+{
+    lol_vector.clear();
 }
 
 void Client::process_success_contact_deletion()
 {
-    int index = std::any_cast<int>(lol[0]);
-    lol.clear();
+    int index = std::any_cast<int>(lol_vector[0]);
+    lol_vector.clear();
     emit success_contact_deletion(index);
+}
+
+void Client::process_internal_server_error()
+{
+    lol_vector.clear();
 }
 
 void Client::fetch_contacts_based_on_date(const QString& date)

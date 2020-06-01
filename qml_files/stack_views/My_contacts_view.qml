@@ -3,7 +3,7 @@ import QtQuick.Controls 2.12
 
 import ".."
 import "../buttons"
-import Days_model_qml 1.0
+import Stat_model_qml 1.0
 
 Rectangle {
     id: root
@@ -13,8 +13,8 @@ Rectangle {
         client.fetch_14_days_stat()
     }
 
-    Days_model {
-        id: days_model
+    Stat_model {
+        id: stat_model
     }
 
     Component {
@@ -37,10 +37,9 @@ Rectangle {
         target: client
         ignoreUnknownSignals: true
         onStatistic_received: {
-            days_model.receive_stats(stats)
+            stat_model.receive_stats(statistic)
         }
     }
-
     Back_btn {
         id: back_btn
         z: 1
@@ -104,17 +103,18 @@ Rectangle {
         orientation: ListView.Vertical
         clip: true
         spacing: 5
-        model: days_model
+        model: stat_model
 
         headerPositioning: ListView.OverlayHeader
         header: Rectangle {
+            id: my_header
             z: 3
             width: parent.width
             height: 50
             border.width: 1
             color: root.color
             Text {
-                id: sort_date
+                id: date_header
                 anchors {
                     left: parent.left
                     top: parent.top
@@ -132,81 +132,32 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        days_model.sort_by_date()
                     }
                 }
             }
             Text {
-                id: sort_reg_count
+                id: count_of_contacts_header
                 anchors {
-                    left: sort_date.right
-                    top: sort_date.top
+                    left: date_header.right
+                    top: date_header.top
                 }
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-                width: (parent.width - sort_date.width) / 3
+                width: parent.width - date_header.width
                 height: parent.height
                 fontSizeMode: Text.Fit
                 minimumPointSize: 1
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
-                text: "Reg."
+                text: "Count of contacts"
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        days_model.sort_by_reg_count()
-                    }
-                }
-            }
-            Text {
-                id: sort_unreg_count
-                anchors {
-                    left: sort_reg_count.right
-                    top: sort_reg_count.top
-                }
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                width: sort_reg_count.width
-                height: parent.height
-                fontSizeMode: Text.Fit
-                minimumPointSize: 1
-                font.pointSize: 12
-                elide: Text.ElideRight
-                wrapMode: Text.WordWrap
-                text: "Unreg."
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        days_model.sort_by_unreg_count()
-                    }
-                }
-            }
-            Text {
-                id: sort_sum_contacts
-                anchors {
-                    left: sort_unreg_count.right
-                    top: sort_unreg_count.top
-                }
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                width: sort_reg_count.width
-                height: parent.height
-                fontSizeMode: Text.Fit
-                minimumPointSize: 1
-                font.pointSize: 12
-                elide: Text.ElideRight
-                wrapMode: Text.WordWrap
-                text: "Sum"
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        days_model.sort_by_sum()
                     }
                 }
             }
         }
-
         delegate: Rectangle {
             id: delegate
             z: 2
@@ -237,55 +188,21 @@ Rectangle {
                 text: String(model.date)
             }
             Text {
-                id: reg_count
+                id: count_of_contacts
                 anchors {
                     left: date.right
                     top: date.top
                 }
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-                width: (parent.width - date.width) / 3
+                width: parent.width - date.width
                 height: parent.height
                 fontSizeMode: Text.Fit
                 minimumPointSize: 5
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
-                text: String(model.reg_count)
-            }
-            Text {
-                id: unreg_count
-                anchors {
-                    left: reg_count.right
-                    top: reg_count.top
-                }
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                width: reg_count.width
-                height: parent.height
-                fontSizeMode: Text.Fit
-                minimumPointSize: 5
-                font.pointSize: 12
-                elide: Text.ElideRight
-                wrapMode: Text.WordWrap
-                text: String(model.unreg_count)
-            }
-            Text {
-                id: sum_contacts
-                anchors {
-                    left: unreg_count.right
-                    top: unreg_count.top
-                }
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                width: reg_count.width
-                height: parent.height
-                fontSizeMode: Text.Fit
-                minimumPointSize: 5
-                font.pointSize: 12
-                elide: Text.ElideRight
-                wrapMode: Text.WordWrap
-                text: parseInt(reg_count.text) + parseInt(unreg_count.text)
+                text: String(model.count_of_contacts)
             }
             MouseArea {
                 anchors.fill: parent

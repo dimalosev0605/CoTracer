@@ -45,7 +45,7 @@ class Client: public QObject
     Path_finder m_path_finder;
 
     QVector<Contacts_model*> m_models;
-    std::vector<std::any> lol;
+    std::vector<std::any> lol_vector;
 
 private:
     void connect_to_server();
@@ -60,21 +60,24 @@ private:
     void create_sign_up_req(const QString& nickname, const QString& password);
     void create_change_password_req(const QString& new_password);
     bool create_change_avatar_req(const QString& new_avatar_path);
-    void create_fetch_14_days_stat_req();
+    void create_fetch_stat_for_14_days_req();
     void create_fetch_contacts_based_on_date_req(const QString& date);
     void create_fetch_contacts_based_on_nickname_req(const QString& nickname, const QString& date);
-    void create_add_contact_req(int code, const QString& nickname, const QString& time, const QString& date);
-    void create_remove_contact_req(int code, const QString& nickname, const QString& time, int index, const QString& date);
+    void create_add_contact_req(const QString& nickname, const QString& time, const QString& date);
+    void create_remove_contact_req(const QString& nickname, const QString& time, const QString& date);
 
     // process response functions
     void process_data(std::size_t bytes_transferred);
     void process_success_sign_in(QMap<QString, QVariant>& j_map);
     void process_success_sign_up();
     void process_success_password_changing();
+    void process_success_avatar_changing();
     void process_success_fetching_stat_for_14_days(QMap<QString, QVariant>& j_map);
-    void process_contacts_list(QMap<QString, QVariant>& j_map);
-    void process_success_adding();
+    void process_success_fetching_contacts(QMap<QString, QVariant>& j_map);
+    void process_success_contact_adding();
+    void process_such_contact_not_exists();
     void process_success_contact_deletion();
+    void process_internal_server_error();
 
     void fetch_contacts_based_on_date(const QString& date);
     void fetch_contacts_based_on_nickname(const QString& nickname, const QString& date);
@@ -96,10 +99,10 @@ public slots:
     bool exit_from_account();
 
     void fetch_14_days_stat();
-    void add_contact(int code, const QString& nickname, const QString& time, const QString& date);
-    void remove_contact(int code, const QString& nickname, const QString& time, int index, const QString& date);
+    void add_contact(const QString& nickname, const QString& time, const QString& date);
+    void remove_contact(const QString& nickname, const QString& time, const QString& date, int index_in_table);
     Contacts_model* create_model_based_on_date(const QString& date);
-    Contacts_model* create_model_based_on_nickname(const QString& nickname, const QString& date);
+    Contacts_model* create_model_based_on_date_and_nickname(const QString& nickname, const QString& date);
     void pop_model();
     void cancel_operation();
 
@@ -112,9 +115,9 @@ signals:
     void is_authorized_changed();
     void update_password_field();
 
-    void statistic_received(const QVector<std::tuple<QString, int, int>>& stats);
-    void contacts_received(const QVector<std::tuple<QString, QString, bool>>& contacts);
-    void success_contact_adding(const QString& nickname, const QString& time, bool is_reg);
+    void statistic_received(const QVector<std::tuple<QString, int>>& statistic);
+    void contacts_received(const QVector<std::tuple<QString, QString>>& contacts);
+    void success_contact_adding(const QString& nickname, const QString& time);
     void success_contact_deletion(int index);
 };
 

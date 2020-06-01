@@ -14,7 +14,7 @@ class Contacts_model: public QAbstractListModel
     Q_OBJECT
 
     QHash<int, QByteArray> m_roles;
-    QVector<std::tuple<QString, QString, bool>> m_contacts;
+    QVector<std::tuple<QString, QString>> m_contacts; // nickname, contact time
     QVector<QString> m_previous_links;
 
 private:
@@ -26,10 +26,9 @@ public:
     ~Contacts_model();
 
     enum class RolesNames {
-        nickname = Qt::UserRole,
-        time = Qt::UserRole + 1,
-        is_registered = Qt::UserRole + 2,
-        avatar_path = Qt::UserRole + 3,
+        contact_nickname = Qt::UserRole,
+        contact_time = Qt::UserRole + 1,
+        contact_avatar_path = Qt::UserRole + 2,
     };
 
     virtual int rowCount(const QModelIndex &index = QModelIndex()) const override;
@@ -37,8 +36,8 @@ public:
 
 public slots:
     void remove_contact(int index);
-    void add_contact(const QString& nickname, const QString& time, bool is_reg);
-    void receive_contacts(const QVector<std::tuple<QString, QString, bool>>& contacts);
+    void add_contact(const QString& nickname, const QString& time);
+    void receive_contacts(const QVector<std::tuple<QString, QString>>& contacts);
 };
 
 #endif // CONTACTS_MODEL_H

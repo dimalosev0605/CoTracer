@@ -128,7 +128,7 @@ Rectangle {
                 }
                 height: parent.height
                 width: height
-                source: model.avatar_path
+                source: model.contact_avatar_path
                 mipmap: true
                 property bool rounded: true
                 property bool adapt: true
@@ -162,7 +162,7 @@ Rectangle {
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
-                text: String(model.nickname)
+                text: String(model.contact_nickname)
             }
             Text {
                 id: time
@@ -179,7 +179,7 @@ Rectangle {
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
-                text: String(model.time)
+                text: String(model.contact_time)
             }
             MouseArea {
                 id: mouse_area
@@ -190,11 +190,9 @@ Rectangle {
                 height: parent.height
                 onClicked: {
                     contacts_list_view.currentIndex = index
-                    if(model.is_registered) {
-                        var comp = Qt.createComponent("Contacts_list.qml");
-                        var obj = comp.createObject(root, { nickname: nickname.text, date: date.text } );
-                        stack_view.push(obj);
-                    }
+                    var comp = Qt.createComponent("Contacts_list.qml");
+                    var obj = comp.createObject(root, { nickname: nickname.text, date: date.text } );
+                    stack_view.push(obj);
                 }
             }
             Rectangle {
@@ -219,16 +217,10 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         contacts_list_view.currentIndex = index
-                        if(model.is_registered) {
-                            client.remove_contact(5, contacts_list_view.currentItem.nickname.text,
-                                                  contacts_list_view.currentItem.time.text, index,
-                                                  days_list_view.currentItem.date)
-
-                        } else {
-                            client.remove_contact(4, contacts_list_view.currentItem.nickname.text,
-                                                  contacts_list_view.currentItem.time.text, index,
-                                                  days_list_view.currentItem.date)
-                        }
+                        client.remove_contact(contacts_list_view.currentItem.nickname.text,
+                                              contacts_list_view.currentItem.time.text,
+                                              days_list_view.currentItem.date,
+                                              index)
                     }
                 }
             }

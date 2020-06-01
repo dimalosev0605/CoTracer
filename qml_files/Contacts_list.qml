@@ -65,7 +65,7 @@ Rectangle {
         clip: true
         spacing: 5
 
-        model: client.create_model_based_on_nickname(nickname, root.date)
+        model: client.create_model_based_on_date_and_nickname(nickname, root.date)
         delegate: Rectangle {
             id: delegate
 
@@ -101,7 +101,7 @@ Rectangle {
                 }
                 height: parent.height
                 width: height
-                source: model.avatar_path
+                source: model.contact_avatar_path
 //                mipmap: true
                 property bool rounded: true
                 property bool adapt: true
@@ -135,7 +135,7 @@ Rectangle {
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
-                text: String(model.nickname)
+                text: String(model.contact_nickname)
             }
             Text {
                 id: time
@@ -152,17 +152,15 @@ Rectangle {
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
-                text: String(model.time)
+                text: String(model.contact_time)
             }
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
                     contacts_list_view.currentIndex = index
-                    if(model.is_registered) {
-                        var comp = Qt.createComponent("Contacts_list.qml");
-                        var obj = comp.createObject(root, { nickname: nickname.text, date: date.text } );
-                        stack_view.push(obj);
-                    }
+                    var comp = Qt.createComponent("Contacts_list.qml");
+                    var obj = comp.createObject(root, { nickname: nickname.text, date: date.text } );
+                    stack_view.push(obj);
                 }
             }
         }
