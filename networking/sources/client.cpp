@@ -506,42 +506,30 @@ void Client::process_success_fetching_stat_for_14_days(QMap<QString, QVariant>& 
 
 void Client::process_success_fetching_contacts(QMap<QString, QVariant>& j_map)
 {
-    QJsonArray j_arr_of_reg_contacts = j_map[Protocol_keys::contact_list].toJsonArray();
+    QJsonArray j_arr_of_contacts = j_map[Protocol_keys::contact_list].toJsonArray();
 
     QVector<std::tuple<QString, QString>> received_contacts;
+    QDir dir_with_avatars(m_path_finder.get_path_to_avatars_dir());
 
-    for(int i = 0; i < j_arr_of_reg_contacts.size(); ++i) {
-        auto contact_j_obj = j_arr_of_reg_contacts[i].toObject();
+    for(int i = 0; i < j_arr_of_contacts.size(); ++i) {
+        auto contact_j_obj = j_arr_of_contacts[i].toObject();
         auto contact_j_obj_map = contact_j_obj.toVariantMap();
 
         auto pair = std::make_pair(contact_j_obj_map[Protocol_keys::contact_nickname].toString(),
                                    contact_j_obj_map[Protocol_keys::contact_time].toString());
 
         received_contacts.push_back(std::make_tuple(pair.first, pair.second));
-    }
 
-    // begin parse array of avatars
-    QDir dir_with_avatars(m_path_finder.get_path_to_avatars_dir());
-
-    QJsonArray avatars = j_map[Protocol_keys::avatar_list].toJsonArray();
-
-    for(int i = 0; i < avatars.size(); ++i) {
-        auto avatar_obj = avatars[i].toObject();
-        auto map = avatar_obj.toVariantMap();
-
-        QString nickname = map[Protocol_keys::contact_nickname].toString();
-
-        QString avatar_str = map[Protocol_keys::avatar_data].toString();
+        QString avatar_str = contact_j_obj_map[Protocol_keys::avatar_data].toString();
         QByteArray avatar = QByteArray::fromBase64(avatar_str.toLatin1());
 
-        QString avatar_path(dir_with_avatars.absolutePath() + '/' + nickname);
+        QString avatar_path(dir_with_avatars.absolutePath() + '/' + pair.first);
         QFile file(avatar_path);
 
         if(file.open(QIODevice::WriteOnly)) {
             file.write(avatar);
         }
     }
-    // end parse array of avatars
 
     emit contacts_received(received_contacts);
     disconnect(this, &Client::contacts_received, nullptr, nullptr);
