@@ -192,7 +192,7 @@ bool Client::exit_from_account()
     return false;
 }
 
-void Client::fetch_14_days_stat()
+void Client::fetch_stat_for_14_days()
 {
     if(!get_is_connected()) {
         connect_to_server();
@@ -249,7 +249,7 @@ Contacts_model* Client::create_model_based_on_date(const QString& date)
             Qt::QueuedConnection);
 
     m_models.push_back(new_model);
-    fetch_contacts_based_on_date(date);
+    fetch_contacts(m_user_validator.get_nickname(), date);
     return new_model;
 }
 
@@ -259,8 +259,9 @@ Contacts_model* Client::create_model_based_on_date_and_nickname(const QString& n
 
     connect(this, &Client::contacts_received, new_model, &Contacts_model::receive_contacts,
             Qt::QueuedConnection);
+
     m_models.push_back(new_model);
-    fetch_contacts_based_on_nickname(nickname, date);
+    fetch_contacts(nickname, date);
     return new_model;
 }
 
@@ -319,7 +320,6 @@ bool Client::create_change_avatar_req(const QString& new_avatar_path)
     m_user_validator.set_new_avatar_path(avatar_path);
 
     QJsonObject j_obj;
-
     j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::change_avatar);
     j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
 
@@ -348,17 +348,7 @@ void Client::create_fetch_stat_for_14_days_req()
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
 
-void Client::create_fetch_contacts_based_on_date_req(const QString& date)
-{
-    QJsonObject j_obj;
-    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::fetch_contacts);
-    j_obj.insert(Protocol_keys::contact_nickname, m_user_validator.get_nickname());
-    j_obj.insert(Protocol_keys::contact_date, date);
-    QJsonDocument j_doc(j_obj);
-    m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
-}
-
-void Client::create_fetch_contacts_based_on_nickname_req(const QString& nickname, const QString& date)
+void Client::create_fetch_contacts_req(const QString& nickname, const QString& date)
 {
     QJsonObject j_obj;
     j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::fetch_contacts);
@@ -371,13 +361,11 @@ void Client::create_fetch_contacts_based_on_nickname_req(const QString& nickname
 void Client::create_add_contact_req(const QString& nickname, const QString& time, const QString& date)
 {
     QJsonObject j_obj;
-
     j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::add_contact);
     j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
     j_obj.insert(Protocol_keys::contact_nickname, nickname);
     j_obj.insert(Protocol_keys::contact_date, date);
     j_obj.insert(Protocol_keys::contact_time, time);
-
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
@@ -385,13 +373,11 @@ void Client::create_add_contact_req(const QString& nickname, const QString& time
 void Client::create_remove_contact_req(const QString& nickname, const QString& time, const QString& date)
 {
     QJsonObject j_obj;
-
     j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::remove_contact);
     j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
     j_obj.insert(Protocol_keys::contact_date, date);
     j_obj.insert(Protocol_keys::contact_nickname, nickname);
     j_obj.insert(Protocol_keys::contact_time, time);
-
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
@@ -560,24 +546,13 @@ void Client::process_internal_server_error()
     lol_vector.clear();
 }
 
-void Client::fetch_contacts_based_on_date(const QString& date)
+void Client::fetch_contacts(const QString& nickname, const QString& date)
 {
     if(!get_is_connected()) {
         connect_to_server();
     }
     if(occupy_sock()) {
-        create_fetch_contacts_based_on_date_req(date);
-        async_write();
-    }
-}
-
-void Client::fetch_contacts_based_on_nickname(const QString &nickname, const QString& date)
-{
-    if(!get_is_connected()) {
-        connect_to_server();
-    }
-    if(occupy_sock()) {
-        create_fetch_contacts_based_on_nickname_req(nickname, date);
+        create_fetch_contacts_req(nickname, date);
         async_write();
     }
 }

@@ -10,7 +10,7 @@ Rectangle {
     z: 0
 
     Component.onCompleted: {
-        client.fetch_14_days_stat()
+        client.fetch_stat_for_14_days()
     }
 
     Stat_model {

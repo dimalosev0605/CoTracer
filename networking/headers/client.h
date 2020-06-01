@@ -61,8 +61,7 @@ private:
     void create_change_password_req(const QString& new_password);
     bool create_change_avatar_req(const QString& new_avatar_path);
     void create_fetch_stat_for_14_days_req();
-    void create_fetch_contacts_based_on_date_req(const QString& date);
-    void create_fetch_contacts_based_on_nickname_req(const QString& nickname, const QString& date);
+    void create_fetch_contacts_req(const QString& nickname, const QString& date);
     void create_add_contact_req(const QString& nickname, const QString& time, const QString& date);
     void create_remove_contact_req(const QString& nickname, const QString& time, const QString& date);
 
@@ -79,8 +78,7 @@ private:
     void process_success_contact_deletion();
     void process_internal_server_error();
 
-    void fetch_contacts_based_on_date(const QString& date);
-    void fetch_contacts_based_on_nickname(const QString& nickname, const QString& date);
+    void fetch_contacts(const QString& nickname, const QString& date);
 
 public:
     explicit Client(QObject* parent = nullptr);
@@ -98,7 +96,7 @@ public slots:
     void change_avatar(const QString& new_avatar_path);
     bool exit_from_account();
 
-    void fetch_14_days_stat();
+    void fetch_stat_for_14_days();
     void add_contact(const QString& nickname, const QString& time, const QString& date);
     void remove_contact(const QString& nickname, const QString& time, const QString& date, int index_in_table);
     Contacts_model* create_model_based_on_date(const QString& date);
