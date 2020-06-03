@@ -115,6 +115,7 @@ Rectangle {
         width: password_field.width
         height: parent.btns_height
         color: mouse_area.pressed ? "#ffffff" : parent.color
+        radius: 4
 
         visible: !client.is_authorized
         text.text: "Sing up"
@@ -135,6 +136,7 @@ Rectangle {
         width: password_field.width
         height: parent.btns_height
         color: mouse_area.pressed ? "#af1111" : "#b22222"
+        radius: 4
 
         visible: !client.is_authorized
         text.text: "Sing in"
@@ -164,6 +166,7 @@ Rectangle {
                }
         height: sign_up_btn.height
         color: mouse_area.pressed ? "#af1111" : "#b22222"
+        radius: 4
 
         visible: client.is_authorized
         text.text: "Exit"

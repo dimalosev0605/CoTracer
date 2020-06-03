@@ -18,30 +18,47 @@ Rectangle {
 
     Image {
         id: avatar
-        z: 0
+        z: 1
         anchors {
             top: parent.top
             topMargin: 5
             horizontalCenter: parent.horizontalCenter
         }
-        width: parent.width * 0.8
-        height: width
+        width: parent.width * 0.9
+        height: (parent.height / 2) - anchors.topMargin
         fillMode: Image.PreserveAspectFit
         source: client.get_avatar_path(true)
     }
 
+    property int max_btns_width: 200
+    property int max_btns_height: 40
     Main_menu_btn {
         id: select_avatar_btn
-        z: 0
+        z: 1
         anchors {
             top: avatar.bottom
             topMargin: 10
             horizontalCenter: parent.horizontalCenter
         }
-        height: 50
-        width: parent.width * 0.7
+        height: if((parent.height - avatar.height - avatar.anchors.topMargin - anchors.topMargin -
+                save_changes_btn.anchors.topMargin * 2) / 2 > parent.max_btns_height) {
+                    parent.max_btns_height
+                }
+                else {
+                    (parent.height - avatar.height - avatar.anchors.topMargin - anchors.topMargin -
+                                    save_changes_btn.anchors.topMargin * 2) / 2
+                }
+        width: if(parent.width < parent.max_btns_width) {
+                   parent.width * 0.95 - back_btn.width * 2
+               }
+               else {
+                   parent.max_btns_width
+               }
         color: mouse_area.pressed ? "#b22222" : root.color
         text.text: "Select image"
+        radius: 4
+        border.width: 1
+        border.color: "#000000"
         mouse_area.onClicked: {
             stack_view.push(file_dialog_comp)
         }
@@ -49,16 +66,20 @@ Rectangle {
 
     Main_menu_btn {
         id: save_changes_btn
-        z: 0
+        z: 1
         anchors {
             top: select_avatar_btn.bottom
             topMargin: 10
             horizontalCenter: parent.horizontalCenter
         }
         height: select_avatar_btn.height
-        width: parent.width * 0.7
+        width: select_avatar_btn.width
         color: mouse_area.pressed ? "#b22222" : root.color
         text.text: "Save changes"
+        text.font.bold: true
+        radius: 4
+        border.width: 2
+        border.color: "#000000"
         visible: false
         mouse_area.onClicked: {
             client.change_avatar(avatar.source)
@@ -67,7 +88,7 @@ Rectangle {
 
     Back_btn {
         id: back_btn
-        z: 0
+        z: 1
         anchors {
             bottom: parent.bottom
             bottomMargin: 5

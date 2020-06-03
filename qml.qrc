@@ -36,5 +36,7 @@
         <file>imgs/up_arrow_in_circle.png</file>
         <file>qml_files/stack_views/settings_views/Change_password_view.qml</file>
         <file>qml_files/stack_views/My_friends_view.qml</file>
+        <file>qml_files/buttons/More_btn.qml</file>
+        <file>imgs/three_vertical_dots.png</file>
     </qresource>
 </RCC>
