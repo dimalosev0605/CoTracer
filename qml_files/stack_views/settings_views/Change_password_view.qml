@@ -34,7 +34,7 @@ Rectangle {
             id: old_password_field
             width: parent.width
             height: 30
-            placeholderText: "Input current password"
+            placeholderText: "Enter current password"
             echoMode: TextInput.Password
             inputMethodHints: Qt.ImhNoPredictiveText
             onTextChanged: if(old_password_field.text !== client.get_password()) {
@@ -108,6 +108,9 @@ Rectangle {
             width: parent.width
             height: 50
             color: mouse_area.pressed ? "#b22222" : root.color
+            radius: 5
+            border.width: 1
+            border.color: "#000000"
             visible: if(old_password_field.text === client.get_password() &&
                         new_password_field.text === repeat_password_field.text &&
                         new_password_field.text !== "" &&

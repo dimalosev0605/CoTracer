@@ -87,6 +87,7 @@ Rectangle {
         width: password_field.width
         height: parent.text_fields_height
         placeholderText: "Nickname"
+        enabled: !client.is_authorized
         text: client.get_nickname()
     }
     TextField {
@@ -98,6 +99,7 @@ Rectangle {
         height: parent.text_fields_height
         placeholderText: "Password"
         echoMode: TextInput.Password
+        enabled: !client.is_authorized
         text: client.get_password()
     }
 
