@@ -1,7 +1,7 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.12
 
-import "buttons"
+import "../buttons"
 
 Rectangle {
     id: root
@@ -24,9 +24,6 @@ Rectangle {
             leftMargin: 10
         }
         color: mouse_area.pressed ? "#708090" : parent.color
-        mouse_area.onClicked: {
-            // poped define in Back_btn.qml
-        }
     }
 
     TextField {
@@ -38,7 +35,7 @@ Rectangle {
         }
         width: parent.width > 300 ? 240 : parent.width * 0.8
         height: 30
-        placeholderText: "Nickname"
+        placeholderText: "Enter a nickname"
     }
 
     Rectangle {
@@ -57,11 +54,11 @@ Rectangle {
             Text {
                 id: time
                 verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                width: parent.width * 0.7
+                horizontalAlignment: Text.AlignLeft
+                width: parent.width * 0.6
                 height: parent.height
                 fontSizeMode: Text.Fit
-                minimumPointSize: 5
+                minimumPointSize: 1
                 font.pointSize: 15
                 elide: Text.ElideRight
                 wrapMode: Text.NoWrap
@@ -121,76 +118,11 @@ Rectangle {
             }
         }
     }
-    Rectangle {
-        id: is_reg_rect
-        z: 0
-        color: root.color
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            top: time_rect.bottom
-            topMargin: 10
-        }
-        width: nickname_field.width
-        height: 30
-        Row {
-            id: row
-            anchors.fill: parent
-            Text {
-                id: qstn
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                width: parent.width * 0.5
-                height: parent.height
-                fontSizeMode: Text.Fit
-                minimumPointSize: 5
-                font.pointSize: 15
-                elide: Text.ElideRight
-                wrapMode: Text.NoWrap
-                text: "Is registered?"
-                property bool is_reg: false
-            }
-            Rectangle {
-                id: yes_rect
-                height: parent.height
-                width: (parent.width - qstn.width) / 2
-                radius: 3
-                color: qstn.is_reg ? "#00ff00" : root.color
-                Text {
-                    anchors.centerIn: parent
-                    text: "Yes"
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        qstn.is_reg = true
-                    }
-                }
-            }
-            Rectangle {
-                id: no_rect
-                height: parent.height
-                width: yes_rect.width
-                radius: 3
-                color: !qstn.is_reg ? "#00ff00" : root.color
-                Text {
-                    anchors.centerIn: parent
-                    text: "No"
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        qstn.is_reg = false
-                    }
-                }
-            }
-        }
-    }
-
     Authorization_button {
         id: add_contact
         z: 0
         anchors {
-            top: is_reg_rect.bottom
+            top: time_rect.bottom
             topMargin: 20
             horizontalCenter: parent.horizontalCenter
         }

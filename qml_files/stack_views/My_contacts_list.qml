@@ -2,15 +2,16 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 import QtGraphicalEffects 1.0
 
-import "buttons"
+import "../buttons"
+import ".."
 
 Rectangle {
     id: root
     z: 0
 
     Component {
-        id: add_contact_menu_comp
-        Add_contact_menu {
+        id: add_contact_view_comp
+        Add_contact_view {
             date: days_list_view.currentItem.date
         }
     }
@@ -26,7 +27,7 @@ Rectangle {
         }
         color: mouse_area.pressed ? "#708090" : parent.color
         mouse_area.onClicked: {
-            // poped define in Back_btn.qml
+            // poped defined in Back_btn.qml
             client.cancel_operation()
             client.pop_model()
         }
@@ -47,7 +48,7 @@ Rectangle {
         }
         color: mouse_area.pressed ? "#00ff00" : parent.color
         mouse_area.onClicked: {
-            stack_view.push(add_contact_menu_comp)
+            stack_view.push(add_contact_view_comp)
         }
     }
 
@@ -56,20 +57,27 @@ Rectangle {
         z: 0
         anchors {
             top: parent.top
-            topMargin: 5
             horizontalCenter: parent.horizontalCenter
-
         }
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
-        width: parent.width - 10
+        width: parent.width
         height: 30
         fontSizeMode: Text.Fit
-        minimumPointSize: 5
+        minimumPointSize: 1
         font.pointSize: 12
         elide: Text.ElideRight
         wrapMode: Text.WordWrap
         text: days_list_view.currentItem.date
+        Rectangle {
+            id: under_date_line
+            anchors {
+                top: date.bottom
+            }
+            height: 1
+            width: parent.width
+            color: "#000000"
+        }
     }
 
     ListView {
@@ -77,18 +85,14 @@ Rectangle {
         z: 0
         anchors {
             top: date.bottom
-            topMargin: 10
+            topMargin: under_date_line.height
             left: parent.left
-            leftMargin: 5
             right: parent.right
-            rightMargin: 5
             bottom: back_btn.top
             bottomMargin: 10
         }
-
         orientation: ListView.Vertical
         clip: true
-        spacing: 5
         model: client.create_model_based_on_date(days_list_view.currentItem.date)
         delegate: Rectangle {
             id: delegate
@@ -97,12 +101,19 @@ Rectangle {
             property alias time: time
 
             width: parent.width
-            height: 70
+            height: 50
 
-            border.width: 1
-            border.color: "#000000"
-            color: model.is_registered ? "#ff0000" : "#d70707"
+            color: mouse_area.pressed ? "#b22222" : "#d70707"
 
+            Rectangle {
+                id: delegate_bottom_line
+                anchors {
+                    bottom: parent.bottom
+                }
+                height: 1
+                width: parent.width
+                color: "#000000"
+            }
             Text {
                 id: number
                 anchors {
@@ -111,10 +122,10 @@ Rectangle {
                 }
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-                height: parent.height
+                height: parent.height - delegate_bottom_line.height
                 width: height * 0.75
                 fontSizeMode: Text.Fit
-                minimumPointSize: 5
+                minimumPointSize: 1
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
@@ -124,26 +135,19 @@ Rectangle {
                 id: avatar
                 anchors {
                     left: number.right
-                    top: number.top
+                    verticalCenter: parent.verticalCenter
                 }
-                height: parent.height
+                height: parent.height - delegate_bottom_line.height - 4
                 width: height
                 source: model.contact_avatar_path
                 mipmap: true
-                property bool rounded: true
-                property bool adapt: true
-
-                layer.enabled: rounded
+                fillMode: Image.PreserveAspectCrop
+                layer.enabled: true
                 layer.effect: OpacityMask {
-                    maskSource: Item {
+                    maskSource: Rectangle {
                         width: avatar.width
                         height: avatar.height
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: avatar.adapt ? avatar.width : Math.min(avatar.width, avatar.height)
-                            height: avatar.adapt ? avatar.height : width
-                            radius: Math.min(width, height)
-                        }
+                        radius: 5
                     }
                 }
             }
@@ -155,10 +159,10 @@ Rectangle {
                 }
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-                height: parent.height
-                width: (parent.width - number.width - avatar.width - remove_contact_rect.width) / 2
+                height: parent.height - delegate_bottom_line.height
+                width: (parent.width - number.width - avatar.width - remove_contact_item.width) / 2
                 fontSizeMode: Text.Fit
-                minimumPointSize: 5
+                minimumPointSize: 1
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
@@ -172,10 +176,10 @@ Rectangle {
                 }
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-                height: parent.height
+                height: parent.height - delegate_bottom_line.height
                 width: nickname.width
                 fontSizeMode: Text.Fit
-                minimumPointSize: 5
+                minimumPointSize: 1
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
@@ -185,9 +189,9 @@ Rectangle {
                 id: mouse_area
                 anchors {
                     left: parent.left
-                    right: remove_contact_rect.left
+                    right: remove_contact_item.left
                 }
-                height: parent.height
+                height: parent.height - delegate_bottom_line.height
                 onClicked: {
                     contacts_list_view.currentIndex = index
                     var comp = Qt.createComponent("Contacts_list.qml");
@@ -195,25 +199,35 @@ Rectangle {
                     stack_view.push(obj);
                 }
             }
-            Rectangle {
-                id: remove_contact_rect
+            Item {
+                id: remove_contact_item
                 anchors {
-                    verticalCenter: parent.verticalCenter
                     right: parent.right
-                    rightMargin: delegate.border.width
                 }
-                height: parent.height - parent.border.width * 4
+                height: parent.height - delegate_bottom_line.height
                 width: height
-                color: delegate.color
-//                radius: height / 2
-                Image {
-                    id: img
-                    width: parent.width
-                    height: parent.height
-                    source: "qrc:/imgs/remove.png"
+                Rectangle {
+                    id: remove_contact_rect
+                    anchors {
+                        centerIn: parent
+                    }
+                    color: remove_contact_m_area.pressed ? "#000000" : delegate.color
+                    height: remove_contact_img.height
+                    width: remove_contact_img.width
+                    radius: height / 2
+                    Image {
+                        id: remove_contact_img
+                        anchors {
+                            centerIn: parent
+                        }
+                        height: remove_contact_item.height * 0.75
+                        width: height
+                        fillMode: Image.PreserveAspectFit
+                        source: "qrc:/imgs/remove.png"
+                    }
                 }
                 MouseArea {
-                    id: m_area
+                    id: remove_contact_m_area
                     anchors.fill: parent
                     onClicked: {
                         contacts_list_view.currentIndex = index

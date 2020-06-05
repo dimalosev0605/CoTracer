@@ -24,8 +24,8 @@ Rectangle {
     }
 
     Component {
-        id: my_contacts_view_comp
-        My_contacts_view {
+        id: my_stat_view_comp
+        My_stat_view {
             color: root.color
         }
     }
@@ -124,9 +124,9 @@ Rectangle {
             height: parent.btns_height < parent.min_btns_height ? parent.btns_height * 2 : parent.btns_height
             color: mouse_area.pressed ? parent.btns_pressed_color : root.color
 
-            text.text: "My contacts"
+            text.text: "My statistics"
             mouse_area.onClicked: {
-                stack_view.push(my_contacts_view_comp)
+                stack_view.push(my_stat_view_comp)
             }
         }
 

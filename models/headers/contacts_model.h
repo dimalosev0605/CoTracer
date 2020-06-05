@@ -6,24 +6,25 @@
 #include <QDebug>
 #include <QThread>
 #include <QCoreApplication>
+#include <QFile>
 
 #include <tuple>
+
+#include "miscellaneous/headers/path_finder.h"
 
 class Contacts_model: public QAbstractListModel
 {
     Q_OBJECT
 
     QHash<int, QByteArray> m_roles;
-    QVector<std::tuple<QString, QString>> m_contacts; // nickname, contact time
-    QVector<QString> m_previous_links;
+    QVector<std::tuple<QString, QString>> m_contacts; // nickname, contact_time
+    Path_finder m_path_finder;
 
 private:
     QHash<int, QByteArray> roleNames() const override;
 
 public:
     Contacts_model(QObject* parent = nullptr);
-    Contacts_model(const QVector<QString>& previous_links, QObject* parent = nullptr);
-    ~Contacts_model();
 
     enum class RolesNames {
         contact_nickname = Qt::UserRole,

@@ -238,7 +238,7 @@ Rectangle {
                 }
             }
             Column {
-                id: column
+                id: texts_column
                 anchors {
                     left: img.right
                     leftMargin: 5

@@ -2,7 +2,7 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 import QtGraphicalEffects 1.0
 
-import "buttons"
+import "../buttons"
 
 Rectangle {
     id: root
@@ -32,50 +32,57 @@ Rectangle {
         z: 0
         anchors {
             top: parent.top
-            topMargin: 5
             horizontalCenter: parent.horizontalCenter
 
         }
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
-        width: parent.width - 10
+        width: parent.width
         height: 30
         fontSizeMode: Text.Fit
-        minimumPointSize: 5
+        minimumPointSize: 1
         font.pointSize: 12
         elide: Text.ElideRight
         wrapMode: Text.WordWrap
         text: root.date
+        Rectangle {
+            id: under_date_line
+            anchors {
+                top: date.bottom
+            }
+            height: 1
+            width: parent.width
+            color: "#000000"
+        }
     }
 
     ListView {
         id: contacts_list_view
         anchors {
             top: date.bottom
-            topMargin: 10
+            topMargin: under_date_line.height
             left: parent.left
-            leftMargin: 5
             right: parent.right
-            rightMargin: 5
             bottom: back_btn.top
             bottomMargin: 10
         }
-
         orientation: ListView.Vertical
         clip: true
-        spacing: 5
-
         model: client.create_model_based_on_date_and_nickname(nickname, root.date)
         delegate: Rectangle {
             id: delegate
-
             width: parent.width
-            height: 70
-
-            border.width: 1
-            border.color: "#000000"
-            color: model.is_registered ? "#ff0000" : "#d70707"
-
+            height: 50
+            color: mouse_area.pressed ? "#b22222" : "#d70707"
+            Rectangle {
+                id: delegate_bottom_line
+                anchors {
+                    bottom: parent.bottom
+                }
+                height: 1
+                width: parent.width
+                color: "#000000"
+            }
             Text {
                 id: number
                 anchors {
@@ -87,7 +94,7 @@ Rectangle {
                 height: parent.height
                 width: height * 0.75
                 fontSizeMode: Text.Fit
-                minimumPointSize: 5
+                minimumPointSize: 1
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
@@ -97,26 +104,19 @@ Rectangle {
                 id: avatar
                 anchors {
                     left: number.right
-                    top: number.top
+                    verticalCenter: parent.verticalCenter
                 }
-                height: parent.height
+                height: parent.height - delegate_bottom_line.height - 4
                 width: height
                 source: model.contact_avatar_path
-//                mipmap: true
-                property bool rounded: true
-                property bool adapt: true
-
-                layer.enabled: rounded
+                mipmap: true
+                fillMode: Image.PreserveAspectCrop
+                layer.enabled: true
                 layer.effect: OpacityMask {
-                    maskSource: Item {
+                    maskSource: Rectangle {
                         width: avatar.width
                         height: avatar.height
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: avatar.adapt ? avatar.width : Math.min(avatar.width, avatar.height)
-                            height: avatar.adapt ? avatar.height : width
-                            radius: Math.min(width, height)
-                        }
+                        radius: 5
                     }
                 }
             }
@@ -129,9 +129,9 @@ Rectangle {
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 height: parent.height
-                width: (parent.width - avatar.width - number.width) / 2
+                width: (parent.width - number.width - avatar.width) / 2
                 fontSizeMode: Text.Fit
-                minimumPointSize: 5
+                minimumPointSize: 1
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
@@ -148,13 +148,14 @@ Rectangle {
                 height: parent.height
                 width: nickname.width
                 fontSizeMode: Text.Fit
-                minimumPointSize: 5
+                minimumPointSize: 1
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
                 text: String(model.contact_time)
             }
             MouseArea {
+                id: mouse_area
                 anchors.fill: parent
                 onClicked: {
                     contacts_list_view.currentIndex = index

@@ -3,10 +3,10 @@
         <file>qml_files/stack_views/Main_menu_view.qml</file>
         <file>qml_files/main.qml</file>
         <file>qml_files/stack_views/Account_view.qml</file>
-        <file>qml_files/stack_views/My_contacts_view.qml</file>
-        <file>qml_files/My_contacts_list.qml</file>
-        <file>qml_files/Add_contact_menu.qml</file>
-        <file>qml_files/Contacts_list.qml</file>
+        <file>qml_files/stack_views/My_stat_view.qml</file>
+        <file>qml_files/stack_views/My_contacts_list.qml</file>
+        <file>qml_files/stack_views/Add_contact_view.qml</file>
+        <file>qml_files/stack_views/Contacts_list.qml</file>
         <file>imgs/biohazard_symbol.png</file>
         <file>qml_files/buttons/Main_menu_btn.qml</file>
         <file>imgs/microorganism.png</file>
@@ -30,7 +30,6 @@
         <file>qml_files/buttons/Show_password_btn.qml</file>
         <file>imgs/opened_eye.png</file>
         <file>imgs/closed_eye.png</file>
-        <file>imgs/default_avatar.png</file>
         <file>qml_files/stack_views/settings_views/Change_avatar_view.qml</file>
         <file>imgs/folder.png</file>
         <file>imgs/up_arrow_in_circle.png</file>
@@ -41,5 +40,6 @@
         <file>imgs/read_more.png</file>
         <file>imgs/update.png</file>
         <file>imgs/sort.png</file>
+        <file>imgs/default_avatar.png</file>
     </qresource>
 </RCC>
