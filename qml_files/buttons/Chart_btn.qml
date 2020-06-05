@@ -14,7 +14,7 @@ Rectangle {
             height: parent.height + 3
             onClicked: {
                 stack_view.push(chart_view_comp)
-                stack_view.currentItem.chart_data.receive_stats(days_model.get_stats())
+                stack_view.currentItem.chart_data.receive_stat(stat_model.get_stat())
             }
         }
     }

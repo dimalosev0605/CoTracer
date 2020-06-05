@@ -33,6 +33,7 @@ public slots:
     void receive_stats(const QVector<std::tuple<QString, int>>& statistic);
     void sort_by_date();
     void sort_by_count_of_contacts();
+    QVector<std::tuple<QString, int>> get_stat() const;
 };
 
 #endif // Stat_MODEL_H

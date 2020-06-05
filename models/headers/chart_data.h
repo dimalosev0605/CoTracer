@@ -9,21 +9,18 @@ class Chart_data : public QObject
 {
     Q_OBJECT
 
-    QVector<QPoint> m_points_sum;
-    QVector<QPoint> m_points_reg;
-    QVector<QPoint> m_points_unreg;
+    QVector<QPoint> m_points;
+    QVector<std::tuple<QString, int>> m_data;
 
 public:
     explicit Chart_data(QObject *parent = nullptr);
 
 public slots:
-    void receive_stats(const QVector<std::tuple<int, int>>& stats);
+    void receive_stat(const QVector<std::tuple<QString, int>>& stat);
 
 signals:
-    void sum_point(int x, int y);
-    void reg_point(int x, int y);
-    void unreg_point(int x, int y);
-    void set_max(int max);
+    void point(int x, int y);
+    void set_max_count_of_contacts(int max_value);
 };
 
 #endif // CHART_DATA_H

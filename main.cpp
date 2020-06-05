@@ -16,8 +16,6 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
 
-//    qmlRegisterType<Authorization_tcp_client>("Authorization_tcp_client_qml", 1, 0, "Authorization_tcp_client");
-//    qmlRegisterType<Communication_tcp_client>("Communication_tcp_client_qml", 1, 0, "Communication_tcp_client");
     qmlRegisterType<Stat_model>("Stat_model_qml", 1, 0, "Stat_model");
     qmlRegisterType<Contacts_model>("Contacts_model_qml", 1, 0, "Contacts_model");
     qmlRegisterType<Chart_data>("Chart_data_qml", 1, 0, "Chart_data");
@@ -27,7 +25,6 @@ int main(int argc, char *argv[])
 
     qRegisterMetaType<QVector<std::tuple<QString, QString>>>("QVector<std::tuple<QString, QString>>");
     qRegisterMetaType<QVector<std::tuple<QString, int>>>("QVector<std::tuple<QString, int>>");
-    qRegisterMetaType<QVector<std::tuple<int, int>>>("QVector<std::tuple<int, int>>");
 
     QQmlApplicationEngine engine;
 

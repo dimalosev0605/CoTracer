@@ -108,3 +108,8 @@ void Stat_model::sort_by_count_of_contacts()
 
     how_sort ? how_sort = false : how_sort = true;
 }
+
+QVector<std::tuple<QString, int>> Stat_model::get_stat() const
+{
+    return m_stat;
+}
