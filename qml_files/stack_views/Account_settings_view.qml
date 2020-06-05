@@ -48,33 +48,37 @@ Rectangle {
             top: parent.top
             topMargin: 5
             left: parent.left
-            leftMargin: 5
             right: parent.right
-            rightMargin: anchors.leftMargin
             bottom: back_btn.top
             bottomMargin: anchors.topMargin
         }
         orientation: ListView.Vertical
         clip: true
-        spacing: 5
         model: settings_model
 
         delegate: Rectangle {
             id: delegate
             height: 50
             width: parent.width
-
             color: mouse_area.pressed ? "#b22222" : root.color
-            border.width: 1
-            border.color: "#000000"
-            radius: 1
 
+            property int line_width: 1
+            property string line_color: "#000000"
+            Rectangle {
+                id: bottom_line
+                anchors {
+                    bottom: parent.bottom
+                }
+                width: parent.width
+                height: parent.line_width
+                color: parent.line_color
+            }
             Text {
                 anchors.centerIn: parent
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 width: parent.width
-                height: parent.height
+                height: parent.height - parent.line_width
                 fontSizeMode: Text.Fit
                 minimumPointSize: 5
                 font.pointSize: 12
@@ -100,7 +104,6 @@ Rectangle {
                         break;
                     }
                     }
-
                 }
             }
         }

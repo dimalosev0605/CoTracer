@@ -3,25 +3,29 @@ import QtQuick.Controls 2.12
 
 Rectangle {
     id: root
-    radius: 5
-    border.width: 1
-    border.color: "#000000"
 
     property alias mouse_area: mouse_area
+    property alias rotation_anim: rotation_anim
 
-    Text {
-        id: text
-        anchors.centerIn: parent
-        verticalAlignment: Text.AlignVCenter
-        horizontalAlignment: Text.AlignHCenter
-        width: parent.width
+    Image {
+        id: img
+        anchors {
+            verticalCenter: parent.verticalCenter
+        }
+        source: "qrc:/imgs/update.png"
         height: parent.height
-        fontSizeMode: Text.Fit
-        minimumPointSize: 5
-        font.pointSize: 15
-        elide: Text.ElideRight
-        wrapMode: Text.WordWrap
-        text: "Update"
+        width: height
+        fillMode: Image.PreserveAspectFit
+    }
+    RotationAnimation {
+        id: rotation_anim
+        target: img
+        duration: 750
+        loops: Animation.Infinite
+        running: false
+        alwaysRunToEnd: true
+        from: 0
+        to: 360
     }
     MouseArea {
         id: mouse_area

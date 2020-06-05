@@ -104,9 +104,9 @@ public slots:
     void pop_model();
     void cancel_operation();
 
-    QString get_nickname() const { return m_user_validator.get_nickname(); }
-    QString get_password() const { return m_user_validator.get_password(); }
-    QString get_avatar_path(bool prefix) const { return m_path_finder.get_path_to_user_avatar(prefix); }
+    QString get_nickname() const;
+    QString get_password() const;
+    QString get_avatar_path(bool prefix) const;
 
 signals:
     void is_connected_changed();

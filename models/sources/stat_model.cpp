@@ -1,5 +1,7 @@
 #include "./models/headers/stat_model.h"
 
+const QString date_format = "dd.MM.yy";
+
 Stat_model::Stat_model(QObject* parent)
     : QAbstractListModel(parent)
 {
@@ -52,9 +54,57 @@ void Stat_model::receive_stats(const QVector<std::tuple<QString, int>>& statisti
     m_stat = statistic;
     std::sort(m_stat.begin(), m_stat.end(), [](const std::tuple<QString, int>& lhs, const std::tuple<QString, int>& rhs)
     {
-        QDate lhs_date = QDate::fromString(std::get<0>(lhs), "dd.MM.yy");
-        QDate rhs_date = QDate::fromString(std::get<0>(rhs), "dd.MM.yy");
+        QDate lhs_date = QDate::fromString(std::get<0>(lhs), date_format);
+        QDate rhs_date = QDate::fromString(std::get<0>(rhs), date_format);
         return lhs_date > rhs_date;
     });
     endInsertRows();
+}
+
+void Stat_model::sort_by_date()
+{
+    static bool how_sort = true;
+
+    beginRemoveRows(QModelIndex(), 0, m_stat.size() - 1);
+    endRemoveRows();
+
+    beginInsertRows(QModelIndex(), 0, m_stat.size() - 1);
+    std::sort(m_stat.begin(), m_stat.end(), [](const std::tuple<QString, int>& lhs, const std::tuple<QString, int>& rhs)
+    {
+        QDate lhs_date = QDate::fromString(std::get<0>(lhs), date_format);
+        QDate rhs_date = QDate::fromString(std::get<0>(rhs), date_format);
+        if(how_sort) {
+            return lhs_date < rhs_date;
+        }
+        else {
+            return lhs_date > rhs_date;
+        }
+    });
+    endInsertRows();
+
+    how_sort ? how_sort = false : how_sort = true;
+}
+
+void Stat_model::sort_by_count_of_contacts()
+{
+    static bool how_sort = true;
+
+    beginRemoveRows(QModelIndex(), 0, m_stat.size() - 1);
+    endRemoveRows();
+
+    beginInsertRows(QModelIndex(), 0, m_stat.size() - 1);
+    std::sort(m_stat.begin(), m_stat.end(), [](const std::tuple<QString, int>& lhs, const std::tuple<QString, int>& rhs)
+    {
+        int lhs_c = std::get<1>(lhs);
+        int rhs_c = std::get<1>(rhs);
+        if(how_sort) {
+            return lhs_c < rhs_c;
+        }
+        else {
+            return lhs_c > rhs_c;
+        }
+    });
+    endInsertRows();
+
+    how_sort ? how_sort = false : how_sort = true;
 }

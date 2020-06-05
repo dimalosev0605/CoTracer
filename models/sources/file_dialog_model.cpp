@@ -29,7 +29,8 @@ QHash<int, QByteArray> File_dialog_model::roleNames() const
 
 void File_dialog_model::clear()
 {
-    beginRemoveRows(QModelIndex(), 0, m_data.size());
+    if(m_data.isEmpty()) return;
+    beginRemoveRows(QModelIndex(), 0, m_data.size() - 1);
     m_data.clear();
     endRemoveRows();
 }
@@ -195,13 +196,15 @@ void File_dialog_model::search(const QString& input)
 
 void File_dialog_model::prepare_search()
 {
-    beginRemoveRows(QModelIndex(), 0, m_data.size());
+    if(m_data.isEmpty()) return;
+    beginRemoveRows(QModelIndex(), 0, m_data.size() - 1);
     m_data_copy = std::move(m_data);
     endRemoveRows();
 }
 
 void File_dialog_model::cancel_search()
 {
+    m_data_copy.clear();
     update_content();
 }
 

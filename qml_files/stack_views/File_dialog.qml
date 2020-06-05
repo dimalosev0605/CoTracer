@@ -184,7 +184,7 @@ Rectangle {
             leftMargin: 5
             right: parent.right
             rightMargin: anchors.leftMargin
-            bottom: btns.top
+            bottom: return_back_btn.top
             bottomMargin: 5
         }
         orientation: ListView.Vertical
@@ -285,43 +285,47 @@ Rectangle {
         }
     }
 
-    Row {
-        id: btns
+    Main_menu_btn {
+        id: return_back_btn
+        z: 1
         anchors {
             left: parent.left
             leftMargin: 5
-            right: parent.right
-            rightMargin: 5
             bottom: parent.bottom
             bottomMargin: 5
         }
         height: 35
-        spacing: 5
-        leftPadding: 5
-        rightPadding: leftPadding
-
-        Main_menu_btn {
-            id: return_back_btn
-            height: parent.height
-            width: (parent.width - parent.spacing - parent.anchors.leftMargin - parent.anchors.rightMargin) / 2
-            color: mouse_area.pressed ? "#b22222" : root.color
-            text.text: "Back"
-            radius: 2
-            mouse_area.onClicked: {
-                file_dialog_model.return_in_parent_directory()
-            }
+        property int space: 5
+        width: (parent.width - anchors.leftMargin - anchors.rightMargin - space) / 2
+        color: mouse_area.pressed ? "#b22222" : root.color
+        text.text: "Back"
+        radius: 2
+        mouse_area.onClicked: {
+            text_input_for_search.text = ""
+            file_dialog_model.cancel_search()
+            text_input_for_search.visible = false
+            current_path_text.visible = true
+            more_btn.visible = true
+            file_dialog_model.return_in_parent_directory()
         }
+    }
 
-        Main_menu_btn {
-            id: cancel_btn
-            height: parent.height
-            width: return_back_btn.width
-            color: mouse_area.pressed ? "#b22222" : root.color
-            text.text: "Cancel"
-            radius: 2
-            mouse_area.onClicked: {
-                stack_view.pop()
-            }
+    Main_menu_btn {
+        id: cancel_btn
+        z: 1
+        anchors {
+            right: parent.right
+            rightMargin: return_back_btn.anchors.leftMargin
+            bottom: parent.bottom
+            bottomMargin: return_back_btn.anchors.bottomMargin
+        }
+        height: return_back_btn.height
+        width: return_back_btn.width
+        color: mouse_area.pressed ? "#b22222" : root.color
+        text.text: "Cancel"
+        radius: 2
+        mouse_area.onClicked: {
+            stack_view.pop()
         }
     }
 }

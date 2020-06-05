@@ -1,5 +1,7 @@
 #include "./networking/headers/client.h"
 
+const QString default_avatar_path = "qrc:/imgs/default_avatar.png";
+
 Client::Client(QObject *parent)
     : QObject(parent),
       m_work(boost::asio::make_work_guard(m_ios))
@@ -279,6 +281,27 @@ void Client::cancel_operation()
     m_session->m_socket.cancel();
     if(!get_is_connected()) {
         connect_to_server();
+    }
+}
+
+QString Client::get_nickname() const
+{
+    return m_user_validator.get_nickname();
+}
+
+QString Client::get_password() const
+{
+    return m_user_validator.get_password();
+}
+
+QString Client::get_avatar_path(bool prefix) const
+{
+    QFile check_existence(m_path_finder.get_path_to_user_avatar(false));
+    if(check_existence.size()) {
+        return m_path_finder.get_path_to_user_avatar(prefix);
+    }
+    else {
+        return default_avatar_path;
     }
 }
 

@@ -38,5 +38,8 @@
         <file>qml_files/stack_views/My_friends_view.qml</file>
         <file>qml_files/buttons/More_btn.qml</file>
         <file>imgs/three_vertical_dots.png</file>
+        <file>imgs/read_more.png</file>
+        <file>imgs/update.png</file>
+        <file>imgs/sort.png</file>
     </qresource>
 </RCC>

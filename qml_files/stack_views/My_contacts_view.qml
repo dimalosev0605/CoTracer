@@ -37,6 +37,7 @@ Rectangle {
         target: client
         ignoreUnknownSignals: true
         onStatistic_received: {
+            update_stats_btn.rotation_anim.stop()
             stat_model.receive_stats(statistic)
         }
     }
@@ -64,10 +65,12 @@ Rectangle {
             horizontalCenter: parent.horizontalCenter
         }
         height: back_btn.height
-        width: height * 1.6
+        width: height
+        radius: 5
         color: mouse_area.pressed ? "#708090" : parent.color
         mouse_area.onClicked: {
-            client.request_for_14_days_stats()
+            rotation_anim.start()
+            client.fetch_stat_for_14_days()
         }
     }
 
@@ -88,72 +91,108 @@ Rectangle {
     ListView {
         id: days_list_view
         z: 1
-
         anchors {
             top: parent.top
-            topMargin: 10
             left: parent.left
-            leftMargin: 5
             right: parent.right
-            rightMargin: 5
             bottom: back_btn.top
             bottomMargin: 10
         }
 
         orientation: ListView.Vertical
         clip: true
-        spacing: 5
         model: stat_model
 
         headerPositioning: ListView.OverlayHeader
-        header: Rectangle {
+        header: Item {
             id: my_header
             z: 3
             width: parent.width
-            height: 50
-            border.width: 1
-            color: root.color
-            Text {
-                id: date_header
+            height: 40
+
+            Rectangle {
+                id: date_col
                 anchors {
                     left: parent.left
                     top: parent.top
                 }
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                width: parent.width * 0.4
                 height: parent.height
-                fontSizeMode: Text.Fit
-                minimumPointSize: 1
-                font.pointSize: 12
-                elide: Text.ElideRight
-                wrapMode: Text.WordWrap
-                text: "Date"
+                width: parent.width * 0.4
+                color: date_col_m_area.pressed ? "#b22222" : "#a40404"
+                Image {
+                    id: sort_date_img
+                    anchors {
+                        left: parent.left
+                        leftMargin: 2
+                        verticalCenter: parent.verticalCenter
+                    }
+                    source: "qrc:/imgs/sort.png"
+                    height: parent.height / 2
+                    width: height
+                    fillMode: Image.PreserveAspectFit
+                }
+                Text {
+                    anchors {
+                        left: sort_date_img.right
+                    }
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignLeft
+                    width: parent.width - sort_date_img.width - sort_date_img.anchors.leftMargin
+                    height: parent.height
+                    fontSizeMode: Text.Fit
+                    minimumPointSize: 1
+                    font.pointSize: 12
+                    elide: Text.ElideRight
+                    wrapMode: Text.WordWrap
+                    text: "Date"
+                }
                 MouseArea {
+                    id: date_col_m_area
                     anchors.fill: parent
                     onClicked: {
+                        stat_model.sort_by_date()
                     }
                 }
             }
-            Text {
-                id: count_of_contacts_header
+            Rectangle {
+                id: count_of_contacts_col
                 anchors {
-                    left: date_header.right
-                    top: date_header.top
+                    left: date_col.right
                 }
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                width: parent.width - date_header.width
                 height: parent.height
-                fontSizeMode: Text.Fit
-                minimumPointSize: 1
-                font.pointSize: 12
-                elide: Text.ElideRight
-                wrapMode: Text.WordWrap
-                text: "Count of contacts"
+                width: parent.width - date_col.width
+                color: count_of_contacts_col_m_area.pressed ? "#b22222" : "#a40404"
+                Image {
+                    id: sort_count_of_contacts_img
+                    anchors {
+                        left: parent.left
+                        verticalCenter: parent.verticalCenter
+                    }
+                    source: "qrc:/imgs/sort.png"
+                    height: parent.height / 2
+                    width: height
+                    fillMode: Image.PreserveAspectFit
+                }
+                Text {
+                    anchors {
+                        left: sort_count_of_contacts_img.right
+                    }
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignLeft
+                    width: parent.width - sort_count_of_contacts_img.width
+                    height: parent.height
+                    fontSizeMode: Text.Fit
+                    minimumPointSize: 1
+                    font.pointSize: 12
+                    elide: Text.ElideRight
+                    wrapMode: Text.WordWrap
+                    text: "Count of contacts"
+                }
                 MouseArea {
+                    id: count_of_contacts_col_m_area
                     anchors.fill: parent
                     onClicked: {
+                        stat_model.sort_by_count_of_contacts()
                     }
                 }
             }
@@ -161,27 +200,32 @@ Rectangle {
         delegate: Rectangle {
             id: delegate
             z: 2
-
             width: parent.width
             height: 50
-
-            border.width: 1
-            border.color: "#000000"
-            color: "#d70707"
-
+            color: delegate_m_area.pressed ? "#b22222" : "#d70707"
+            Rectangle {
+                id: bottom_line
+                anchors {
+                    bottom: parent.bottom
+                }
+                width: parent.width
+                height: 1
+                color: "#000000"
+            }
             property string date: date.text
             Text {
                 id: date
                 anchors {
                     left: parent.left
+                    leftMargin: 2
                     top: parent.top
                 }
                 verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                width: parent.width * 0.4
-                height: parent.height
+                horizontalAlignment: Text.AlignLeft
+                width: parent.width * 0.4 - anchors.leftMargin
+                height: parent.height - bottom_line.height
                 fontSizeMode: Text.Fit
-                minimumPointSize: 5
+                minimumPointSize: 1
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
@@ -194,17 +238,29 @@ Rectangle {
                     top: date.top
                 }
                 verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                width: parent.width - date.width
-                height: parent.height
+                horizontalAlignment: Text.AlignLeft
+                width: parent.width - date.width - read_more_btn.width
+                height: parent.height - bottom_line.height
                 fontSizeMode: Text.Fit
-                minimumPointSize: 5
+                minimumPointSize: 1
                 font.pointSize: 12
                 elide: Text.ElideRight
                 wrapMode: Text.WordWrap
                 text: String(model.count_of_contacts)
             }
+            Image {
+                id: read_more_btn
+                anchors {
+                    left: count_of_contacts.right
+                    verticalCenter: parent.verticalCenter
+                }
+                source: "qrc:/imgs/read_more.png"
+                fillMode: Image.PreserveAspectFit
+                height: parent.height
+                width: height
+            }
             MouseArea {
+                id: delegate_m_area
                 anchors.fill: parent
                 onClicked: {
                     days_list_view.currentIndex = index

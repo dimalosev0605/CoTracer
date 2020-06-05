@@ -39,8 +39,8 @@ bool FAD_manager::delete_avatars_dir() const
 bool FAD_manager::delete_all_user_files() const
 {
     delete_avatars_dir_content();
-    return delete_user_info_file() &&
-           delete_user_avatar_file();
+    delete_user_avatar_file();
+    return delete_user_info_file();
 }
 
 void FAD_manager::delete_avatars_dir_content() const
