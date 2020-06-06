@@ -50,6 +50,7 @@ bool User_validator::save_user_info()
 
 bool User_validator::save_user_avatar(const QByteArray& avatar)
 {
+    if(avatar.isEmpty()) return true;
     QFile file(m_path_finder.get_path_to_user_avatar(false));
     if(file.open(QIODevice::WriteOnly)) {
         file.write(avatar);

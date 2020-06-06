@@ -11,6 +11,7 @@ class Path_finder
     static const QString user_info_file_name;
     static const QString avatars_dir_name;
     static const QString file_path_prefix;
+    static const QString default_avatar_path;
 
 public:
     QString get_app_dir_path() const;
@@ -19,6 +20,7 @@ public:
     QString get_path_to_user_info_file() const;
     QString get_path_to_avatars_dir() const;
     QString get_path_to_particular_user_avatar(const QString& nickname, bool prefix) const;
+    QString get_path_to_default_avatar_path() const;
 };
 
 #endif // PATH_FINDER_H

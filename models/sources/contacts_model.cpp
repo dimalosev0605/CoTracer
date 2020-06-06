@@ -1,7 +1,5 @@
 #include "./models/headers/contacts_model.h"
 
-const QString default_avatar_path = "qrc:/imgs/default_avatar.png";
-
 Contacts_model::Contacts_model(QObject* parent)
     : QAbstractListModel(parent)
 {
@@ -37,11 +35,11 @@ QVariant Contacts_model::data(const QModelIndex& index, int role) const
     case (int)RolesNames::contact_avatar_path: {
         QString path = m_path_finder.get_path_to_particular_user_avatar(std::get<0>(m_contacts[row]), false);
         QFile file(path);
-        if(file.size()) {
+        if(file.exists()) {
             return m_path_finder.get_path_to_particular_user_avatar(std::get<0>(m_contacts[row]), true);
         }
         else {
-            return default_avatar_path;
+            return m_path_finder.get_path_to_default_avatar_path();
         }
     }
 

@@ -1,7 +1,5 @@
 #include "./networking/headers/client.h"
 
-const QString default_avatar_path = "qrc:/imgs/default_avatar.png";
-
 Client::Client(QObject *parent)
     : QObject(parent),
       m_work(boost::asio::make_work_guard(m_ios))
@@ -297,11 +295,11 @@ QString Client::get_password() const
 QString Client::get_avatar_path(bool prefix) const
 {
     QFile check_existence(m_path_finder.get_path_to_user_avatar(false));
-    if(check_existence.size()) {
+    if(check_existence.exists()) {
         return m_path_finder.get_path_to_user_avatar(prefix);
     }
     else {
-        return default_avatar_path;
+        return m_path_finder.get_path_to_default_avatar_path();
     }
 }
 
@@ -530,6 +528,7 @@ void Client::process_success_fetching_contacts(QMap<QString, QVariant>& j_map)
         received_contacts.push_back(std::make_tuple(pair.first, pair.second));
 
         QString avatar_str = contact_j_obj_map[Protocol_keys::avatar_data].toString();
+        if(avatar_str.isEmpty()) continue;
         QByteArray avatar = QByteArray::fromBase64(avatar_str.toLatin1());
 
         QString avatar_path(dir_with_avatars.absolutePath() + '/' + pair.first);
