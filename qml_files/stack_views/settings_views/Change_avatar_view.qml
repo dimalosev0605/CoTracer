@@ -7,7 +7,6 @@ import "../"
 Rectangle {
     id: root
     z: 0
-
     Component {
         id: file_dialog_comp
         File_dialog {
@@ -24,6 +23,7 @@ Rectangle {
             topMargin: 5
             horizontalCenter: parent.horizontalCenter
         }
+        cache: false
         width: parent.width * 0.9
         height: (parent.height / 2) - anchors.topMargin
         fillMode: Image.PreserveAspectFit

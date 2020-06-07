@@ -12,7 +12,7 @@ Rectangle {
     Component {
         id: change_avatar_comp
         Change_avatar_view {
-            id: change_avatar
+            id: change_avatar_view
             color: root.color
         }
     }
