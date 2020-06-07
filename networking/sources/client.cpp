@@ -12,6 +12,13 @@ Client::Client(QObject *parent)
     m_thread->detach();
 
     set_is_authorized(m_user_validator.get_is_authorized());
+    read_cached_avatars_info_file();
+}
+
+Client::~Client()
+{
+    qDebug() << this << " destroyed!";
+    save_cached_avatars_info_file();
 }
 
 void Client::connect_to_server()
@@ -187,6 +194,7 @@ bool Client::exit_from_account()
 {
     if(m_user_validator.exit_from_account()) {
         set_is_authorized(false);
+        m_cached_avatars.clear();
         return true;
     }
     return false;
@@ -375,20 +383,7 @@ void Client::create_fetch_contacts_req(const QString& nickname, const QString& d
     j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::fetch_contacts);
     j_obj.insert(Protocol_keys::contact_nickname, nickname);
     j_obj.insert(Protocol_keys::contact_date, date);
-
-    // insert info about cached avatars
-    QFile cached_avatars_info_file(m_path_finder.get_path_to_cached_avatars_info_file());
-    if(cached_avatars_info_file.open(QIODevice::ReadOnly)) {
-        auto doc = QJsonDocument::fromJson(cached_avatars_info_file.readAll());
-        if(!doc.isEmpty()) {
-            auto obj = doc.object();
-            auto map = obj.toVariantMap();
-            auto cached_avatars = map[Protocol_keys::cached_avatars].toJsonArray();
-            j_obj.insert(Protocol_keys::cached_avatars, cached_avatars);
-        }
-    }
-    // end insert info about cached avatars
-
+    insert_info_about_cached_avatars_in_req(j_obj);
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
@@ -531,26 +526,6 @@ void Client::process_success_fetching_contacts(QMap<QString, QVariant>& j_map)
     QVector<std::tuple<QString, QString>> received_contacts;
     QDir dir_with_avatars(m_path_finder.get_path_to_avatars_dir());
 
-    // read cached_avatras file
-    QFile cached_avatars_info_file_read(m_path_finder.get_path_to_cached_avatars_info_file());
-    std::vector<std::tuple<QString, QString>> cached_avatras_v;
-    if(cached_avatars_info_file_read.open(QIODevice::ReadOnly)) {
-        auto doc = QJsonDocument::fromJson(cached_avatars_info_file_read.readAll());
-        if(!doc.isEmpty()) {
-            auto obj = doc.object();
-            auto map = obj.toVariantMap();
-            auto cached_avatars = map[Protocol_keys::cached_avatars].toJsonArray();
-            for(int i = 0; i < cached_avatars.size(); ++i) {
-                auto obj = cached_avatars[i].toObject();
-                QString contact_nickname = obj[Protocol_keys::contact_nickname].toString();
-                QString avatar_downloaded_date_time = obj[Protocol_keys::avatar_downloaded_date_time].toString();
-                cached_avatras_v.push_back(std::make_tuple(contact_nickname, avatar_downloaded_date_time));
-            }
-        }
-    }
-    cached_avatars_info_file_read.close();
-    // end read cached_avatras file
-
     for(int i = 0; i < j_arr_of_contacts.size(); ++i) {
         auto contact_j_obj = j_arr_of_contacts[i].toObject();
         auto contact_j_obj_map = contact_j_obj.toVariantMap();
@@ -562,6 +537,7 @@ void Client::process_success_fetching_contacts(QMap<QString, QVariant>& j_map)
 
         QString avatar_str = contact_j_obj_map[Protocol_keys::avatar_data].toString();
         if(avatar_str.isEmpty()) continue;
+
         // if we receive avatar data -> save avatar
         QByteArray avatar = QByteArray::fromBase64(avatar_str.toLatin1());
 
@@ -573,41 +549,21 @@ void Client::process_success_fetching_contacts(QMap<QString, QVariant>& j_map)
         }
         // end if we receive avatar data -> save avatar
 
-        // insert new downloaded time in cached_avatras_v
+        // insert new downloaded time in cached_avatars
         QString avatar_downloaded_date_time = contact_j_obj_map[Protocol_keys::avatar_downloaded_date_time].toString();
-        auto iter = std::find_if(cached_avatras_v.begin(), cached_avatras_v.end(), [&](const std::tuple<QString, QString>& i)
+        auto iter = std::find_if(m_cached_avatars.begin(), m_cached_avatars.end(), [&](const std::tuple<QString, QString>& i)
         {
             return pair.first == std::get<0>(i);
         });
-        if(iter != cached_avatras_v.end()) {
-            auto new_obj = std::make_tuple(pair.first, avatar_downloaded_date_time);
-            *iter = new_obj;
+        if(iter != m_cached_avatars.end()) {
+            auto updated_cached_obj = std::make_tuple(pair.first, avatar_downloaded_date_time);
+            *iter = updated_cached_obj;
         }
         else {
-            cached_avatras_v.push_back(std::make_tuple(pair.first, avatar_downloaded_date_time));
+            m_cached_avatars.push_back(std::make_tuple(pair.first, avatar_downloaded_date_time));
         }
-        // end insert new downloaded time in cached_avatras_v
+        // end insert new downloaded time in cached_avatars
     }
-
-    // save cached avatars info file
-    QFile cached_avatars_info_file_save(m_path_finder.get_path_to_cached_avatars_info_file());
-    if(cached_avatars_info_file_save.open(QIODevice::WriteOnly)) {
-        // create json arr from cached avatars vector
-        QJsonArray arr;
-        for(int i = 0; i < cached_avatras_v.size(); ++i) {
-            QJsonObject obj;
-            obj.insert(Protocol_keys::contact_nickname, std::get<0>(cached_avatras_v[i]));
-            obj.insert(Protocol_keys::avatar_downloaded_date_time, std::get<1>(cached_avatras_v[i]));
-            arr.append(obj);
-        }
-        // end create json arr from cached avatars vector
-
-        QJsonObject obj;
-        obj.insert(Protocol_keys::cached_avatars, arr);
-        QJsonDocument doc(obj);
-        cached_avatars_info_file_save.write(doc.toJson());
-    }
-    // end save cached avatars info file
 
     emit contacts_received(received_contacts);
     disconnect(this, &Client::contacts_received, nullptr, nullptr);
@@ -646,5 +602,56 @@ void Client::fetch_contacts(const QString& nickname, const QString& date)
     if(occupy_sock()) {
         create_fetch_contacts_req(nickname, date);
         async_write();
+    }
+}
+
+void Client::insert_info_about_cached_avatars_in_req(QJsonObject& j_obj)
+{
+    QJsonArray arr;
+    for(size_t i = 0; i < m_cached_avatars.size(); ++i) {
+        QJsonObject obj;
+        obj.insert(Protocol_keys::contact_nickname, std::get<0>(m_cached_avatars[i]));
+        obj.insert(Protocol_keys::avatar_downloaded_date_time, std::get<1>(m_cached_avatars[i]));
+        arr.append(obj);
+    }
+    j_obj.insert(Protocol_keys::cached_avatars ,arr);
+}
+
+void Client::read_cached_avatars_info_file()
+{
+    m_cached_avatars.clear();
+
+    QFile cached_avatars_file(m_path_finder.get_path_to_cached_avatars_info_file());
+    if(cached_avatars_file.open(QIODevice::ReadOnly)) {
+        auto doc = QJsonDocument::fromJson(cached_avatars_file.readAll());
+        if(!doc.isEmpty()) {
+            auto obj = doc.object();
+            auto map = obj.toVariantMap();
+            auto cached_avatars = map[Protocol_keys::cached_avatars].toJsonArray();
+            for(int i = 0; i < cached_avatars.size(); ++i) {
+                auto cached_obj = cached_avatars[i].toObject();
+                QString contact_nickname = cached_obj[Protocol_keys::contact_nickname].toString();
+                QString avatar_downloaded_date_time = cached_obj[Protocol_keys::avatar_downloaded_date_time].toString();
+                m_cached_avatars.push_back(std::make_tuple(contact_nickname, avatar_downloaded_date_time));
+            }
+        }
+    }
+}
+
+void Client::save_cached_avatars_info_file()
+{
+    QFile cached_avatars_info_file(m_path_finder.get_path_to_cached_avatars_info_file());
+    if(cached_avatars_info_file.open(QIODevice::WriteOnly)) {
+        QJsonArray arr;
+        for(size_t i = 0; i < m_cached_avatars.size(); ++i) {
+            QJsonObject cached_obj;
+            cached_obj.insert(Protocol_keys::contact_nickname, std::get<0>(m_cached_avatars[i]));
+            cached_obj.insert(Protocol_keys::avatar_downloaded_date_time, std::get<1>(m_cached_avatars[i]));
+            arr.append(cached_obj);
+        }
+        QJsonObject obj;
+        obj.insert(Protocol_keys::cached_avatars, arr);
+        QJsonDocument doc(obj);
+        cached_avatars_info_file.write(doc.toJson());
     }
 }

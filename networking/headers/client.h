@@ -47,6 +47,8 @@ class Client: public QObject
     QVector<Contacts_model*> m_models;
     std::vector<std::any> lol_vector;
 
+    std::vector<std::tuple<QString, QString>> m_cached_avatars;
+
 private:
     void connect_to_server();
     bool occupy_sock();
@@ -78,10 +80,16 @@ private:
     void process_success_contact_deletion();
     void process_internal_server_error();
 
+    // miscellaneous
     void fetch_contacts(const QString& nickname, const QString& date);
+    void insert_info_about_cached_avatars_in_req(QJsonObject& j_obj);
+
+    void read_cached_avatars_info_file();
+    void save_cached_avatars_info_file();
 
 public:
     explicit Client(QObject* parent = nullptr);
+    ~Client();
 
     bool get_is_connected();
     void set_is_connected(bool value);
