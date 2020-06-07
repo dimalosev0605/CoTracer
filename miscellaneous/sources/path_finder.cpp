@@ -6,6 +6,7 @@ const QString Path_finder::user_info_file_name = "user_info";
 const QString Path_finder::avatars_dir_name = "avatars";
 const QString Path_finder::file_path_prefix = "file://";
 const QString Path_finder::default_avatar_path = "qrc:/imgs/default_avatar.png";
+const QString Path_finder::cached_avatars_info_file_name = "cached_avatars_info_file";
 
 QString Path_finder::get_app_dir_path() const
 {
@@ -50,4 +51,9 @@ QString Path_finder::get_path_to_particular_user_avatar(const QString& nickname,
 QString Path_finder::get_path_to_default_avatar_path() const
 {
     return default_avatar_path;
+}
+
+QString Path_finder::get_path_to_cached_avatars_info_file() const
+{
+    return get_path_to_user_files_dir() + cached_avatars_info_file_name;
 }
