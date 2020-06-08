@@ -39,16 +39,41 @@ find_package(Qt5 COMPONENTS Core Quick Charts REQUIRED)
 
 if(ANDROID)
     add_library(mhc_client SHARED
-      main.cpp
-      qml.qrc
-      ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/stat_model.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/contacts_model.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/chart_data.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/file_dialog_model.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/settings_model.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/user_validator.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/path_finder.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/fad_manager.cpp
+        main.cpp
+        qml.qrc
+
+        #####
+        ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/stat_model.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/contacts_model.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/chart_data.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/file_dialog_model.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/settings_model.h
+        #---
+        ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/stat_model.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/contacts_model.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/chart_data.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/file_dialog_model.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/settings_model.cpp
+        #####
+
+        #####
+        ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/client.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Protocol_codes.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Session.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/networking/headers/Protocol_keys.h
+        #---
+        ${CMAKE_CURRENT_SOURCE_DIR}/networking/sources/client.cpp
+        #####
+
+        #####
+        ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/headers/user_validator.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/headers/path_finder.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/headers/fad_manager.h
+        #---
+        ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/user_validator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/path_finder.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/fad_manager.cpp
+        #####
     )
 else()
     add_executable(
