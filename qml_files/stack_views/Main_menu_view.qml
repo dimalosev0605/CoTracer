@@ -1,11 +1,13 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.12
+import QtQuick.Window 2.14
 
 import "../buttons"
 import Client_qml 1.0
 
 Rectangle {
     id: root
+    z: 0
     color: "#e00d0d"
 
     Component {
@@ -36,6 +38,7 @@ Rectangle {
 
     Text {
         id: app_label
+        z: 1
         anchors {
             top: parent.top
             left: parent.left
@@ -54,50 +57,35 @@ Rectangle {
 
     Image {
         id: bio_hazard_symbol_img
+        z: 1
         anchors {
             top: app_label.bottom
             topMargin: 10
             horizontalCenter: parent.horizontalCenter
         }
-        width: if(parent.height > parent.width) {
-                   parent.width * 0.6
-               }
-               else {
-                   parent.height * 0.4
-               }
+        width:  parent.width * 0.5
         height: width
         source: "qrc:/imgs/biohazard_symbol.png"
     }
 
     Column {
         id: btns_col
-
+        z: 1
+        y: root.height / 2
         anchors {
-            top: bio_hazard_symbol_img.bottom
-            topMargin: parent.height > parent.width ? 90 : 5
-            bottom: parent.bottom
-            bottomMargin: 5
             horizontalCenter: parent.horizontalCenter
         }
-        width: parent.width * 0.9
-
-        property int btns_count: 4
-        property real btns_height:
-            (height - spacing * (btns_count - 1)) / btns_count / 2
-        property real btns_width: width
+        width: parent.width * 0.5
+        spacing: 10
         property color btns_pressed_color: "#b22222"
-        property real min_btns_height: 30
-        property real max_btns_width: 250
-
-        spacing: parent.height > parent.width ? 10 : 5
-
+        property int btns_height: 40
+        property int btns_radius: 5
         Main_menu_btn {
             id: my_account_btn
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.btns_width > parent.max_btns_width ? parent.max_btns_width : parent.btns_width
-            height: parent.btns_height < parent.min_btns_height ? parent.btns_height * 2 : parent.btns_height
+            width: btns_col.width
+            height: btns_col.btns_height
             color: mouse_area.pressed ? parent.btns_pressed_color : root.color
-
+            radius: btns_col.btns_radius
             text.text: "My account"
             mouse_area.onClicked: {
                 stack_view.push(account_view_comp)
@@ -106,11 +94,10 @@ Rectangle {
 
         Main_menu_btn {
             id: my_friends_btn
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.btns_width > parent.max_btns_width ? parent.max_btns_width : parent.btns_width
-            height: parent.btns_height < parent.min_btns_height ? parent.btns_height * 2 : parent.btns_height
+            width: btns_col.width
+            height: btns_col.btns_height
             color: mouse_area.pressed ? parent.btns_pressed_color : root.color
-
+            radius: btns_col.btns_radius
             text.text: "My friends"
             mouse_area.onClicked: {
                 stack_view.push(my_friends_view_comp)
@@ -119,12 +106,11 @@ Rectangle {
 
         Main_menu_btn {
             id: my_contacts_btn
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.btns_width > parent.max_btns_width ? parent.max_btns_width : parent.btns_width
-            height: parent.btns_height < parent.min_btns_height ? parent.btns_height * 2 : parent.btns_height
+            width: btns_col.width
+            height: btns_col.btns_height
             color: mouse_area.pressed ? parent.btns_pressed_color : root.color
-
-            text.text: "My statistics"
+            radius: btns_col.btns_radius
+            text.text: "My statistic"
             mouse_area.onClicked: {
                 stack_view.push(my_stat_view_comp)
             }
@@ -132,11 +118,10 @@ Rectangle {
 
         Main_menu_btn {
             id: exit_btn
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.btns_width > parent.max_btns_width ? parent.max_btns_width : parent.btns_width
-            height: parent.btns_height < parent.min_btns_height ? parent.btns_height * 2 : parent.btns_height
+            width: btns_col.width
+            height: btns_col.btns_height
             color: mouse_area.pressed ? parent.btns_pressed_color : root.color
-
+            radius: btns_col.btns_radius
             text.text: "Exit"
             mouse_area.onClicked: {
                 Qt.quit()

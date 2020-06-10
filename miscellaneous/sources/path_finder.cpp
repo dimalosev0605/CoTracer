@@ -10,7 +10,7 @@ const QString Path_finder::cached_avatars_info_file_name = "cached_avatars_info_
 
 QString Path_finder::get_app_dir_path() const
 {
-    return QCoreApplication::applicationDirPath() + '/';
+    return QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + '/';
 }
 
 QString Path_finder::get_path_to_user_files_dir() const

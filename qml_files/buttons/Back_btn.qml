@@ -3,7 +3,7 @@ import QtQuick.Controls 2.12
 
 Rectangle {
 
-    width: 35
+    width: 30
     height: width
     radius: 5
     property alias mouse_area: mouse_area

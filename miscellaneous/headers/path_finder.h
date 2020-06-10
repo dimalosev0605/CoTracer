@@ -3,6 +3,7 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QStandardPaths>
 
 class Path_finder
 {
