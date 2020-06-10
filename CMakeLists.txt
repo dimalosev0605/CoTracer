@@ -35,7 +35,7 @@ include_directories(${Boost_INCLUDE_DIR})
 
 link_directories(${Boost_LIBRARY_DIR})
 
-find_package(Qt5 COMPONENTS Core Quick Charts REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Charts AndroidExtras REQUIRED)
 
 if(ANDROID)
     add_library(mhc_client SHARED
@@ -69,10 +69,12 @@ if(ANDROID)
         ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/headers/user_validator.h
         ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/headers/path_finder.h
         ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/headers/fad_manager.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/headers/avatar_selector.h
         #---
         ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/user_validator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/path_finder.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/fad_manager.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/avatar_selector.cpp
         #####
     )
 else()
@@ -108,10 +110,12 @@ else()
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/headers/user_validator.h
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/headers/path_finder.h
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/headers/fad_manager.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/headers/avatar_selector.h
       #---
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/user_validator.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/path_finder.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/fad_manager.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous/sources/avatar_selector.cpp
       #####
     )
 endif()
@@ -119,4 +123,4 @@ endif()
 target_compile_definitions(mhc_client
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(mhc_client
-  PRIVATE Qt5::Core Qt5::Quick Qt5::Charts)
+  PRIVATE Qt5::Core Qt5::Quick Qt5::Charts Qt5::AndroidExtras)

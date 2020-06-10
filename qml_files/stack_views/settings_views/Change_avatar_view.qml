@@ -3,15 +3,24 @@ import QtQuick.Controls 2.12
 
 import "../../buttons"
 import "../"
+import Avatar_selector_qml 1.0
 
 Rectangle {
     id: root
     z: 0
-    Component {
-        id: file_dialog_comp
-        File_dialog {
-            id: file_dialog
-            color: root.color
+//    Component {
+//        id: file_dialog_comp
+//        File_dialog {
+//            id: file_dialog
+//            color: root.color
+//        }
+//    }
+
+    Avatar_selector {
+        id: avatar_selector
+        onImage_selected: {
+            avatar.source = path
+            save_changes_btn.visible = true
         }
     }
 
@@ -30,8 +39,8 @@ Rectangle {
         source: client.get_avatar_path(true)
     }
 
-    property int max_btns_width: 200
-    property int max_btns_height: 40
+    property int btns_width: 200
+    property int btns_height: 40
     Main_menu_btn {
         id: select_avatar_btn
         z: 1
@@ -40,27 +49,16 @@ Rectangle {
             topMargin: 10
             horizontalCenter: parent.horizontalCenter
         }
-        height: if((parent.height - avatar.height - avatar.anchors.topMargin - anchors.topMargin -
-                save_changes_btn.anchors.topMargin * 2) / 2 > parent.max_btns_height) {
-                    parent.max_btns_height
-                }
-                else {
-                    (parent.height - avatar.height - avatar.anchors.topMargin - anchors.topMargin -
-                                    save_changes_btn.anchors.topMargin * 2) / 2
-                }
-        width: if(parent.width < parent.max_btns_width) {
-                   parent.width * 0.95 - back_btn.width * 2
-               }
-               else {
-                   parent.max_btns_width
-               }
+        height: root.btns_height
+        width: root.btns_width
         color: mouse_area.pressed ? "#b22222" : root.color
         text.text: "Select image"
         radius: 4
         border.width: 1
         border.color: "#000000"
         mouse_area.onClicked: {
-            stack_view.push(file_dialog_comp)
+//            stack_view.push(file_dialog_comp)
+            avatar_selector.select_avatar()
         }
     }
 
@@ -72,17 +70,17 @@ Rectangle {
             topMargin: 10
             horizontalCenter: parent.horizontalCenter
         }
-        height: select_avatar_btn.height
-        width: select_avatar_btn.width
+        height: root.btns_height
+        width: root.btns_width
         color: mouse_area.pressed ? "#b22222" : root.color
-        text.text: "Save changes"
+        text.text: "Save"
         text.font.bold: true
         radius: 4
         border.width: 2
         border.color: "#000000"
         visible: false
         mouse_area.onClicked: {
-            client.change_avatar(avatar.source)
+            client.change_avatar(avatar_selector.get_selected_image_path())
         }
     }
 
