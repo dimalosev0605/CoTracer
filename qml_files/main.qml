@@ -24,6 +24,9 @@ Window {
         property int counter: 0
         Screen.onPrimaryOrientationChanged: {
             if(Screen.orientation !== Qt.PortraitOrientation) {
+                if(stack_view.currentItem.objectName === "Chart_view") {
+                    return
+                }
                 stack_view.push(rotation_message_view_comp);
                 ++counter;
             }

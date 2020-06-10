@@ -1,12 +1,9 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
 
-//#include "./networking/headers/authorization_tcp_client.h"
-//#include "./networking/headers/communication_tcp_client.h"
 #include "./models/headers/stat_model.h"
 #include "./models/headers/contacts_model.h"
 #include "./models/headers/chart_data.h"
-#include "./models/headers/file_dialog_model.h"
 #include "./models/headers/settings_model.h"
 #include "./networking/headers/client.h"
 #include "./miscellaneous/headers/avatar_selector.h"
@@ -20,7 +17,6 @@ int main(int argc, char *argv[])
     qmlRegisterType<Stat_model>("Stat_model_qml", 1, 0, "Stat_model");
     qmlRegisterType<Contacts_model>("Contacts_model_qml", 1, 0, "Contacts_model");
     qmlRegisterType<Chart_data>("Chart_data_qml", 1, 0, "Chart_data");
-    qmlRegisterType<File_dialog_model>("File_dialog_model_qml", 1, 0, "File_dialog_model");
     qmlRegisterType<Settings_model>("Settings_model_qml", 1, 0, "Settings_model");
     qmlRegisterType<Client>("Client_qml", 1, 0, "Client");
     qmlRegisterType<Avatar_selector>("Avatar_selector_qml", 1, 0, "Avatar_selector");

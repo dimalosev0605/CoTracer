@@ -46,13 +46,11 @@ if(ANDROID)
         ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/stat_model.h
         ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/contacts_model.h
         ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/chart_data.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/file_dialog_model.h
         ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/settings_model.h
         #---
         ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/stat_model.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/contacts_model.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/chart_data.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/file_dialog_model.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/settings_model.cpp
         #####
 
@@ -87,13 +85,11 @@ else()
       ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/stat_model.h
       ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/contacts_model.h
       ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/chart_data.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/file_dialog_model.h
       ${CMAKE_CURRENT_SOURCE_DIR}/models/headers/settings_model.h
       #---
       ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/stat_model.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/contacts_model.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/chart_data.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/file_dialog_model.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/models/sources/settings_model.cpp
       #####
 

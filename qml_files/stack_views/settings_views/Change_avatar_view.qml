@@ -8,13 +8,6 @@ import Avatar_selector_qml 1.0
 Rectangle {
     id: root
     z: 0
-//    Component {
-//        id: file_dialog_comp
-//        File_dialog {
-//            id: file_dialog
-//            color: root.color
-//        }
-//    }
 
     Avatar_selector {
         id: avatar_selector
@@ -57,7 +50,6 @@ Rectangle {
         border.width: 1
         border.color: "#000000"
         mouse_area.onClicked: {
-//            stack_view.push(file_dialog_comp)
             avatar_selector.select_avatar()
         }
     }

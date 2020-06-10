@@ -9,6 +9,7 @@ Rectangle {
     id: root
 
     property alias chart_data: chart_data
+    objectName: "Chart_view" // for enabling rotation
 
     Back_btn {
         id: back_btn
