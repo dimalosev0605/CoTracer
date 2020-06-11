@@ -11,10 +11,12 @@ Rectangle {
 
     MouseArea {
         id: root_m_area
-        z: 0
+        z: 1
         anchors.fill: parent
         onClicked: {
             Qt.inputMethod.hide()
+            nickname_field.focus = false
+            stack_view.focus = true
         }
     }
 

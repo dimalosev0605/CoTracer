@@ -1,5 +1,6 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.12
+import QtQuick.Window 2.14
 
 import "../buttons"
 
@@ -10,17 +11,44 @@ Rectangle {
 
     property string date
 
+    MouseArea {
+        id: root_m_area
+        z: 1
+        anchors.fill: parent
+        onClicked: {
+            Qt.inputMethod.hide()
+            nickname_field.focus = false
+            stack_view.focus = true
+        }
+    }
+
     Connections {
         target: client
     }
 
+    Connections {
+        id: keyboard_connections
+        target: Qt.inputMethod
+        onKeyboardRectangleChanged: {
+            if(Qt.inputMethod.keyboardRectangle.height !== 0) {
+                nickname_field.y = root.height * 0.2
+                back_btn.y = Qt.inputMethod.keyboardRectangle.y / Screen.devicePixelRatio
+                - back_btn.height - back_btn.bottom_margin
+            }
+            else {
+                nickname_field.y = root.height * 0.35
+                back_btn.y = root.height - back_btn.height - back_btn.bottom_margin
+            }
+        }
+    }
+
     Back_btn {
         id: back_btn
-        z: 0
+        z: 1
+        y: root.height - height - bottom_margin
+        property int bottom_margin: 10
         anchors {
-            bottom: parent.bottom
             left: parent.left
-            bottomMargin: 10
             leftMargin: 10
         }
         color: mouse_area.pressed ? "#708090" : parent.color
@@ -28,19 +56,29 @@ Rectangle {
 
     TextField {
         id: nickname_field
-        z: 0
-        y: parent.height * 0.25
+        z: 1
+        y: parent.height * 0.35
         anchors {
             horizontalCenter: parent.horizontalCenter
         }
-        width: parent.width > 300 ? 240 : parent.width * 0.8
+        width: parent.width * 0.7
         height: 30
         placeholderText: "Enter a nickname"
+        cursorVisible: activeFocus
+        inputMethodHints: Qt.ImhNoPredictiveText
+        font.pointSize: height * 0.4
+        Keys.onPressed: {
+            if(event.key === Qt.Key_Return) {
+                event.accepted = true
+                nickname_field.focus = false
+                stack_view.focus = true
+            }
+        }
     }
 
     Rectangle {
         id: time_rect
-        z: 0
+        z: 1
         color: root.color
         anchors {
             horizontalCenter: parent.horizontalCenter
@@ -120,21 +158,24 @@ Rectangle {
     }
     Authorization_button {
         id: add_contact
-        z: 0
+        z: 1
         anchors {
             top: time_rect.bottom
-            topMargin: 20
+            topMargin: 10
             horizontalCenter: parent.horizontalCenter
         }
         width: nickname_field.width * 0.8
-        height: 30
+        height: 40
         radius: 5
         color: mouse_area.pressed ? "#af1111" : "#b22222"
 
         text.text: "Add contact"
         mouse_area.onClicked: {
+            nickname_field.focus = false
             if(nickname_field.text === "") return;
             client.add_contact(nickname_field.text, hours.currentItem.text + ":" + minutes.currentItem.text, root.date)
+            stack_view.focus = true
+            Qt.inputMethod.hide()
         }
     }
 }

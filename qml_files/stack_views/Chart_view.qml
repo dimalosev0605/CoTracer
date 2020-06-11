@@ -1,6 +1,7 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.12
 import QtCharts 2.14
+import QtQuick.Window 2.14
 
 import "../buttons"
 import Chart_data_qml 1.0
@@ -20,6 +21,7 @@ Rectangle {
             leftMargin: 10
         }
         color: mouse_area.pressed ? "#708090" : parent.color
+        visible: Screen.orientation === Qt.PortraitOrientation
     }
 
     Chart_data {
@@ -37,7 +39,8 @@ Rectangle {
         anchors {
             top: parent.top
             topMargin: 5
-            bottom: back_btn.top
+            bottom: Screen.orientation === Qt.PortraitOrientation ?
+                        back_btn.top : parent.bottom
             bottomMargin: 5
             left: parent.left
             leftMargin: 5
@@ -52,6 +55,7 @@ Rectangle {
             antialiasing: true
             height: scroll.height
             backgroundColor: root.color
+            legend.visible: false
             implicitWidth: if(root.width > root.height) {
                                scroll.width
                            }
@@ -64,7 +68,7 @@ Rectangle {
                 max: 13
                 tickCount: max - min + 1
                 titleText: "Days ago"
-                labelsFont: Qt.font({pointSize: 10, weight: 99})
+                labelsFont: Qt.font({pointSize: 8, weight: 99})
                 color: "#000000"
                 titleVisible: true
                 gridVisible: false
@@ -73,16 +77,20 @@ Rectangle {
                 id: y_axis
                 min: 0
                 max: 14
-                tickCount: max - min + 1
+                tickCount: if(Screen.orientation === Qt.PortraitOrientation) {
+                               max - min + 1
+                           }
+                           else {
+                               (max - min + 1) / 2
+                           }
                 titleText: "Count of contacts"
-                labelsFont: Qt.font({pointSize: 10, weight: 99})
+                labelsFont: Qt.font({pointSize: 8, weight: 99})
                 color: "#000000"
                 titleVisible: true
                 gridVisible: false
             }
             LineSeries {
                 id: line_series
-                name: "Count of contacts"
                 axisX: x_axis
                 axisY: y_axis
                 color: "#000000"
@@ -92,7 +100,7 @@ Rectangle {
                 pointLabelsVisible: true
                 pointLabelsFormat: "@yPoint"
                 pointLabelsColor: "#000000"
-                pointLabelsFont: Qt.font({family: "Times New Romans", pointSize: 12, color: "#000000"})
+                pointLabelsFont: Qt.font({family: "Times New Romans", pointSize: 10, color: "#000000"})
             }
         }
     }

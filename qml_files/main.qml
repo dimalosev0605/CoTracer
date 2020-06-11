@@ -48,6 +48,7 @@ Window {
         Keys.onPressed: {
             if(event.key === Qt.Key_Back) {
                 event.accepted = true
+                if(Screen.orientation !== Qt.PortraitOrientation) return
                 if(stack_view.depth > 1) {
                     stack_view.pop()
                 }
