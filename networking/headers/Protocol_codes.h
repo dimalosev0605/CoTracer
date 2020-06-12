@@ -11,6 +11,7 @@ enum class Request_code: int {
     fetch_stat_for_14_days,
     fetch_contacts,
     change_avatar,
+    set_default_avatar,
     change_password
 };
 
@@ -26,7 +27,8 @@ enum class Response_code: int {
     success_fetching_stat_for_14_days,
     success_fetching_contacts,
     success_avatar_changing,
-    success_password_changing
+    success_password_changing,
+    success_setting_default_avatar
 };
 
 }

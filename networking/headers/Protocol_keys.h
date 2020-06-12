@@ -24,6 +24,7 @@ const QString cached_avatars = "cached_avatars";
 const QString avatar_data = "avatar_data";
 const QString avatar_downloaded_date_time = "avatar_downloaded_date_time";
 const QString avatar_downloaded_date_time_format = "dd.MM.yyyy-hh:mm:ss";
+const QString deleted_avatar = "000";
 
 const QString end_of_message = "\r\n\r\n";
 

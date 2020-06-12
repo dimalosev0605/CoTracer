@@ -62,6 +62,7 @@ private:
     void create_sign_up_req(const QString& nickname, const QString& password);
     void create_change_password_req(const QString& new_password);
     bool create_change_avatar_req(const QString& new_avatar_path);
+    void create_set_default_avatar_req();
     void create_fetch_stat_for_14_days_req();
     void create_fetch_contacts_req(const QString& nickname, const QString& date);
     void create_add_contact_req(const QString& nickname, const QString& time, const QString& date);
@@ -73,6 +74,7 @@ private:
     void process_success_sign_up();
     void process_success_password_changing();
     void process_success_avatar_changing();
+    void process_success_setting_default_avatar();
     void process_success_fetching_stat_for_14_days(QMap<QString, QVariant>& j_map);
     void process_success_fetching_contacts(QMap<QString, QVariant>& j_map);
     void process_success_contact_adding();
@@ -102,6 +104,7 @@ public slots:
     void sign_up(const QString& nickname, const QString& password);
     void change_password(const QString& new_password);
     void change_avatar(const QString& new_avatar_path);
+    void set_default_avatar();
     bool exit_from_account();
 
     void fetch_stat_for_14_days();
@@ -120,6 +123,7 @@ signals:
     void is_connected_changed();
     void is_authorized_changed();
     void update_password_field();
+    void success_setting_default_avatar();
 
     void statistic_received(const QVector<std::tuple<QString, int>>& statistic);
     void contacts_received(const QVector<std::tuple<QString, QString>>& contacts);

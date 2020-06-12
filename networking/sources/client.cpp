@@ -190,6 +190,17 @@ void Client::change_avatar(const QString& new_avatar_path)
     }
 }
 
+void Client::set_default_avatar()
+{
+    if(!get_is_connected()) {
+        connect_to_server();
+    }
+    if(occupy_sock()) {
+        create_set_default_avatar_req();
+        async_write();
+    }
+}
+
 bool Client::exit_from_account()
 {
     if(m_user_validator.exit_from_account()) {
@@ -368,6 +379,15 @@ bool Client::create_change_avatar_req(const QString& new_avatar_path)
     return true;
 }
 
+void Client::create_set_default_avatar_req()
+{
+    QJsonObject j_obj;
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::set_default_avatar);
+    j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
+    QJsonDocument j_doc(j_obj);
+    m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
+}
+
 void Client::create_fetch_stat_for_14_days_req()
 {
     QJsonObject j_obj;
@@ -442,6 +462,10 @@ void Client::process_data(std::size_t bytes_transferred)
             process_success_avatar_changing();
             break;
         }
+        case Protocol_codes::Response_code::success_setting_default_avatar: {
+            process_success_setting_default_avatar();
+            break;
+        }
         case Protocol_codes::Response_code::success_fetching_stat_for_14_days: {
             process_success_fetching_stat_for_14_days(j_map);
             break;
@@ -502,6 +526,29 @@ void Client::process_success_avatar_changing()
     m_user_validator.reset_user_avatar();
 }
 
+void Client::process_success_setting_default_avatar()
+{
+    FAD_manager manager;
+    manager.delete_user_avatar_file();
+
+    // delete own avatar from own cache
+    QString user_nick = m_user_validator.get_nickname();
+    auto iter = std::find_if(m_cached_avatars.begin(), m_cached_avatars.end(), [&](const std::tuple<QString, QString>& i)
+    {
+        return std::get<0>(i) == user_nick;
+    });
+
+    // if in cache -> delete it!
+    if(iter != m_cached_avatars.end()) {
+        m_cached_avatars.erase(iter);
+        QFile file(m_path_finder.get_path_to_particular_user_avatar(m_user_validator.get_nickname(), false));
+        file.remove();
+    }
+    // end delete own avatar from own cache
+
+    emit success_setting_default_avatar();
+}
+
 void Client::process_success_fetching_stat_for_14_days(QMap<QString, QVariant>& j_map)
 {
     auto j_arr_of_stats = j_map[Protocol_keys::statistic_for_14_days].toJsonArray();
@@ -536,7 +583,30 @@ void Client::process_success_fetching_contacts(QMap<QString, QVariant>& j_map)
         received_contacts.push_back(std::make_tuple(pair.first, pair.second));
 
         QString avatar_str = contact_j_obj_map[Protocol_keys::avatar_data].toString();
-        if(avatar_str.isEmpty()) continue;
+        if(avatar_str.isEmpty()) {
+            // if avatar in cache and it was deleted on server -> delete this avatar from cache
+            auto iter = find_if(m_cached_avatars.begin(), m_cached_avatars.end(), [&](const std::tuple<QString, QString>& i)
+            {
+                return std::get<0>(i) == pair.first;
+            });
+
+            if(iter != m_cached_avatars.end()) {
+                QString is_deleted = contact_j_obj_map[Protocol_keys::avatar_downloaded_date_time].toString();
+                if(is_deleted.isEmpty()) {
+                    qDebug() << "magic_str.isEmpty --> continue";
+                    continue;
+                }
+                else {
+                    qDebug() << "delete cached avatar.";
+                    QFile file(m_path_finder.get_path_to_particular_user_avatar(pair.first, false));
+                    if(file.remove()) {
+                        qDebug() << "REMOVED: " << file.fileName();
+                        m_cached_avatars.erase(iter);
+                    }
+                }
+            }
+            continue;
+        }
 
         // if we receive avatar data -> save avatar
         QByteArray avatar = QByteArray::fromBase64(avatar_str.toLatin1());

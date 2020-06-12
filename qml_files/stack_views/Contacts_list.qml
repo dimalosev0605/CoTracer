@@ -110,6 +110,7 @@ Rectangle {
                 width: height
                 source: model.contact_avatar_path
                 mipmap: true
+                asynchronous: true
                 fillMode: Image.PreserveAspectCrop
                 layer.enabled: true
                 layer.effect: OpacityMask {

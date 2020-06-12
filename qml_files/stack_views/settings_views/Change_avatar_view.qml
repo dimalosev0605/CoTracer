@@ -1,5 +1,6 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.12
+import QtQml 2.12
 
 import "../../buttons"
 import "../"
@@ -9,11 +10,19 @@ Rectangle {
     id: root
     z: 0
 
+    Connections {
+        target: client
+        ignoreUnknownSignals: true
+        onSuccess_setting_default_avatar: {
+            avatar.source = client.get_avatar_path(true)
+        }
+    }
+
     Avatar_selector {
         id: avatar_selector
         onImage_selected: {
-            avatar.source = path
             save_changes_btn.visible = true
+            avatar.source = path
         }
     }
 
@@ -29,6 +38,8 @@ Rectangle {
         width: parent.width * 0.9
         height: (parent.height / 2) - anchors.topMargin
         fillMode: Image.PreserveAspectFit
+        mipmap: true
+        asynchronous: true
         source: client.get_avatar_path(true)
     }
 
@@ -73,6 +84,27 @@ Rectangle {
         visible: false
         mouse_area.onClicked: {
             client.change_avatar(avatar_selector.get_selected_image_path())
+        }
+    }
+
+    Main_menu_btn {
+        id: set_default_avatar_btn
+        z: 1
+        anchors {
+            bottom: parent.bottom
+            bottomMargin: back_btn.anchors.bottomMargin
+            horizontalCenter: parent.horizontalCenter
+        }
+        height: root.btns_height
+        width: root.btns_width
+        color: mouse_area.pressed ? "#b22222" : root.color
+        text.text: "Set default avatar"
+        radius: 4
+        visible: avatar.source.toString() === "qrc:/imgs/default_avatar.png" ? false : save_changes_btn.visible ? false : true
+        border.width: 1
+        border.color: "#000000"
+        mouse_area.onClicked: {
+            client.set_default_avatar()
         }
     }
 
