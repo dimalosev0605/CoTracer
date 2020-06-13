@@ -18,6 +18,7 @@ Client::Client(QObject *parent)
 Client::~Client()
 {
     qDebug() << this << " destroyed!";
+    delete_old_cached_avatars();
     save_cached_avatars_info_file();
 }
 
@@ -723,5 +724,30 @@ void Client::save_cached_avatars_info_file()
         obj.insert(Protocol_keys::cached_avatars, arr);
         QJsonDocument doc(obj);
         cached_avatars_info_file.write(doc.toJson());
+    }
+}
+
+void Client::delete_old_cached_avatars()
+{
+    const int cache_age = 14;
+    QDate max_file_age = QDate::currentDate().addDays(cache_age);
+
+    QDir cached_avatars_dir(m_path_finder.get_path_to_avatars_dir());
+    cached_avatars_dir.setFilter(QDir::NoDotAndDotDot);
+
+    auto cached_avatars = cached_avatars_dir.entryInfoList();
+    for(int i = 0; i < cached_avatars.size(); ++i) {
+        if(max_file_age > cached_avatars[i].lastModified().date()) {
+            auto iter = std::find_if(m_cached_avatars.begin(), m_cached_avatars.end(), [&](const std::tuple<QString, QString>& elem)
+            {
+                return std::get<0>(elem) == cached_avatars[i].fileName();
+            });
+            if(iter != m_cached_avatars.end()) {
+                QFile file_for_remove(cached_avatars[i].path());
+                if(file_for_remove.remove()) {
+                    m_cached_avatars.erase(iter);
+                }
+            }
+        }
     }
 }

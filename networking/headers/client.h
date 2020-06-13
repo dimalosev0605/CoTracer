@@ -88,6 +88,7 @@ private:
 
     void read_cached_avatars_info_file();
     void save_cached_avatars_info_file();
+    void delete_old_cached_avatars();
 
 public:
     explicit Client(QObject* parent = nullptr);
