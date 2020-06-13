@@ -77,7 +77,7 @@ private:
     void process_success_setting_default_avatar();
     void process_success_fetching_stat_for_14_days(QMap<QString, QVariant>& j_map);
     void process_success_fetching_contacts(QMap<QString, QVariant>& j_map);
-    void process_success_contact_adding();
+    void process_success_contact_adding(QMap<QString, QVariant>& j_map);
     void process_such_contact_not_exists();
     void process_success_contact_deletion();
     void process_internal_server_error();

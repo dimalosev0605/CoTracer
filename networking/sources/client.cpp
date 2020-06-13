@@ -417,6 +417,18 @@ void Client::create_add_contact_req(const QString& nickname, const QString& time
     j_obj.insert(Protocol_keys::contact_nickname, nickname);
     j_obj.insert(Protocol_keys::contact_date, date);
     j_obj.insert(Protocol_keys::contact_time, time);
+
+    // is avatar cached?
+    auto is_cached = false;
+    auto iter = std::find_if(m_cached_avatars.begin(), m_cached_avatars.end(), [&](const std::tuple<QString, QString>& i)
+    {
+        return std::get<0>(i) == nickname;
+    });
+    if(iter != m_cached_avatars.end()) {
+        is_cached = true;
+    }
+    j_obj.insert(Protocol_keys::is_contact_avatar_cached, is_cached);
+
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
@@ -476,7 +488,7 @@ void Client::process_data(std::size_t bytes_transferred)
             break;
         }
         case Protocol_codes::Response_code::success_contact_adding: {
-            process_success_contact_adding();
+            process_success_contact_adding(j_map);
             break;
         }
         case Protocol_codes::Response_code::such_contact_not_exists: {
@@ -640,11 +652,25 @@ void Client::process_success_fetching_contacts(QMap<QString, QVariant>& j_map)
     disconnect(this, &Client::contacts_received, nullptr, nullptr);
 }
 
-void Client::process_success_contact_adding()
+void Client::process_success_contact_adding(QMap<QString, QVariant>& j_map)
 {
     QString nickname = std::any_cast<QString>(lol_vector[0]);
     QString time = std::any_cast<QString>(lol_vector[1]);
     lol_vector.clear();
+
+    QString avatar_str = j_map[Protocol_keys::avatar_data].toString();
+    if(!avatar_str.isEmpty()) {
+        QByteArray avatar_byte_arr = QByteArray::fromBase64(avatar_str.toLatin1());
+
+        QFile contact_avatar(m_path_finder.get_path_to_particular_user_avatar(nickname, false));
+        if(contact_avatar.open(QIODevice::WriteOnly)) {
+            contact_avatar.write(avatar_byte_arr);
+            QString avatar_downloaded_date_time = j_map[Protocol_keys::avatar_downloaded_date_time].toString();
+            m_cached_avatars.push_back(std::make_tuple(nickname, avatar_downloaded_date_time));
+            contact_avatar.close();
+        }
+    }
+
     emit success_contact_adding(nickname, time);
 }
 
