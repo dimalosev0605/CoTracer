@@ -27,6 +27,9 @@ const QString avatar_downloaded_date_time = "avatar_downloaded_date_time";
 const QString avatar_downloaded_date_time_format = "dd.MM.yyyy-hh:mm:ss";
 const QString deleted_avatar = "000";
 
+const QString found_users = "found_users";
+const QString friend_nickname = "friend_nickname";
+
 const QString end_of_message = "\r\n\r\n";
 
 }

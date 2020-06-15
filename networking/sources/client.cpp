@@ -20,6 +20,7 @@ Client::~Client()
     qDebug() << this << " destroyed!";
     delete_old_cached_avatars();
     save_cached_avatars_info_file();
+    delete_all_temp_files();
 }
 
 void Client::connect_to_server()
@@ -257,6 +258,28 @@ void Client::remove_contact(const QString& nickname, const QString& time, const 
     }
 }
 
+void Client::find_friends(const QString& nickname)
+{
+    if(!get_is_connected()) {
+        connect_to_server();
+    }
+    if(occupy_sock()) {
+        create_find_friends_req(nickname);
+        async_write();
+    }
+}
+
+void Client::add_in_my_friends(const QString& nickname)
+{
+    if(!get_is_connected()) {
+        connect_to_server();
+    }
+    if(occupy_sock()) {
+        create_add_in_my_friends_req(nickname);
+        async_write();
+    }
+}
+
 Contacts_model* Client::create_model_based_on_date(const QString& date)
 {
     Contacts_model* new_model = new Contacts_model(this);
@@ -445,6 +468,25 @@ void Client::create_remove_contact_req(const QString& nickname, const QString& t
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
 
+void Client::create_find_friends_req(const QString& nickname)
+{
+    QJsonObject j_obj;
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::find_friends);
+    j_obj.insert(Protocol_keys::user_nickname, nickname);
+    QJsonDocument j_doc(j_obj);
+    m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
+}
+
+void Client::create_add_in_my_friends_req(const QString& nickname)
+{
+    QJsonObject j_obj;
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::add_in_my_friends);
+    j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::friend_nickname, nickname);
+    QJsonDocument j_doc(j_obj);
+    m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
+}
+
 void Client::process_data(std::size_t bytes_transferred)
 {
     std::string data((const char*)m_session->m_response.data().data(), bytes_transferred - Protocol_keys::end_of_message.size());
@@ -497,6 +539,14 @@ void Client::process_data(std::size_t bytes_transferred)
         }
         case Protocol_codes::Response_code::success_contact_deletion: {
             process_success_contact_deletion();
+            break;
+        }
+        case Protocol_codes::Response_code::success_find_friends: {
+            process_success_find_friends(j_map);
+            break;
+        }
+        case Protocol_codes::Response_code::success_friend_adding: {
+            process_success_friend_adding();
             break;
         }
         case Protocol_codes::Response_code::internal_server_error: {
@@ -686,6 +736,35 @@ void Client::process_success_contact_deletion()
     emit success_contact_deletion(index);
 }
 
+void Client::process_success_find_friends(QMap<QString, QVariant>& j_map)
+{
+    auto found_friends_j_arr = j_map[Protocol_keys::found_users].toJsonArray();
+    QVector<QString> found_friends;
+
+    for(int i = 0; i < found_friends_j_arr.size(); ++i) {
+        auto obj = found_friends_j_arr[i].toObject();
+        auto map = obj.toVariantMap();
+        auto found_user = map[Protocol_keys::user_nickname].toString();
+        found_friends.push_back(found_user);
+
+        QString avatar_str = map[Protocol_keys::avatar_data].toString();
+        if(!avatar_str.isEmpty()) {
+            QByteArray avatar_byte_arr = QByteArray::fromBase64(avatar_str.toLatin1());
+            QFile file(m_path_finder.get_path_to_particular_temp_file(found_user, false));
+            if(file.open(QIODevice::WriteOnly)) {
+                file.write(avatar_byte_arr);
+            }
+        }
+    }
+
+    emit friends_found(found_friends);
+}
+
+void Client::process_success_friend_adding()
+{
+    qDebug() << "FRIEND WAS ADDED!";
+}
+
 void Client::process_internal_server_error()
 {
     lol_vector.clear();
@@ -776,4 +855,9 @@ void Client::delete_old_cached_avatars()
             }
         }
     }
+}
+
+void Client::delete_all_temp_files()
+{
+    m_fad_manager.delete_all_temp_files();
 }

@@ -5,6 +5,7 @@ FAD_manager::FAD_manager()
     create_user_files_dir();
     create_avatars_dir();
     create_cached_avatars_info_file();
+    create_temp_files_dir();
 }
 
 bool FAD_manager::create_user_files_dir() const
@@ -33,6 +34,12 @@ bool FAD_manager::create_cached_avatars_info_file() const
         return false;
     }
     return true;
+}
+
+bool FAD_manager::create_temp_files_dir() const
+{
+    QDir dir(m_path_finder.get_path_to_user_files_dir());
+    return dir.mkdir(m_path_finder.get_path_to_temp_files_dir());
 }
 
 bool FAD_manager::delete_user_info_file() const
@@ -77,4 +84,13 @@ bool FAD_manager::delete_cached_avatars_info_file() const
 {
     QFile file(m_path_finder.get_path_to_cached_avatars_info_file());
     return file.remove();
+}
+
+void FAD_manager::delete_all_temp_files() const
+{
+    QDir dir(m_path_finder.get_path_to_temp_files_dir());
+    auto files = dir.entryList();
+    for(const auto& i : files) {
+        dir.remove(i);
+    }
 }

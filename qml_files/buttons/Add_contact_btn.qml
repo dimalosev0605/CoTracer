@@ -2,9 +2,8 @@ import QtQuick 2.14
 import QtQuick.Controls 2.12
 
 Rectangle {
-
     property alias mouse_area: mouse_area
-
+    radius: 5
     Image {
         id: img
         anchors.fill: parent

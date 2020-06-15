@@ -23,10 +23,6 @@ Rectangle {
     }
 
     Connections {
-        target: client
-    }
-
-    Connections {
         id: keyboard_connections
         target: Qt.inputMethod
         onKeyboardRectangleChanged: {

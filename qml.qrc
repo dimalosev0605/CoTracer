@@ -41,5 +41,6 @@
         <file>imgs/sort.png</file>
         <file>imgs/default_avatar.png</file>
         <file>qml_files/stack_views/Rotation_message_view.qml</file>
+        <file>qml_files/stack_views/Add_friend_view.qml</file>
     </qresource>
 </RCC>
