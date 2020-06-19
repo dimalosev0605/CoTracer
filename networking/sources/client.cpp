@@ -280,6 +280,17 @@ void Client::add_in_my_friends(const QString& nickname)
     }
 }
 
+void Client::remove_from_my_friends(const QString& nickname)
+{
+    if(!get_is_connected()) {
+        connect_to_server();
+    }
+    if(occupy_sock()) {
+        create_remove_from_my_friends_req(nickname);
+        async_write();
+    }
+}
+
 Contacts_model* Client::create_model_based_on_date(const QString& date)
 {
     Contacts_model* new_model = new Contacts_model(this);
@@ -450,7 +461,7 @@ void Client::create_add_contact_req(const QString& nickname, const QString& time
     if(iter != m_cached_avatars.end()) {
         is_cached = true;
     }
-    j_obj.insert(Protocol_keys::is_contact_avatar_cached, is_cached);
+    j_obj.insert(Protocol_keys::is_cached, is_cached);
 
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
@@ -483,6 +494,27 @@ void Client::create_add_in_my_friends_req(const QString& nickname)
     j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::add_in_my_friends);
     j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
     j_obj.insert(Protocol_keys::friend_nickname, nickname);
+
+    //
+    lol_vector.push_back(QString(nickname));
+    //
+
+    QJsonDocument j_doc(j_obj);
+    m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
+}
+
+void Client::create_remove_from_my_friends_req(const QString& nickname)
+{
+    qDebug() << "In create_remove_from_my_friends_req(), nick = " << nickname;
+    QJsonObject j_obj;
+    j_obj.insert(Protocol_keys::request_code, (int)Protocol_codes::Request_code::remove_from_my_friends);
+    j_obj.insert(Protocol_keys::user_nickname, m_user_validator.get_nickname());
+    j_obj.insert(Protocol_keys::friend_nickname, nickname);
+
+    //
+    lol_vector.push_back(QString(nickname));
+    //
+
     QJsonDocument j_doc(j_obj);
     m_session->m_request = j_doc.toJson().append(Protocol_keys::end_of_message).data();
 }
@@ -549,6 +581,10 @@ void Client::process_data(std::size_t bytes_transferred)
             process_success_friend_adding();
             break;
         }
+        case Protocol_codes::Response_code::success_friend_removing: {
+            process_success_friend_removing();
+            break;
+        }
         case Protocol_codes::Response_code::internal_server_error: {
             process_internal_server_error();
             break;
@@ -568,6 +604,27 @@ void Client::process_success_sign_in(QMap<QString, QVariant>& j_map)
     if(m_user_validator.save_user_info() && m_user_validator.save_user_avatar(avatar_byte_arr)) {
         set_is_authorized(true);
     }
+
+    auto friends_avatars = j_map[Protocol_keys::friends_list].toJsonArray();
+    QVector<QString> friends;
+    for(int i = 0; i < friends_avatars.size(); ++i) {
+        auto obj = friends_avatars[i].toObject();
+        auto map = obj.toVariantMap();
+        auto nick = map[Protocol_keys::friend_nickname].toString();
+        friends.push_back(nick);
+        auto friend_avatar_str = map[Protocol_keys::avatar_data].toString();
+        if(!friend_avatar_str.isEmpty()) {
+            QByteArray friend_avatar_b_arr = QByteArray::fromBase64(friend_avatar_str.toLatin1());
+            QFile avatar_file(m_path_finder.get_path_to_particular_friend_avatar(nick, false));
+            if(avatar_file.open(QIODevice::WriteOnly)) {
+                avatar_file.write(friend_avatar_b_arr);
+            }
+        }
+        else {
+        }
+    }
+
+    save_friends_list(friends);
 }
 
 void Client::process_success_sign_up()
@@ -762,7 +819,28 @@ void Client::process_success_find_friends(QMap<QString, QVariant>& j_map)
 
 void Client::process_success_friend_adding()
 {
-    qDebug() << "FRIEND WAS ADDED!";
+    QString new_friend = std::any_cast<QString>(lol_vector[0]);
+    lol_vector.clear();
+
+    // copy friend avatar from temp files dir
+    QFile copy(m_path_finder.get_path_to_particular_temp_file(new_friend, false));
+    copy.copy(m_path_finder.get_path_to_particular_friend_avatar(new_friend, false));
+
+    emit success_friend_adding(new_friend);
+}
+
+void Client::process_success_friend_removing()
+{
+    qDebug() << "In process_success_friend_removing()";
+
+    QString removed_friend = std::any_cast<QString>(lol_vector[0]);
+    lol_vector.clear();
+
+    // delete friend avatar
+    QFile avatar(m_path_finder.get_path_to_particular_user_avatar(removed_friend, false));
+    avatar.remove();
+
+    emit success_friend_removing(removed_friend);
 }
 
 void Client::process_internal_server_error()
@@ -829,6 +907,23 @@ void Client::save_cached_avatars_info_file()
         obj.insert(Protocol_keys::cached_avatars, arr);
         QJsonDocument doc(obj);
         cached_avatars_info_file.write(doc.toJson());
+    }
+}
+
+void Client::save_friends_list(const QVector<QString>& list)
+{
+    QFile friends_list_file(m_path_finder.get_path_to_friends_list_file());
+    if(friends_list_file.open(QIODevice::WriteOnly)) {
+        QJsonArray arr;
+        for(int i = 0; i < list.size(); ++i) {
+            QJsonObject obj;
+            obj.insert(Protocol_keys::friend_nickname, list[i]);
+            arr.append(obj);
+        }
+        QJsonObject j_obj;
+        j_obj.insert(Protocol_keys::friends_list, arr);
+        QJsonDocument doc(j_obj);
+        friends_list_file.write(doc.toJson());
     }
 }
 

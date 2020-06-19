@@ -8,6 +8,7 @@
 #include "./networking/headers/client.h"
 #include "./miscellaneous/headers/avatar_selector.h"
 #include "./models/headers/found_friends_model.h"
+#include "./models/headers/my_friends_model.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<Client>("Client_qml", 1, 0, "Client");
     qmlRegisterType<Avatar_selector>("Avatar_selector_qml", 1, 0, "Avatar_selector");
     qmlRegisterType<Found_friends_model>("Found_friends_model_qml", 1, 0, "Found_friends_model");
+    qmlRegisterType<My_friends_model>("My_friends_model_qml", 1, 0, "My_friends_model");
 
     qRegisterMetaType<QVector<std::tuple<QString, QString>>>("QVector<std::tuple<QString, QString>>");
     qRegisterMetaType<QVector<std::tuple<QString, int>>>("QVector<std::tuple<QString, int>>");

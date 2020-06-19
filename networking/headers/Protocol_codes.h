@@ -14,7 +14,8 @@ enum class Request_code: int {
     set_default_avatar,
     change_password,
     find_friends,
-    add_in_my_friends
+    add_in_my_friends,
+    remove_from_my_friends
 };
 
 enum class Response_code: int {
@@ -32,7 +33,8 @@ enum class Response_code: int {
     success_password_changing,
     success_setting_default_avatar,
     success_find_friends,
-    success_friend_adding
+    success_friend_adding,
+    success_friend_removing
 };
 
 }

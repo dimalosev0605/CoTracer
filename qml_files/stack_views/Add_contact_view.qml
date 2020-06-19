@@ -22,6 +22,14 @@ Rectangle {
         }
     }
 
+    Component {
+        id: friends_list_comp
+        Friends_list {
+            id: friends_list
+            color: root.color
+        }
+    }
+
     Connections {
         id: keyboard_connections
         target: Qt.inputMethod
@@ -68,6 +76,25 @@ Rectangle {
                 event.accepted = true
                 nickname_field.focus = false
                 stack_view.focus = true
+            }
+        }
+        rightPadding: select_contact_from_friends_list.width + 2
+        Image {
+            id: select_contact_from_friends_list
+            anchors {
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+            }
+            height: parent.height * 0.75
+            width: height
+            source: "qrc:/imgs/three_vertical_dots.png"
+            MouseArea {
+                anchors.centerIn: parent
+                width: parent.width + 3
+                height: parent.height + 3
+                onClicked: {
+                    stack_view.push(friends_list_comp)
+                }
             }
         }
     }

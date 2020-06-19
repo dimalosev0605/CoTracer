@@ -41,6 +41,7 @@ Rectangle {
     Connections {
         id: found_friends_connection
         target: client
+        ignoreUnknownSignals: true
         onFriends_found: {
             found_friends_model.receive_found_friends(found_friends)
         }
@@ -162,7 +163,6 @@ Rectangle {
                 color: mouse_area.pressed ? "#00ff00" : root.color
                 mouse_area.onClicked: {
                     client.add_in_my_friends(nickname.text)
-                    console.log("CLICKED!")
                 }
             }
         }

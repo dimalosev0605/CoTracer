@@ -15,7 +15,7 @@ const QString contact_nickname = "contact_nickname";
 const QString contact_time = "contact_time";
 const QString contact_date = "contact_date";
 const QString contact_list = "contact_list";
-const QString is_contact_avatar_cached = "is_contact_avatar_cached";
+const QString is_cached = "is_cached";
 
 const QString statistic_for_14_days = "statistic_for_14_days";
 const QString quantity_of_contacts = "quantity_of_contacts";
@@ -29,6 +29,7 @@ const QString deleted_avatar = "000";
 
 const QString found_users = "found_users";
 const QString friend_nickname = "friend_nickname";
+const QString friends_list = "friends_list";
 
 const QString end_of_message = "\r\n\r\n";
 

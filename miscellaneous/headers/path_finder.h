@@ -15,6 +15,8 @@ class Path_finder
     static const QString default_avatar_path;
     static const QString cached_avatars_info_file_name;
     static const QString temp_files_dir_name;
+    static const QString friends_avatar_dir_name;
+    static const QString friends_list_file_name;
 
 public:
     QString get_app_dir_path() const;
@@ -26,7 +28,10 @@ public:
     QString get_path_to_default_avatar_path() const;
     QString get_path_to_cached_avatars_info_file() const;
     QString get_path_to_temp_files_dir() const;
-    QString get_path_to_particular_temp_file(const QString nick, bool prefix) const;
+    QString get_path_to_particular_temp_file(const QString& nick, bool prefix) const;
+    QString get_path_to_friends_avatar_dir() const;
+    QString get_path_to_particular_friend_avatar(const QString& nick, bool prefix) const;
+    QString get_path_to_friends_list_file() const;
 };
 
 #endif // PATH_FINDER_H

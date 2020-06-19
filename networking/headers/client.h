@@ -70,6 +70,7 @@ private:
     void create_remove_contact_req(const QString& nickname, const QString& time, const QString& date);
     void create_find_friends_req(const QString& nickname);
     void create_add_in_my_friends_req(const QString& nickname);
+    void create_remove_from_my_friends_req(const QString& nickname);
 
     // process response functions
     void process_data(std::size_t bytes_transferred);
@@ -85,6 +86,7 @@ private:
     void process_success_contact_deletion();
     void process_success_find_friends(QMap<QString, QVariant>& j_map);
     void process_success_friend_adding();
+    void process_success_friend_removing();
     void process_internal_server_error();
 
     // miscellaneous
@@ -93,6 +95,7 @@ private:
 
     void read_cached_avatars_info_file();
     void save_cached_avatars_info_file();
+    void save_friends_list(const QVector<QString>& list);
     void delete_old_cached_avatars();
     void delete_all_temp_files();
 
@@ -119,6 +122,7 @@ public slots:
     void remove_contact(const QString& nickname, const QString& time, const QString& date, int index_in_table);
     void find_friends(const QString& nickname);
     void add_in_my_friends(const QString& nickname);
+    void remove_from_my_friends(const QString& nickname);
     Contacts_model* create_model_based_on_date(const QString& date);
     Contacts_model* create_model_based_on_date_and_nickname(const QString& nickname, const QString& date);
     void pop_model();
@@ -139,6 +143,8 @@ signals:
     void success_contact_adding(const QString& nickname, const QString& time);
     void success_contact_deletion(int index);
     void friends_found(const QVector<QString>& found_friends);
+    void success_friend_adding(const QString& new_friend);
+    void success_friend_removing(const QString& removed_friend);
 };
 
 #endif // CLIENT_H

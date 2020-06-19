@@ -22,6 +22,7 @@ public:
     bool create_avatars_dir() const;
     bool create_cached_avatars_info_file() const;
     bool create_temp_files_dir() const;
+    bool create_friends_avatar_dir() const;
 
     bool delete_user_info_file() const;
     bool delete_user_avatar_file() const;
@@ -30,6 +31,7 @@ public:
     void delete_avatars_dir_content() const;
     bool delete_cached_avatars_info_file() const;
     void delete_all_temp_files() const;
+    void delete_friends_avatar_dir_content() const;
 };
 
 #endif // FAD_MANAGER_H
